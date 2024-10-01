@@ -1,6 +1,6 @@
 # Wader Scenarios Repository
 
-![alt text](Plots/MarkdownPics/lolandwaderscenarios logo.png)
+<img src="Plots/MarkdownPics/lolandwaderscenarios logo.png" id="id" class="class" width=25% height=25% > 
 
 Currently just using this repository to host the code and main plots for this project. The outputs from the code and the raw data are not stored on here was the file sizes are too large.
 
