@@ -9,15 +9,11 @@
 ## 
 ##------------------------------------------------------##
 
-
+## Read in packages and custom function
 pacman::p_load(tidyverse, sf, terra, tidyterra, ggspatial, ggpubr)
 options(scipen=999) # turn off scientific notation
 source("Code/Helper functions.R")
 source("Code/Scenarios/5.2- Scenario Functions.R")
-
-
-# Secondly
-# 1. Need to create plots of the additive == T progression where canvas resets
 
 
 
@@ -313,6 +309,57 @@ P3 = ggplot() +
 
 ## save the arranged plot
 ggsave(plot = P3, filename = "CleanData/Paper Plots/ManageCosts/Costs_of_management_ha.png", width = 25, height = 20, units = "cm")
+
+
+
+
+
+
+##-----------------------------------##
+#### 3.0 Plot Landscape Boundaries ####
+##-----------------------------------##
+
+## Filter out the landscapes of interest
+Scapes <- filter(MyBoxes, Att3Value %in% c("Broads", "Essex", "North Kent", "Somerset Levels and Moors"))
+Scapes$Att3Value <- ifelse(Scapes$Att3Value =="Somerset Levels and Moors", "Somerset Levels", Scapes$Att3Value)
+ScapeExt <- ext(Scapes)
+
+## create the plot
+LP1 <- ggplot() + 
+  ## add coastline
+ geom_sf(data = UKCoast, aes(geometry = geometry), color = "#C3C3C3", fill = "#CBCACA") +
+ # add map of landscapes
+ geom_sf(data = Scapes, aes(geometry = geometry, fill = Att3Value), color = NA) + 
+ scale_fill_manual(name = "Landscape:",
+                   values = c("#06d6a0", "#ffd166", "#26547c", "#ef476f")) +
+ # set plot limits
+ coord_sf(xlim = c(ScapeExt[1]-198000, ScapeExt[2]+20000), ylim = c(ScapeExt[3]-115000, ScapeExt[4]+200000), crs = 27700,
+          expand = FALSE) +
+ # add labels
+ labs(x = "Longitude", y = "Latitude", fill = "Landscape:") +
+ # add styling
+ theme_light() +
+ theme(legend.position = "bottom",
+       legend.title = element_text(size = 13),
+       legend.text = element_text(size = 12),
+       axis.title.x = element_text(size = 15),
+       axis.text.x = element_text(hjust=0.7, angle = 45),
+       axis.title.y = element_text(angle=90, vjust = 0.4, size = 15),
+       axis.text.y = element_text(hjust=0.7,angle=45,vjust=0.3),
+       text = element_text(family = "Karla", color = "#2D2D2E"), 
+       panel.grid = element_line(color = "#ebebe5", size = 0.2),
+       panel.background = element_rect(fill = "#f5f5f2", color = NA)) 
+
+
+## Save the plot
+ggsave("CleanData/Paper Plots/AllLandscapePlots.png", 
+       plot = LP1,  width = 20, height = 20, units = "cm")
+
+
+
+
+
+
 
 
 

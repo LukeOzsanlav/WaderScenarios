@@ -24,6 +24,10 @@ options(scipen=999) # turn off scientific notation
 source("Code/Helper functions.R")
 source("Code/Scenarios/5.2- Scenario Functions.R")
 
+## Set yrs variables
+## This controls how many years fixed costs are spread out over
+Yrs=20
+
 
 ## Overview of Random Scenario modelling
 ## - **Read in annotated canvas
@@ -137,7 +141,7 @@ AreaForScenarios <- function(Canvas, ## the canvas for the priority landscape, c
 
 ## This function take the CreatScenario function and batch runs them over a spreadsheet with scenario settings
 BatchBake <- function(Canvas, SniModel, LapModel,  RedModel, LandCov, Outpath, 
-                      N_sets, Additive, SaveCanv, runsetting, Unfenced=FALSE, zstart=1){
+                      N_sets, Additive, SaveCanv, runsetting, Unfenced=FALSE, zstart=1, zend=nrow(runsetting)){
   
   ##-----------------------------##        
   ## F 2.1 Calc Opp Area Targets ##
@@ -172,10 +176,10 @@ BatchBake <- function(Canvas, SniModel, LapModel,  RedModel, LandCov, Outpath,
   ##---------------------------##
 
   ## Loop through each row in the setting doc as these will all be separate scenarios
-  for(z in zstart:nrow(runsetting)){
+  for(z in zstart:zend){
     
     ## Update to console on progress
-    message("Running scenario ", z, " out of ", nrow(runsetting))
+    message("Running scenario ", z, " out of ", zend)
     
 
     ##Join together opportunity and replacement categories for CreateScenario() function
@@ -257,6 +261,9 @@ Canv <- mutate(Canv,
 ## Visualize canvas categories
 # ggplot() + geom_sf(data = Canv, mapping = aes(geometry = geometry, fill = Category), colour = NA) +
 #            theme_minimal()
+            
+## Get the areas of different categories
+Canv |> st_drop_geometry() |> group_by(Category) |> summarise(TotArea = sum(FieldArea))
 
 
 ## Read in the UKCEH landcover data as a base map to rasterize my fields with
@@ -323,7 +330,7 @@ WhichAES <- which(Canv$Category == "AES Only")
 ## Now using the list column of the different AES schemes this function looks through all the AES codes
 ## Then ti works out the total payment for those fields based on the AES payment rates and the area of the field
 for(j in 1:nrow(AES_Costs)){
-
+  
   ## create columns used to track AES payment
   Canv$Add <- NA
   Canv$AddAmount <- 0
@@ -408,15 +415,19 @@ Scen_settingsSom <- filter(Scen_settings, !OppCat1 == "Arable Opp") #|> filter(!
 Scen_settingsSom$OppCat4 <- NA
 
 
+## REMOVE
+Scen_settingsSom <- filter(Scen_settingsSom, NewCat1 == "Reserve" & Plus == T)
+
+
 ## Run the batch function for additive
 BatchBake(Canvas=Canv, SniModel=SniMod, LapModel=NULL,  RedModel=NULL, LandCov=LC_Som,
           Outpath = "CleanData/Scenarios/5-ScenarioCreation/Som/", SaveCanv = FALSE,
-          N_sets = 5, runsetting = Scen_settingsSom, zstart = 1, Additive = TRUE, Unfenced=TRUE)
+          N_sets = 20, runsetting = Scen_settingsSom, zstart = 1, Additive = TRUE, Unfenced=TRUE)
 
 ## Run the batch function for multiplicative
-BatchBake(Canvas=Canv, SniModel=SniMod, LapModel=NULL,  RedModel=NULL, LandCov=LC_Som,
-          Outpath = "CleanData/Scenarios/5-ScenarioCreation/Som/", SaveCanv = FALSE,
-          N_sets = 5, runsetting = Scen_settingsSom, zstart = 1, Additive = FALSE, Unfenced=TRUE)
+# BatchBake(Canvas=Canv, SniModel=SniMod, LapModel=NULL,  RedModel=NULL, LandCov=LC_Som,
+#           Outpath = "CleanData/Scenarios/5-ScenarioCreation/Som/", SaveCanv = FALSE,
+#           N_sets = 5, runsetting = Scen_settingsSom, zstart = 1, Additive = FALSE, Unfenced=TRUE)
 
 
 
@@ -571,6 +582,8 @@ Canv <- mutate(Canv,
 ggplot() + geom_sf(data = Canv, mapping = aes(geometry = geometry, fill = Category), colour = NA) +
            theme_minimal()
 
+## Get the areas of different categories
+Canv |> st_drop_geometry() |> group_by(Category) |> summarise(TotArea = sum(FieldArea))
 
 
 ## Read in the UKCEH landcover data as a base map to rasterize my fields with
@@ -637,9 +650,6 @@ WhichAES <- which(Canv$Category == "AES Only")
 ## Now using the list column of the different AES schemes this function looks through all the AES codes
 ## Then ti works out the total payment for those fields based on the AES payment rates and the area of the field
 for(j in 1:nrow(AES_Costs)){
-  
-  ## How many years to spread one off costs over
-  Yrs <- 15
 
   ## create columns used to track AES payment
   Canv$Add <- NA
@@ -724,16 +734,19 @@ Scen_settings$ClustMean <- ifelse(Scen_settings$ClustMean == max(Scen_settings$C
 Scen_settingsNK<- Scen_settings #|> filter(!(ScenType == "cluster" & ClustMean == max(ClustMean, na.rm = T) & Strategy == "Better"))
 Scen_settingsNK$OppCat4 <- NA
 
+## REMOVE
+Scen_settingsNK <- filter(Scen_settingsNK, NewCat1 == "Reserve" & Plus == T)
+
 
 ## Run the batch function for additive
 BatchBake(Canvas=Canv, SniModel=NULL, LapModel=LapMod,  RedModel=RedMod, LandCov=LC_crop,
           Outpath = "CleanData/Scenarios/5-ScenarioCreation/Kent/", SaveCanv = FALSE,
-          N_sets = 5, runsetting = Scen_settingsNK, zstart = 1, Additive = TRUE, Unfenced=TRUE)
+          N_sets = 20, runsetting = Scen_settingsNK, zstart = 1, Additive = TRUE, Unfenced=TRUE)
 
 ## Run the batch function for multiplicative
-BatchBake(Canvas=Canv, SniModel=NULL, LapModel=LapMod,  RedModel=RedMod, LandCov=LC_crop,
-          Outpath = "CleanData/Scenarios/5-ScenarioCreation/Kent/", SaveCanv = FALSE,
-          N_sets = 5, runsetting = Scen_settingsNK, zstart = 1, Additive = FALSE, Unfenced=TRUE)
+# BatchBake(Canvas=Canv, SniModel=NULL, LapModel=LapMod,  RedModel=RedMod, LandCov=LC_crop,
+#           Outpath = "CleanData/Scenarios/5-ScenarioCreation/Kent/", SaveCanv = FALSE,
+#           N_sets = 5, runsetting = Scen_settingsNK, zstart = 1, Additive = FALSE, Unfenced=TRUE)
 
 
 
@@ -792,6 +805,9 @@ Canv <- mutate(Canv,
 ## Visualize canvas categories
 # ggplot() + geom_sf(data = Canv, mapping = aes(geometry = geometry, fill = Category), colour = NA) +
 #            theme_minimal()
+            
+## Get the areas of different categories
+Canv |> st_drop_geometry() |> group_by(Category) |> summarise(TotArea = sum(FieldArea))
 
 
 ## Read in the UKCEH landcover data as a base map to rasterize my fields with
@@ -941,15 +957,18 @@ Scen_settings$ClustMean <- ifelse(Scen_settings$ClustMean == max(Scen_settings$C
 Scen_settingsEs<- Scen_settings #|> filter(!(ScenType == "cluster" & ClustMean == max(ClustMean, na.rm = T) & Strategy == "Better"))
 Scen_settingsEs$OppCat4 <- NA
 
+## REMOVE
+Scen_settingsEs <- filter(Scen_settingsEs, NewCat1 == "Reserve" & Plus == T)
+
 ## Run the batch function for additive
 BatchBake(Canvas=Canv, SniModel=NULL, LapModel=LapMod,  RedModel=RedMod, LandCov=LC_crop,
           Outpath = "CleanData/Scenarios/5-ScenarioCreation/Essex/", SaveCanv = FALSE,
-          N_sets = 5, runsetting = Scen_settingsEs, zstart = 1, Additive = TRUE, Unfenced=TRUE)
+          N_sets = 20, runsetting = Scen_settingsEs, zstart = 1, Additive = TRUE, Unfenced=TRUE)
 
 ## Run the batch function for multiplicative
-BatchBake(Canvas=Canv, SniModel=NULL, LapModel=LapMod,  RedModel=RedMod, LandCov=LC_crop,
-          Outpath = "CleanData/Scenarios/5-ScenarioCreation/Essex/", SaveCanv = FALSE,
-          N_sets = 5, runsetting = Scen_settingsEs, zstart = 1, Additive = FALSE, Unfenced=TRUE)
+# BatchBake(Canvas=Canv, SniModel=NULL, LapModel=LapMod,  RedModel=RedMod, LandCov=LC_crop,
+#           Outpath = "CleanData/Scenarios/5-ScenarioCreation/Essex/", SaveCanv = FALSE,
+#           N_sets = 5, runsetting = Scen_settingsEs, zstart = 1, Additive = FALSE, Unfenced=TRUE)
 
 
 
@@ -1009,7 +1028,9 @@ Canv <- mutate(Canv,
 ## Visualize canvas categories
 # ggplot() + geom_sf(data = Canv, mapping = aes(geometry = geometry, fill = Category), colour = NA) +
 #            theme_minimal()
-
+            
+## Get the areas of different categories
+Canv |> st_drop_geometry() |> group_by(Category) |> summarise(TotArea = sum(FieldArea))
 
 ## Read in the UKCEH landcover data as a base map to rasterize my fields with
 LC <- rast("RawData/LandCover/gblcm25m2021.tif")
@@ -1162,12 +1183,12 @@ Scen_settingsBr$OppCat4 <- NA
 ## Run the batch function for additive
 BatchBake(Canvas=Canv, SniModel=NULL, LapModel=LapMod,  RedModel=RedMod, LandCov=LC_crop,
           Outpath = "CleanData/Scenarios/5-ScenarioCreation/Broads/", SaveCanv = FALSE,
-          N_sets = 5, runsetting = Scen_settingsBr, zstart = 1, Additive = TRUE, Unfenced=TRUE)
+          N_sets = 20, runsetting = Scen_settingsBr, zstart = 1, Additive = TRUE, Unfenced=TRUE)
 
 ## Run the batch function for multiplicative
-BatchBake(Canvas=Canv, SniModel=NULL, LapModel=LapMod,  RedModel=RedMod, LandCov=LC_crop,
-          Outpath = "CleanData/Scenarios/5-ScenarioCreation/Broads/", SaveCanv = FALSE,
-          N_sets = 5, runsetting = Scen_settingsBr, zstart = 1, Additive = FALSE, Unfenced=TRUE)
+# BatchBake(Canvas=Canv, SniModel=NULL, LapModel=LapMod,  RedModel=RedMod, LandCov=LC_crop,
+#           Outpath = "CleanData/Scenarios/5-ScenarioCreation/Broads/", SaveCanv = FALSE,
+#           N_sets = 5, runsetting = Scen_settingsBr, zstart = 1, Additive = FALSE, Unfenced=TRUE)
 
 
 
@@ -1205,6 +1226,9 @@ Paths <- c("CleanData/Scenarios/5-ScenarioCreation/Broads/",
 ## Create vector of the species that are used for each region
 Species <- c("LapRed", "LapRed", "LapRed", "Snipe")
 
+## file path for all of the plots made here
+outpath <- "CleanData/Scenarios/5-ScenarioCreation/Combined/"
+
 
 ## Loop through each region and calculate a series of columns needed for plotting
 for(j in 1:length(Paths)){ 
@@ -1228,14 +1252,16 @@ for(j in 1:length(Paths)){
                      ChangeWaders = (Lapwing+Redshank) - (BaseLapwing+BaseRedshank),
                      ChangeWadersnoF = (Lapwing_unfenced+Redshank_unfenced) - (BaseLapwing+BaseRedshank),
                      ChangeCostsFG = ifelse(NewCat=="AES Only", NewAESCost - BaseAESCost,
-                                          ifelse(NewCat=="Reserve", (NewResMaintCost+(NewResCreatCost/Yr)+(FencingCost/Yr)+ForegoneCost)-BaseResMaintCost, 0)),
+                                          ifelse(NewCat=="Reserve", (NewResMaintCost+(NewResCreatCost/Yrs)+(FencingCost/15)+ForegoneCost)-BaseResMaintCost, 0)),
                      ChangeCostsPU = ifelse(NewCat=="AES Only", NewAESCost - BaseAESCost,
-                                          ifelse(NewCat=="Reserve", (NewResMaintCost+(NewResCreatCost/Yr)+(FencingCost/Yr)+(PurchaseCost/Yr))-BaseResMaintCost, 0)),
+                                          ifelse(NewCat=="Reserve", (NewResMaintCost+(NewResCreatCost/Yrs)+(FencingCost/15)+(PurchaseCost/Yrs))-BaseResMaintCost, 0)),
                      ChangeCostsNoF = ifelse(NewCat=="AES Only", NewAESCost - BaseAESCost,
-                                          ifelse(NewCat=="Reserve", (NewResMaintCost+(NewResCreatCost/Yr)+ForegoneCost)-BaseResMaintCost, 0)),
+                                          ifelse(NewCat=="Reserve", (NewResMaintCost+(NewResCreatCost/Yrs)+ForegoneCost)-BaseResMaintCost, 0)),
                      PlotCat = paste0(NewCat, ifelse(Plus==T, "+", "-"), " ", ifelse(OppCat== "Arable Opp", "Arable", ""))) |>
               filter(!SegmentArea == 0) 
-
+              
+  ## ratio of income forgone to
+  mean(AllScn2$PurchaseCost/AllScn2$ForegoneCost, na.rm=T)
   
   ## Calculate the cost per pairs depending on whether it is Snipe or Lapwing/Redshank
   ## Here I calculate the percentage change in breeding pairs per 100ha
@@ -1259,149 +1285,171 @@ for(j in 1:length(Paths)){
 
 
 ## Now finally combine all the scenario outputs across regions
+#ListSet[[1]] <- ListSet[[1]] |> mutate(ClustActual=NA) ## remove after I have rerun the scenarios
 Set <- do.call("rbind", ListSet)
 
 
+## Set a general theme for the bar plots
+BarPlotTheme <- theme_light() +
+                theme(panel.grid.minor = element_blank(),
+                      strip.text = element_text(size = 13, face = "bold"),
+                      axis.title = element_text(size = 15),
+                      axis.text.y = element_text(size = 13),
+                      axis.text.x = element_text(size = 13, angle = 45, vjust = 0.5),
+                      legend.title = element_text(size = 13, face = "bold"),
+                      legend.text = element_text(size = 13),
+                      legend.position = "top")
 
 
+##-----------------------------------------##
+##  Additive: Pairs per 100 ha vs Category ##
+##-----------------------------------------##
 
-
-##-----------------------------------------------------##
-##  Additive: % Change in Pairs per 100 ha vs Category ##
-##-----------------------------------------------------##
 
 ## First create a data set that can be used to create a bar plot that covers all scenarios
 ScenSum <- Set |>
-  mutate(PlotCatFull = paste0(Strategy, " & ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
-         PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
-  group_by(PlotCatFull, ScenType, PlusFull, Plus, NewCat, Strategy) |>
-  summarise(Perc_Waders_100Ha = mean(Perc_Waders_100Ha))
+mutate(PlotCatFull = paste0(Strategy, " & ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
+       PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
+group_by(PlotCatFull, ScenType, PlusFull, Plus, NewCat, Strategy) |>
+summarise(StEr = sd(Perc_Waders_100Ha)/sqrt(n()),
+          t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
+          Perc_Waders_100Ha = mean(Perc_Waders_100Ha)) |>  
+ungroup() |> 
+mutate(LowerCI = Perc_Waders_100Ha - (t_score * StEr),
+       UpperCI = Perc_Waders_100Ha + (t_score * StEr))
 
 
 ## Create Bar plot
-ggplot(ScenSum, aes(x= PlotCatFull, y= Perc_Waders_100Ha)) +
-  geom_col(aes(fill = ScenType), width=0.55, position=position_dodge(0.55)) +
-  facet_wrap(~PlusFull) +
-  scale_fill_manual(name = "Scenario Type",   # Change legend title
-                      labels = c("clusterlarge"= "Cluster-large", "clustersmall"= "Cluster-small", "random" ="Random"),  # Change legend labels
-                      values = c("clusterlarge"="#A5F076", "clustersmall"="#76A5F0", "random"="#F076A5")) +
-  ylab("% Change in Breeding Wader Pairs/ 100 ha") +
-  xlab("Scenario Category") +
-  labs(fill = "Targeting Strategy") +
-  BarPlotTheme + 
-  theme(axis.text.x = element_text(size = 11, angle = 45, vjust = 1, hjust = 1))
+ggplot(ScenSum, aes(x= PlotCatFull, y= Perc_Waders_100Ha, fill = ScenType)) +
+geom_col(width=0.55, position=position_dodge(width=0.55)) +
+geom_errorbar(aes(ymin= LowerCI, ymax= UpperCI), width=0.2, position=position_dodge(width=0.55), colour = "#6a6b6b") +
+facet_wrap(~PlusFull) +
+scale_fill_manual(name = "Scenario Type",   # Change legend title
+                    labels = c("clusterlarge"= "Cluster-large", "clustersmall"= "Cluster-small", "random" ="Random"),  # Change legend labels
+                    values = c("clusterlarge"="#A5F076", "clustersmall"="#76A5F0", "random"="#F076A5")) +
+ylab("Change in Breeding Wader Pairs/ 100 ha") +
+xlab("Scenario Category") +
+labs(fill = "Targeting Strategy") +
+BarPlotTheme + 
+theme(axis.text.x = element_text(size = 11, angle = 45, vjust = 1, hjust = 1))
 
 ## save the plot
-ggsave(plot=last_plot(), filename= paste0("CleanData/Scenarios/5-ScenarioCreation/Combined/", "Additive_Pairha_vs_Category.png"), units = "in", height = 9, width = 11)
+ggsave(plot=last_plot(), filename= paste0(outpath, "Additive_Pairha_vs_Category.png"), units = "in", height = 9, width = 11)
 
 
 
 
-
-
-
-##-------------------------------------------------------##
-##  Additive: % Change in Pairs per £100,000 vs Category ##
-##-------------------------------------------------------##
+##-------------------------------------------##
+##  Additive: Pairs per £100,000 vs Category ##
+##-------------------------------------------##
 
 ## First create a data set that can be used to create a bar plot that covers all scenarios
 ScenSumCost <- Set |>
-  mutate(PlotCatFull = paste0(Strategy, " & ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
-         PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
-  group_by(PlotCatFull, ScenType, PlusFull, Plus, NewCat, Strategy) |>
-  summarise(Perc_PairCost = mean(Perc_PairCost))
+mutate(PlotCatFull = paste0(Strategy, " & ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
+       PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
+group_by(PlotCatFull, ScenType, PlusFull, Plus, NewCat, Strategy) |>
+summarise(StEr = sd(Perc_PairCost)/sqrt(n()),
+          t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
+          Perc_PairCost = mean(Perc_PairCost)) |>     
+ungroup() |> 
+mutate(LowerCI = Perc_PairCost - (t_score * StEr),
+       UpperCI = Perc_PairCost + (t_score * StEr))
 
 
 ## Create Bar plot
-ggplot(ScenSumCost, aes(x= PlotCatFull, y= Perc_PairCost*100000)) +
-  geom_col(aes(fill = ScenType), width=0.55, position=position_dodge(0.55)) +
-  facet_wrap(~PlusFull) +
-  scale_fill_manual(name = "Scenario Type",   # Change legend title
-                      labels = c("clusterlarge"= "Cluster-large", "clustersmall"= "Cluster-small", "random" ="Random"),  # Change legend labels
-                      values = c("clusterlarge"="#A5F076", "clustersmall"="#76A5F0", "random"="#F076A5")) +
-  ylab("% Change in Breeding Wader Pairs/ £100,000") +
-  xlab("Scenario Category") +
-  labs(fill = "Targeting Strategy") +
-  BarPlotTheme + 
-  theme(axis.text.x = element_text(size = 11, angle = 45, vjust = 1, hjust = 1))
+ggplot(ScenSumCost, aes(x= PlotCatFull, y= Perc_PairCost*100000, fill = ScenType)) +
+geom_col(width=0.55, position=position_dodge(0.55)) +
+geom_errorbar(aes(ymin= LowerCI*100000, ymax= UpperCI*100000), width=0.2, position=position_dodge(width=0.55), colour = "#6a6b6b") +
+facet_wrap(~PlusFull) +
+scale_fill_manual(name = "Scenario Type",   # Change legend title
+                    labels = c("clusterlarge"= "Cluster-large", "clustersmall"= "Cluster-small", "random" ="Random"),  # Change legend labels
+                    values = c("clusterlarge"="#A5F076", "clustersmall"="#76A5F0", "random"="#F076A5")) +
+ylab("Breeding Wader Pairs/ £100,000") +
+xlab("Scenario Category") +
+labs(fill = "Targeting Strategy") +
+BarPlotTheme + 
+theme(axis.text.x = element_text(size = 11, angle = 45, vjust = 1, hjust = 1))
 
 
 ## save the plot
-ggsave(plot=last_plot(), filename= paste0("CleanData/Scenarios/5-ScenarioCreation/Combined/", "Additive_Pair£_vs_Category.png"), units = "in", height = 9, width = 12)
+ggsave(plot=last_plot(), filename= paste0(outpath, "Additive_Pair£_vs_Category.png"), units = "in", height = 9, width = 12)
 
 
 
 
-
-
-
-
-##------------------------------------------------------------------##
-##  Additive: % Change in Pairs per 100 ha vs Summarized Categories ##
-##--------------------------------------------------------------------##
+##------------------------------------------------------##
+##  Additive: Pairs per 100 ha vs Summarized Categories ##
+##------------------------------------------------------##
 
 ## Summarise the data so there are less rows
 ## Essentially the data is summarized to by taking the average across the different targeting strategies
-ScenSum2 <- ScenSum |>
-          filter(!PlotCatFull %in% c("Big & Reserve from Arable", "More & Reserve from Arable")) |> 
-          group_by(Strategy, Plus, NewCat) |>
-          summarise(Perc_Waders_100Ha = mean(Perc_Waders_100Ha)) |>
-          mutate(PlotCatOther = paste0(NewCat, " ", ifelse(Plus==T, "+", "-")),
-                 PlotCatFull= paste0(Strategy, " & ", PlotCatOther),
-                 PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling"))
+ScenSum2 <- Set |>
+        filter(!OppCat %in% c("Arable Opp")) |> 
+        group_by(Strategy, Plus, NewCat) |>
+        summarise(StEr = sd(Perc_Waders_100Ha)/sqrt(n()),
+                  t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
+                  Perc_Waders_100Ha = mean(Perc_Waders_100Ha)) |>
+        ungroup() |>
+        mutate(PlotCatOther = paste0(NewCat, " ", ifelse(Plus==T, "+", "-")),
+               PlotCatFull= paste0(Strategy, " & ", PlotCatOther),
+               PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling"),
+               LowerCI = Perc_Waders_100Ha - (t_score * StEr),
+               UpperCI = Perc_Waders_100Ha + (t_score * StEr)) 
 
 ## Create bar plot
-## Much simpler than above and mainly focuses on showing the differences between AES and reserve for the different Lawton Principles
-ggplot(ScenSum2, aes(x= Strategy, y= Perc_Waders_100Ha)) +
-  geom_col(aes(fill = NewCat), width=0.55, position=position_dodge(0.55)) +
-  facet_wrap(~PlusFull) +
-  scale_fill_manual(name = "Scenario Type",   # Change legend title
-                    labels = c("AES Only"= "AES Only", "Reserve"= "Nature Reserve"),  # Change legend labels
-                    values = c("AES Only"="#F076A5", "Reserve"= "#76A5F0")) +
-  ylab("% Change in Breeding Wader Pairs/ 100 ha") +
-  xlab("Lawton Principle") +
-  labs(fill = "Management Used") +
-  BarPlotTheme
+## Much simpler than above and mainly focusses on showing the differences between AES and reserve for the different Lawton Principles
+ggplot(ScenSum2, aes(x= Strategy, y= Perc_Waders_100Ha, fill = NewCat)) +
+geom_col(width=0.55, position=position_dodge(0.55)) +
+geom_errorbar(aes(ymin= LowerCI, ymax= UpperCI), width=0.2, position=position_dodge(width=0.55), colour = "#6a6b6b") +
+facet_wrap(~PlusFull) +
+scale_fill_manual(name = "Scenario Type",   # Change legend title
+                  labels = c("AES Only"= "AES Only", "Reserve"= "Nature Reserve"),  # Change legend labels
+                  values = c("AES Only"="#F076A5", "Reserve"= "#76A5F0")) +
+ylab("Change in Breeding Wader Pairs/ 100 ha") +
+xlab("Lawton Principle") +
+labs(fill = "Management Used") +
+BarPlotTheme
 
 ## save the plot
-ggsave(plot=last_plot(), filename= paste0("CleanData/Scenarios/5-ScenarioCreation/Combined/", "Additive_Pairha_vs_SumCategory.png"), units = "in", height = 9, width = 11)
+ggsave(plot=last_plot(), filename= paste0(outpath, "Additive_Pairha_vs_SumCategory.png"), units = "in", height = 9, width = 11)
 
 
 
 
-
-##--------------------------------------------------------------------##
-##  Additive: % Change in Pairs per £100,000 vs Summarized Categories ##
-##--------------------------------------------------------------------##
+##--------------------------------------------------------##
+##  Additive: Pairs per £100,000 vs Summarized Categories ##
+##--------------------------------------------------------##
 
 ## Summarise the data so there are less rows
-## Essentially the data is summarised to by taking the average across the different targeting strategies
-ScenSumCost2 <- ScenSumCost |>
-            filter(!PlotCatFull %in% c("Big & Reserve from Arable", "More & Reserve from Arable")) |> 
-          group_by(Strategy, Plus, NewCat) |>
-          summarise(Perc_PairCost = mean(Perc_PairCost)) |>
-          mutate(PlotCatOther = paste0(NewCat, " ", ifelse(Plus==T, "+", "-")),
-                 PlotCatFull= paste0(Strategy, " & ", PlotCatOther),
-                 PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling"))
+## Essentially the data is summarized to by taking the average across the different targeting strategies
+ScenSumCost2 <- Set |>
+          filter(!OppCat %in% c("Arable Opp")) |> 
+        group_by(Strategy, Plus, NewCat) |>
+        summarise(StEr = sd(Perc_PairCost)/sqrt(n()),
+                  t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
+                  Perc_PairCost = mean(Perc_PairCost)) |>
+        mutate(PlotCatOther = paste0(NewCat, " ", ifelse(Plus==T, "+", "-")),
+               PlotCatFull= paste0(Strategy, " & ", PlotCatOther),
+               PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling"),
+               LowerCI = Perc_PairCost - (t_score * StEr),
+               UpperCI = Perc_PairCost + (t_score * StEr))
 
 ## Create bar plot
 ## Much simpler than above and mainly focuses on showing the differences between AES and reserve for the different Lawton Principles
-ggplot(ScenSumCost2, aes(x= Strategy, y= Perc_PairCost*100000)) +
-  geom_col(aes(fill = NewCat), width=0.55, position=position_dodge(0.55)) +
-  facet_wrap(~PlusFull) +
-  scale_fill_manual(name = "Scenario Type",   # Change legend title
-                    labels = c("AES Only"= "AES Only", "Reserve"= "Nature Reserve"),  # Change legend labels
-                    values = c("AES Only"="#F076A5", "Reserve"= "#76A5F0")) +
-  ylab("% Change in Breeding Wader Pairs/ £100,000") +
-  xlab("Lawton Principle") +
-  labs(fill = "Management Used") +
-  BarPlotTheme
+ggplot(ScenSumCost2, aes(x= Strategy, y= Perc_PairCost*100000, fill = NewCat)) +
+geom_col(width=0.55, position=position_dodge(0.55)) +
+geom_errorbar(aes(ymin= LowerCI*100000, ymax= UpperCI*100000), width=0.2, position=position_dodge(width=0.55), colour = "#6a6b6b") +
+facet_wrap(~PlusFull) +
+scale_fill_manual(name = "Scenario Type",   # Change legend title
+                  labels = c("AES Only"= "AES Only", "Reserve"= "Nature Reserve"),  # Change legend labels
+                  values = c("AES Only"="#F076A5", "Reserve"= "#76A5F0")) +
+ylab("Breeding Wader Pairs/ £100,000") +
+xlab("Lawton Principle") +
+labs(fill = "Management Used") +
+BarPlotTheme
 
 ## save the plot
-ggsave(plot=last_plot(), filename= paste0("CleanData/Scenarios/5-ScenarioCreation/Combined/", "Additive_Pair£_vs_SumCategory.png"), units = "in", height = 9, width = 11)
-
-
-
+ggsave(plot=last_plot(), filename= paste0(outpath, "Additive_Pair£_vs_SumCategory.png"), units = "in", height = 9, width = 11)
 
 
 
@@ -1413,83 +1461,100 @@ ggsave(plot=last_plot(), filename= paste0("CleanData/Scenarios/5-ScenarioCreatio
 ##--------------------------------------##
 
 ## First create a data set that can be used to create a bar plot that covers all scenarios
-## Calculate the percentage change in pairs for un-fenced reserve
+## Calculate the change in pairs per unit cost for un-fenced reserve
 ScenSumCost_NoFence <- Set |>
 filter(!OppCat == "Arable Opp") |> 
 mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
        PlotCatFull = paste0(Strategy, " & ", NewCat, Arable2),
        PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
 group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
-summarise(Ave_PairCost = mean(Perc_PairCostNoF)) |> 
+summarise(StEr = sd(Perc_PairCostNoF)/sqrt(n()),
+          t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
+          Ave_PairCost = mean(Perc_PairCostNoF)) |> 
 ungroup() |> 
-mutate(Fencing = "Reserve Unfenced\n(grassland)") |> 
+mutate(Fencing = "Reserve Unfenced\n(grassland)",
+       LowerCI = Ave_PairCost - (t_score * StEr),
+       UpperCI = Ave_PairCost + (t_score * StEr)) |> 
 filter(NewCat == "Reserve")
 
-## Calculate the percentage change in pairs for fenced reserve
+## Calculate the change in pairs per unit cost for fenced reserve
 ScenSumCost_Fence <- Set |>
 filter(!OppCat == "Arable Opp") |> 
 mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
        PlotCatFull = paste0(Strategy, " & ", NewCat, Arable2),
        PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
 group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
-summarise(Ave_PairCost = mean(Perc_PairCost)) |> 
+summarise(StEr = sd(Perc_PairCost)/sqrt(n()),
+          t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
+          Ave_PairCost = mean(Perc_PairCost)) |> 
 ungroup() |> 
-mutate(Fencing = "Reserve Fenced\n(grassland)") |> 
+mutate(Fencing = "Reserve Fenced\n(grassland)",
+       LowerCI = Ave_PairCost - (t_score * StEr),
+       UpperCI = Ave_PairCost + (t_score * StEr)) |> 
 filter(NewCat == "Reserve")
 
-
-
-## Calculate the percentage change in pairs for created AES only land
+## Calculate the change in pairs per unit cost for AES only land
 ScenSumCost_AES <- Set |>
 mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
        PlotCatFull = paste0(Strategy, " & ", NewCat, Arable2),
        PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
 group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
-summarise(Ave_PairCost = mean(Perc_PairCost)) |> 
+summarise(StEr = sd(Perc_PairCost)/sqrt(n()),
+          t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
+          Ave_PairCost = mean(Perc_PairCost)) |> 
 ungroup() |> 
-mutate(Fencing = "AES Only") |> 
+mutate(Fencing = "AES Only",
+       LowerCI = Ave_PairCost - (t_score * StEr),
+       UpperCI = Ave_PairCost + (t_score * StEr)) |> 
 filter(NewCat == "AES Only")
 
 
 
-## Calculate the percentage change in pairs for un-fenced reserve created from arable land
+## Calculate the change in pairs per unit cost for un-fenced reserve from arable land
 ScenSumCost_NoFArable <- Set |>
 filter(OppCat == "Arable Opp") |> 
 mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
        PlotCatFull = paste0(Strategy, " & ", NewCat, Arable2),
        PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
 group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
-summarise(Ave_PairCost = mean(Perc_PairCostNoF)) |> 
+summarise(StEr = sd(Perc_PairCostNoF)/sqrt(n()),
+          t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
+          Ave_PairCost = mean(Perc_PairCostNoF)) |> 
 ungroup() |> 
-mutate(Fencing = "Reserve Unfenced\n(arable)") |> 
+mutate(Fencing = "Reserve Unfenced\n(arable)",
+       LowerCI = Ave_PairCost - (t_score * StEr),
+       UpperCI = Ave_PairCost + (t_score * StEr)) |> 
 filter(NewCat == "Reserve")
 
-## Calculate the percentage change in pairs for fenced reserve created from arable land
+## Calculate the change in pairs per unit cost for fenced reserve from arable land
 ScenSumCost_FenceArable <- Set |>
 filter(OppCat == "Arable Opp") |> 
 mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
        PlotCatFull = paste0(Strategy, " & ", NewCat, Arable2),
        PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
 group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
-summarise(Ave_PairCost = mean(Perc_PairCost)) |> 
+summarise(StEr = sd(Perc_PairCost)/sqrt(n()),
+          t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
+          Ave_PairCost = mean(Perc_PairCost)) |> 
 ungroup() |> 
-mutate(Fencing = "Reserve Fenced\n(arable)") |> 
+mutate(Fencing = "Reserve Fenced\n(arable)",
+       LowerCI = Ave_PairCost - (t_score * StEr),
+       UpperCI = Ave_PairCost + (t_score * StEr)) |> 
 filter(NewCat == "Reserve")
 
 
-
-## Combine all the different data sets for plotting
+## Combine all data sets for plotting
 FenceComp <- rbind(ScenSumCost_NoFence, ScenSumCost_Fence, ScenSumCost_AES, ScenSumCost_NoFArable, ScenSumCost_FenceArable)
 
 
-
 ## Create Bar plot
-ggplot(FenceComp, aes(x= Strategy, y= Ave_PairCost*100000)) +
-geom_col(aes(fill = Fencing), width=0.55, position=position_dodge(0.6, preserve = "single")) +
+ggplot(FenceComp, aes(x= Strategy, y= Ave_PairCost*100000, fill = Fencing)) +
+geom_col(width=0.55, position=position_dodge(0.6, preserve = "single")) +
+geom_errorbar(aes(ymin= LowerCI*100000, ymax= UpperCI*100000), width=0.2, position=position_dodge(0.6, preserve = "single"), colour = "#6a6b6b") +
 facet_wrap(~PlusFull) +
 scale_fill_manual(name = "Created Habitat\n(orginal habitat)",   # Change legend title
                   values = c("#073b4c", "#ffd166", "#06d6a0",  "#ef476f", "#118ab2")) +
-ylab("% Change in Breeding Wader Pairs/ £100,000") +
+ylab("Breeding Wader Pairs/ £100,000") +
 xlab("Lawton Principle") +
 labs(fill = "Targeting Strategy") +
 guides(fill=guide_legend(nrow=2, byrow=F)) +
@@ -1497,8 +1562,7 @@ BarPlotTheme
 
 
 ## save the plot
-ggsave(plot=last_plot(), filename= paste0("CleanData/Scenarios/5-ScenarioCreation/Combined/", "Additive_Pair£_vs_FencingEffect.png"), units = "in", height = 9, width = 11)
-
+ggsave(plot=last_plot(), filename= paste0(outpath, "Additive_Pair£_vs_FencingEffect.png"), units = "in", height = 9, width = 11)
 
 
 
@@ -1510,79 +1574,100 @@ ggsave(plot=last_plot(), filename= paste0("CleanData/Scenarios/5-ScenarioCreatio
 ##------------------------------------------------------##
 ##------------------------------------------------------##
 
-## Calculate % change in breeding pairs for reserve creation on grassland and pay income foregone
+## Calculate change in breeding pairs for reserve creation on grassland and pay income foregone
 ScenSumCost_FG <- Set |>
 filter(!OppCat == "Arable Opp") |> 
 mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
        PlotCatFull = paste0(Strategy, " & ", NewCat, Arable2),
        PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
 group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
-summarise(Ave_PairCost = mean(Perc_PairCost)) |> 
+summarise(StEr = sd(Perc_PairCost)/sqrt(n()),
+          t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
+          Ave_PairCost = mean(Perc_PairCost)) |> 
 ungroup() |> 
-mutate(Created = "Reserve- Grassland Income Foregone") |> 
+mutate(Created = "Reserve- Grassland Income Foregone",           
+       LowerCI = Ave_PairCost - (t_score * StEr),
+       UpperCI = Ave_PairCost + (t_score * StEr)) |> 
 filter(NewCat == "Reserve")
 
-## Calculate % change in breeding pairs for reserve creation on grassland and purchase land
+## Calculate change in breeding pairs for reserve creation on grassland and purchase land
 ScenSumCost_PU <- Set |>
 filter(!OppCat == "Arable Opp") |> 
 mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
        PlotCatFull = paste0(Strategy, " & ", NewCat, Arable2),
        PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
 group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
-summarise(Ave_PairCost = mean(Perc_PairCostPU)) |> 
+summarise(StEr = sd(Perc_PairCostPU)/sqrt(n()),
+          t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
+          Ave_PairCost = mean(Perc_PairCostPU)) |> 
 ungroup() |> 
-mutate(Created = "Reserve- Purchase Grassland") |> 
+mutate(Created = "Reserve- Purchase Grassland",           
+       LowerCI = Ave_PairCost - (t_score * StEr),
+       UpperCI = Ave_PairCost + (t_score * StEr)) |> 
 filter(NewCat == "Reserve")
 
 
-## Calculate % change in breeding pairs for reserve creation on arable land and pay income foregone
+## Calculate change in breeding pairs for reserve creation on arable land and pay income foregone
 ScenSumCost_FGArable <- Set |>
 filter(OppCat == "Arable Opp") |> 
 mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
        PlotCatFull = paste0(Strategy, " & ", NewCat, Arable2),
        PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
 group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
-summarise(Ave_PairCost = mean(Perc_PairCost)) |> 
+summarise(StEr = sd(Perc_PairCost)/sqrt(n()),
+          t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
+          Ave_PairCost = mean(Perc_PairCost)) |> 
 ungroup() |> 
-mutate(Created = "Reserve- Arable Income Foregone") |> 
+mutate(Created = "Reserve- Arable Income Foregone",           
+       LowerCI = Ave_PairCost - (t_score * StEr),
+       UpperCI = Ave_PairCost + (t_score * StEr)) |> 
 filter(NewCat == "Reserve")
 
-
-## Calculate % change in breeding pairs for reserve creation on arable land and purchase land
+## Calculate change in breeding pairs for reserve creation on arable land and purchase land
 ScenSumCost_PUArable <- Set |>
 filter(OppCat == "Arable Opp") |> 
 mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
        PlotCatFull = paste0(Strategy, " & ", NewCat, Arable2),
        PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
 group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
-summarise(Ave_PairCost = mean(Perc_PairCostPU)) |> 
+summarise(StEr = sd(Perc_PairCostPU)/sqrt(n()),
+          t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
+          Ave_PairCost = mean(Perc_PairCostPU)) |> 
 ungroup() |> 
-mutate(Created = "Reserve- Purchase Arable") |> 
+mutate(Created = "Reserve- Purchase Arable",           
+       LowerCI = Ave_PairCost - (t_score * StEr),
+       UpperCI = Ave_PairCost + (t_score * StEr)) |> 
 filter(NewCat == "Reserve")
 
-## Calculate % change in breeding pairs for AES creation
+
+## Calculate change in breeding pairs for AES creation
 ScenSumCost_AES <- Set |>
 mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
        PlotCatFull = paste0(Strategy, " & ", NewCat, Arable2),
        PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
 group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
-summarise(Ave_PairCost = mean(Perc_PairCost)) |> 
+summarise(StEr = sd(Perc_PairCost)/sqrt(n()),
+          t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
+          Ave_PairCost = mean(Perc_PairCost)) |> 
 ungroup() |> 
-mutate(Created = "AES Only") |> 
+mutate(Created = "AES Only",           
+       LowerCI = Ave_PairCost - (t_score * StEr),
+       UpperCI = Ave_PairCost + (t_score * StEr)) |> 
 filter(NewCat == "AES Only")
 
 
-## Combine all data set for plotting
+## Combine all data sets for plotting
 CostComp <- rbind(ScenSumCost_FG, ScenSumCost_PU, ScenSumCost_AES, ScenSumCost_FGArable, ScenSumCost_PUArable)
 
 
-## Create bar plot
-ggplot(CostComp, aes(x= Strategy, y= Ave_PairCost*100000)) +
-geom_col(aes(fill = Created), width=0.55, position=position_dodge(0.6, preserve = "single")) +
+## Create Bar plot
+ggplot(CostComp, aes(x= Strategy, y= Ave_PairCost*100000, fill = Created)) +
+geom_col(width=0.55, position=position_dodge(0.6, preserve = "single")) +
+geom_errorbar(aes(ymin= LowerCI*100000, ymax= UpperCI*100000), width=0.2, position=position_dodge(0.6, preserve = "single"), colour = "#6a6b6b") +
 facet_wrap(~PlusFull) +
 scale_fill_manual(name = "Created Habitat-\n(land costs)",   # Change legend title
                   values = c("#073b4c", "#ffd166", "#06d6a0",  "#ef476f", "#118ab2")) +
-ylab("% Change in Breeding Wader Pairs/ £100,000") +
+ylab("Breeding Wader Pairs/ £100,000") +
 xlab("Lawton Principle") +
 labs(fill = "Targeting Strategy") +
 guides(fill=guide_legend(nrow=2, byrow=F)) +
@@ -1590,8 +1675,7 @@ BarPlotTheme
 
 
 ## save the plot
-ggsave(plot=last_plot(), filename= paste0("CleanData/Scenarios/5-ScenarioCreation/Combined/", "Additive_Pair£_vs_ForegonePurchase.png"), units = "in", height = 9, width = 12)
-
+ggsave(plot=last_plot(), filename= paste0(outpath, "Additive_Pair£_vs_ForegonePurchase.png"), units = "in", height = 9, width = 12)
 
 
 
@@ -1602,35 +1686,40 @@ ggsave(plot=last_plot(), filename= paste0("CleanData/Scenarios/5-ScenarioCreatio
 ##-------------------------------------##
 ##-------------------------------------##  
 
+
 ## First create a data set that can be used to create a bar plot that covers all scenarios
 ScenSum <- Set |>
-  mutate(PlotCatFull = paste0(Strategy, " & ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
-         PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
-  group_by(PlotCatFull, ScenType, PlusFull, Plus, NewCat, Strategy) |>
-  summarise(ClustActual= mean(ClustActual))
+mutate(PlotCatFull = paste0(Strategy, " & ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
+       PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
+group_by(PlotCatFull, ScenType, PlusFull, Plus, NewCat, Strategy) |>
+summarise(StEr = sd(ClustActual)/sqrt(n()),
+          t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
+          ClustActual= mean(ClustActual)) |> 
+ungroup() |> 
+mutate(LowerCI = ClustActual - (t_score * StEr),
+       UpperCI = ClustActual + (t_score * StEr))
 
 ## Read in the 
 Sizes <- read_csv("CleanData/Scenarios/4-AnnotateCanvas/Average_reserve_AES_size.csv")
 
 ## Create Bar plot
-ggplot(ScenSum, aes(x= PlotCatFull, y= ClustActual)) +
-  geom_col(aes(fill = ScenType), width=0.55, position=position_dodge(0.55)) +
-  facet_wrap(~PlusFull) +
-  scale_fill_manual(name = "Scenario Type",   # Change legend title
-                      labels = c("clusterlarge"= "Cluster-large", "clustersmall"= "Cluster-small", "random" ="Random"),  # Change legend labels
-                      values = c("clusterlarge"="#A5F076", "clustersmall"="#76A5F0", "random"="#F076A5")) +
-  geom_hline(yintercept=Sizes$ReserveAve, linetype="dashed", color = "grey", linewidth = 1.2) +
-  geom_hline(yintercept=Sizes$AESAve, linetype="dashed", color = "grey", linewidth = 1.2) +
-  ylab("Average cluster size/ ha") +
-  xlab("Scenario Category") +
-  labs(fill = "Targeting Strategy") +
-  BarPlotTheme + 
-  theme(axis.text.x = element_text(size = 11, angle = 45, vjust = 1, hjust = 1))
+ggplot(ScenSum, aes(x= PlotCatFull, y= ClustActual, fill = ScenType)) +
+geom_col(width=0.55, position=position_dodge(0.55)) +
+geom_errorbar(aes(ymin= LowerCI, ymax= UpperCI), width=0.2, position=position_dodge(0.55), colour = "#6a6b6b") +
+facet_wrap(~PlusFull) +
+scale_fill_manual(name = "Scenario Type",   # Change legend title
+                    labels = c("clusterlarge"= "Cluster-large", "clustersmall"= "Cluster-small", "random" ="Random"),  # Change legend labels
+                    values = c("clusterlarge"="#A5F076", "clustersmall"="#76A5F0", "random"="#F076A5")) +
+geom_hline(yintercept=Sizes$ReserveAve, linetype="dashed", color = "grey", linewidth = 1.2) +
+geom_hline(yintercept=Sizes$AESAve, linetype="dashed", color = "grey", linewidth = 1.2) +
+ylab("Average cluster size/ ha") +
+xlab("Scenario Category") +
+labs(fill = "Targeting Strategy") +
+BarPlotTheme + 
+theme(axis.text.x = element_text(size = 11, angle = 45, vjust = 1, hjust = 1))
 
 ## save the plot
-ggsave(plot=last_plot(), filename= paste0("CleanData/Scenarios/5-ScenarioCreation/Combined/", "Additive_AveClusterSizeha_vs_Category.png"), units = "in", height = 9, width = 11)
-  
-
+ggsave(plot=last_plot(), filename= paste0(outpath, "Additive_AveClusterSizeha_vs_Category.png"), units = "in", height = 9, width = 11)
 
 
 
@@ -1640,34 +1729,45 @@ ggsave(plot=last_plot(), filename= paste0("CleanData/Scenarios/5-ScenarioCreatio
 ##------------------------------------##
 ##------------------------------------##
 
-## Calculate the % change in Lapwing pairs per unit cost
+## Calculate the change in Lapwing pairs per unit cost
 ScenSumLap <- Set |>
+  filter(!Landscape == "Somerset Levels and Moors") |> 
   mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
          PlotCatFull = paste0(Strategy, " & ", NewCat, Arable2),
          PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
   group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
-  summarise(Ave_PairCost = mean(Perc_PairCostLap, na.rm=T)) |> 
+  summarise(StEr = sd(Perc_PairCostLap)/sqrt(n()),
+            t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
+            Ave_PairCost = mean(Perc_PairCostLap)) |> 
   ungroup() |> 
-  mutate(Species = "Lapwing")
+  mutate(Species = "Lapwing",
+         LowerCI = Ave_PairCost - (t_score * StEr),
+         UpperCI = Ave_PairCost + (t_score * StEr))
 
-## Calculate the % change in Redshank pairs per unit cost
+## Calculate the change in Redshank pairs per unit cost
 ScenSumRed <- Set |>
+  filter(!Landscape == "Somerset Levels and Moors") |> 
   mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
          PlotCatFull = paste0(Strategy, " & ", NewCat, Arable2),
          PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
   group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
-  summarise(Ave_PairCost = mean(Perc_PairCostRed, na.rm=T)) |> 
+  summarise(StEr = sd(Perc_PairCostRed)/sqrt(n()),
+            t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
+            Ave_PairCost = mean(Perc_PairCostRed)) |> 
   ungroup() |> 
-  mutate(Species = "Redshank")
+  mutate(Species = "Redshank",
+         LowerCI = Ave_PairCost - (t_score * StEr),
+         UpperCI = Ave_PairCost + (t_score * StEr))
   
 
 ## Combine the data sets for Lapwing and Redshank
 SpeciesComb <- rbind(ScenSumLap, ScenSumRed)
 
 
-## Create bar plot
-ggplot(SpeciesComb, aes(x= PlotCatFull, y= Ave_PairCost*100000)) +
-  geom_col(aes(fill = Species), width=0.55, position=position_dodge(0.6)) +
+## Create Bar plot
+ggplot(SpeciesComb, aes(x= PlotCatFull, y= Ave_PairCost*100000, fill = Species)) +
+  geom_col(width=0.55, position=position_dodge(0.6)) +
+  geom_errorbar(aes(ymin= LowerCI*100000, ymax= UpperCI*100000), width=0.2, position=position_dodge(0.6), colour = "#6a6b6b") +
   facet_wrap(~PlusFull) +
   scale_fill_manual(name = "Species",   # Change legend title
                     values = c("#6464f4", "#f46464")) +
@@ -1678,7 +1778,7 @@ ggplot(SpeciesComb, aes(x= PlotCatFull, y= Ave_PairCost*100000)) +
 
 
 ## save the plot
-ggsave(plot=last_plot(), filename= paste0("CleanData/Scenarios/5-ScenarioCreation/Combined/", "Additive_Pair£_vs_LapwingRedshankComparison.png"), units = "in", height = 9, width = 11)
+ggsave(plot=last_plot(), filename= paste0(outpath, "Additive_Pair£_vs_LapwingRedshankComparison.png"), units = "in", height = 9, width = 11)
   
 
 

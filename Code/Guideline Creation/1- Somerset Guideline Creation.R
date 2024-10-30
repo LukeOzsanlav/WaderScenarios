@@ -1480,6 +1480,8 @@ CanvasBetter <- filter(Canvas, (Mask_G1 > 0.5) & is.na(ClustPop)==F)
 
 ## make plot
 ggplot() + 
+  ## add landscape outline
+  geom_sf(data=SomOutline, mapping=aes(geometry=geometry), colour = "grey", fill = NA) + 
   ## add polygons
   geom_sf(data=CanvasBetter, mapping=aes(geometry=geometry, fill = BetterGrade_G1), colour = NA) + 
   ## give a viridis fill to shapes
@@ -1488,7 +1490,7 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "Better Grading") +
-  ggtitle("Somerset Levels: Better Grading") +
+  ggtitle("Somerset Levels: Better Grading G1") +
   ## set them
   theme_light() + 
   GeneralThemeing
@@ -1507,6 +1509,8 @@ CanvasBig <- filter(Canvas, (Mask_G1 > 0.5) & is.na(ClustPop)==T)
 
 ## make plot
 ggplot() + 
+  ## add landscape outline
+  geom_sf(data=SomOutline, mapping=aes(geometry=geometry), colour = "grey", fill = NA) + 
   ## add polygons
   geom_sf(data=CanvasBig, mapping=aes(geometry=geometry, fill = BigGrade_G1), colour = NA) + 
   ## give a viridis fill to shapes
@@ -1515,7 +1519,7 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "Bigger Grading") +
-  ggtitle("Somerset Levels: Bigger Grading") +
+  ggtitle("Somerset Levels: Bigger Grading G1") +
   ## set them
   theme_light() + 
   GeneralThemeing
@@ -1534,6 +1538,8 @@ CanvasMore <- filter(Canvas, (Mask_G1 > 0.5) & is.na(ClustPop)==T)
 
 ## make plot
 ggplot() + 
+  ## add landscape outline
+  geom_sf(data=SomOutline, mapping=aes(geometry=geometry), colour = "grey", fill = NA) + 
   ## add polygons
   geom_sf(data=CanvasMore, mapping=aes(geometry=geometry, fill = MoreGrade_G1), colour = NA) + 
   ## give a viridis fill to shapes
@@ -1542,7 +1548,7 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "More Grading") +
-  ggtitle("Somerset Levels: More Grading") +
+  ggtitle("Somerset Levels: More Grading G1") +
   ## set them
   theme_light() + 
   GeneralThemeing
@@ -1566,6 +1572,8 @@ ReservesSom <- st_crop(Reserves, (Som |> st_buffer(dist=500)))
 
 ## make plot
 ggplot() + 
+  ## add landscape outline
+  geom_sf(data=SomOutline, mapping=aes(geometry=geometry), colour = "grey", fill = NA) + 
   ## add polygons
   geom_sf(data=Som, mapping=aes(geometry=geometry), fill = "lightblue", colour = NA) + 
   geom_sf(data=ReservesSom, mapping=aes(geometry=geometry), fill = "red", alpha = 0.5, colour = NA) + 
@@ -1604,6 +1612,8 @@ CanvasBetter <- filter(Canvas, (Mask_G2 > 0.5) & is.na(ClustPop)==F)
 
 ## make plot
 ggplot() + 
+  ## add landscape outline
+  geom_sf(data=SomOutline, mapping=aes(geometry=geometry), colour = "grey", fill = NA) + 
   ## add polygons
   geom_sf(data=CanvasBetter, mapping=aes(geometry=geometry, fill = BetterGrade_G2), colour = NA) + 
   ## give a viridis fill to shapes
@@ -1631,6 +1641,8 @@ CanvasBig <- filter(Canvas, (Mask_G2 > 0.5) & is.na(ClustPop)==T)
 
 ## make plot
 ggplot() + 
+  ## add landscape outline
+  geom_sf(data=SomOutline, mapping=aes(geometry=geometry), colour = "grey", fill = NA) + 
   ## add polygons
   geom_sf(data=CanvasBig, mapping=aes(geometry=geometry, fill = BigGrade_G2), colour = NA) + 
   ## give a viridis fill to shapes
@@ -1658,6 +1670,8 @@ CanvasMore <- filter(Canvas, (Mask_G2 > 0.5) & is.na(ClustPop)==T)
 
 ## make plot
 ggplot() + 
+  ## add landscape outline
+  geom_sf(data=SomOutline, mapping=aes(geometry=geometry), colour = "grey", fill = NA) + 
   ## add polygons
   geom_sf(data=CanvasMore, mapping=aes(geometry=geometry, fill = MoreGrade_G2), colour = NA) + 
   ## give a viridis fill to shapes
@@ -1686,6 +1700,8 @@ CanvasBetter <- filter(Canvas, (Mask_G3 > 0.5) & is.na(ClustPop)==F)
 
 ## make plot
 ggplot() + 
+  ## add landscape outline
+  geom_sf(data=SomOutline, mapping=aes(geometry=geometry), colour = "grey", fill = NA) + 
   ## add polygons
   geom_sf(data=CanvasBetter, mapping=aes(geometry=geometry, fill = BetterGrade_G3), colour = NA) + 
   ## give a viridis fill to shapes
@@ -1713,6 +1729,8 @@ CanvasBig <- filter(Canvas, (Mask_G3 > 0.5) & is.na(ClustPop)==T)
 
 ## make plot
 ggplot() + 
+  ## add landscape outline
+  geom_sf(data=SomOutline, mapping=aes(geometry=geometry), colour = "grey", fill = NA) + 
   ## add polygons
   geom_sf(data=CanvasBig, mapping=aes(geometry=geometry, fill = BigGrade_G3), colour = NA) + 
   ## give a viridis fill to shapes
@@ -1740,6 +1758,8 @@ CanvasMore <- filter(Canvas, (Mask_G3 > 0.5) & is.na(ClustPop)==T)
 
 ## make plot
 ggplot() + 
+  ## add landscape outline
+  geom_sf(data=SomOutline, mapping=aes(geometry=geometry), colour = "grey", fill = NA) + 
   ## add polygons
   geom_sf(data=CanvasMore, mapping=aes(geometry=geometry, fill = MoreGrade_G3), colour = NA) + 
   ## give a viridis fill to shapes

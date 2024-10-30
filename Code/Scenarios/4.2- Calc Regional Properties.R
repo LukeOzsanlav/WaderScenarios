@@ -208,5 +208,516 @@ TableESS_WaderOcc <- as.data.frame((table(Landsc_Fields2$opttitle, Landsc_Fields
 
 
 
+##----------------------------------##
+#### 4.0 Regional Wader AES Spend ####
+##----------------------------------##
+
+## create data frame to record costs
+AESTable <- data.frame(Landscape = NA,
+                       Cost = NA,
+                       Area = NA,
+                       Fields = NA,
+                       Length = 1:4) 
+
+##-------------------------##
+## 4.1 North Kent AES Cost ##
+##-------------------------##
+
+## Read in canvas polygons
+Canvshp <- st_read("CleanData/Scenarios/4-AnnotateCanvas/NKent_AnnotatedCanv.shp") |> select(ParcRef)
+table(duplicated(Canvshp$ParcRef))
+
+## Read in annotated canvas as csv
+Canv <- readRDS("CleanData/Scenarios/4-AnnotateCanvas/NKent_AnnotatedCanv.rds")
+table(duplicated(Canv$ParcRef))
+
+## Join polygons to annotations
+Canv <- left_join(Canv, Canvshp, by = "ParcRef") |> st_as_sf()
+rm(Canvshp)
+
+## If any parcels are current reserve, AES-only or opportunity then apply some simple additional masks
+## This will remove any fields that are not suitable for wader management
+Canv <- mutate(Canv,
+               Category = ifelse(Mask_G1 > 0.5 & !Category == "NoOpp", "Masked Hab", Category), # apply a mask to canvas (priority habs, monuments...etc)
+               WaterCoverage = ifelse(is.na(WaterCoverage)==T, 0, WaterCoverage), # Any fields that did not get a water coverage value just get a zero
+               Fence_Coverage = ifelse(Fence_Coverage == 0 | is.na(Fence_Coverage) == T, "N", "Y"), # match RF variable format
+               ParcArea = m2_to_ha(ParcArea), # match RF variable format
+               GroupArea = m2_to_ha(GroupArea), # convert to hectares
+               Perim = st_length(st_cast(geometry,"MULTILINESTRING")),
+               # initiate columns for wader abundance
+               SnipeAbund = NA,
+               LapAbund = NA,
+               RedAbund = NA) |>
+  rename(FieldArea=ParcArea)
+
+
+## Add a new column that separates out breeding wader vs wintering wader payment
+Canv$BrAES <- lapply(Canv$AES_options, FUN=function(x){any(x %in% c("GS9", "GS11"))})
+
+
+##-- Calculate the costs of the AES agreements in the canvas --##
+
+## Calculate the costs of the AES agreements in the canvas
+
+## Read in the AES scheme
+## Remove the small field supplement as not going to use this option for now
+AES_Costs <- read.csv("RawData/AES Costings/CSS_Cost_Sheet.csv")
+SmallSup <-  AES_Costs |> filter(CSS_Code == "SP1")
+AES_Costs <-  AES_Costs |> filter(!CSS_Code == "SP1")
+
+## Initiate a column for creating the costings
+Canv$AESCostGDP <- 0
+
+## Work out which rows in the data set are AES fields
+## This includes AES Only fields and reserve fields with AES
+WhichAES <- which(is.na(Canv$AES_options) == F)
+
+## Now using the list column of the different AES schemes this function looks through all the AES codes
+## Then ti works out the total payment for those fields based on the AES payment rates and the area of the field
+for(j in 1:nrow(AES_Costs)){
+  
+  ## How many years to spread one off costs over
+  Yrs <- 15
+
+  ## create columns used to track AES payment
+  Canv$Add <- NA
+  Canv$AddAmount <- 0
+
+  ## Work out which fields have the the current AES scheme or not (TRUE/FALSE)
+  Canv$Add[WhichAES] <- lapply(Canv$AES_options[WhichAES], FUN=function(x){any(x %in% AES_Costs$CSS_Code[j])})
+
+  ## Calculate the cost for that field of the current AES scheme
+  ## Add this costs onto any existing costs from other schemes calculated earlier in the loop
+  ## Also if the field is less then 1ha add on a small field supplement
+  Canv[WhichAES,] <- Canv[WhichAES,] %>%
+                     mutate(AddAmount = case_when(Add==T & AES_Costs$Unit[j]=="ha" & AES_Costs$Annual[j]=="Y" ~ FieldArea*AES_Costs$Cost[j],
+                                                  Add==T & AES_Costs$Unit[j]=="m" & AES_Costs$Annual[j]=="Y" ~ as.numeric(Perim)*AES_Costs$Cost[j],
+                                                  Add==T & AES_Costs$Unit[j]=="ha" & AES_Costs$Annual[j]=="N" ~ FieldArea*(AES_Costs$Cost[j]/Yrs),
+                                                  Add==T & AES_Costs$Unit[j]=="item" & AES_Costs$Annual[j]=="N" ~ ((2*AES_Costs$Cost[j])/Yrs),
+                                                  .default = 0),
+                            AddAmount = ifelse(FieldArea<1, AddAmount+(FieldArea*SmallSup$Cost), AddAmount),
+                            AESCostGDP = AESCostGDP + AddAmount)
+
+  if(j == nrow(AES_Costs)){Canv <- Canv |> select(-c(Add, AddAmount))}
+}
+
+## Calculate the costs in £1000's of pounds
+AESTable$Cost[1] <- sum(Canv$AESCostGDP[WhichAES], na.rm=T)
+AESTable$Area[1] <- sum(Canv$FieldArea[WhichAES], na.rm=T)
+AESTable$Fields[1] <- length(Canv$FieldArea[WhichAES])
+AESTable$Landscape[1] <- "North Kent"
+
+
+
+##-----------------------##
+## 4.2 Somerset AES Cost ##
+##-----------------------##
+
+## Read in canvas polygons
+Canvshp <- st_read("CleanData/Scenarios/4-AnnotateCanvas/Som_AnnotatedCanv.shp") |> select(ParcRef)
+
+## Read in annotated canvas as csv
+Canv <- readRDS("CleanData/Scenarios/4-AnnotateCanvas/Som_AnnotatedCanv.rds")
+
+## Join polygons to annotations
+Canv <- left_join(Canv, Canvshp, by = "ParcRef") |> st_as_sf()
+rm(Canvshp)
+
+## If any parcels are current reserve, AES-only or opportunity then apply some simple additional masks
+## This will remove any fields that are not suitable for wader management
+Canv <- mutate(Canv, 
+               Category = ifelse(Mask_G1 > 0.5 & !Category == "NoOpp", "Masked Hab", Category), # apply a mask to canvas (priority habs, monuments...etc)
+               WaterCoverage = ifelse(is.na(WaterCoverage)==T, 0, WaterCoverage), # Any fields that did not get a water coverage value just get a zero
+               Fence_Coverage = ifelse(Fence_Coverage == 0 | is.na(Fence_Coverage) == T, "N", "Y"), # match RF variable format
+               ParcArea = m2_to_ha(ParcArea), # match RF variable format
+               GroupArea = m2_to_ha(GroupArea), # convert to hectares
+               Perim = st_length(st_cast(geometry,"MULTILINESTRING")),
+               # initiate columns for wader abundance
+               SnipeAbund = NA, 
+               LapAbund = NA,
+               RedAbund = NA) |> 
+        rename(FieldArea=ParcArea)
+
+
+##-- Calculate the costs of the AES agreements in the canvas --##
+
+## Calculate the costs of the AES agreements in the canvas
+
+## Read in the AES scheme
+## Remove the small field supplement as not going to use this option for now
+AES_Costs <- read.csv("RawData/AES Costings/CSS_Cost_Sheet.csv")
+SmallSup <-  AES_Costs |> filter(CSS_Code == "SP1")
+AES_Costs <-  AES_Costs |> filter(!CSS_Code == "SP1")
+
+
+## Initiate a column for creating the costings
+Canv$AESCostGDP <- 0
+
+## Work out which rows in the data set are AES fields
+## This includes AES Only fields and reserve fields with AES
+WhichAES <- which(is.na(Canv$AES_options) == F)
+
+## Now using the list column of the different AES schemes this function looks through all the AES codes
+## Then ti works out the total payment for those fields based on the AES payment rates and the area of the field
+for(j in 1:nrow(AES_Costs)){
+
+  ## create columns used to track AES payment
+  Canv$Add <- NA
+  Canv$AddAmount <- 0
+
+  ## Work out which fields have the the current AES scheme or not (TRUE/FALSE)
+  Canv$Add[WhichAES] <- lapply(Canv$AES_options[WhichAES], FUN=function(x){any(x %in% AES_Costs$CSS_Code[j])})
+
+  ## Calculate the cost for that field of the current AES scheme
+  ## Add this costs onto any existing costs from other schemes calculated earlier in the loop
+  ## Also if the field is less then 1ha add on a small field supplement
+  Canv[WhichAES,] <- Canv[WhichAES,] %>%
+                     mutate(AddAmount = case_when(Add==T & AES_Costs$Unit[j]=="ha" & AES_Costs$Annual[j]=="Y" ~ FieldArea*AES_Costs$Cost[j],
+                                                  Add==T & AES_Costs$Unit[j]=="m" & AES_Costs$Annual[j]=="Y" ~ as.numeric(Perim)*AES_Costs$Cost[j],
+                                                  Add==T & AES_Costs$Unit[j]=="ha" & AES_Costs$Annual[j]=="N" ~ FieldArea*(AES_Costs$Cost[j]/Yrs),
+                                                  Add==T & AES_Costs$Unit[j]=="item" & AES_Costs$Annual[j]=="N" ~ ((2*AES_Costs$Cost[j])/Yrs),
+                                                  .default = 0),
+                            AddAmount = ifelse(FieldArea<1, AddAmount+(FieldArea*SmallSup$Cost), AddAmount),
+                            AESCostGDP = AESCostGDP + AddAmount)
+
+  if(j == nrow(AES_Costs)){Canv <- Canv |> select(-c(Add, AddAmount))}
+}
+
+## Calculate the costs in £1000's of pounds
+AESTable$Cost[2] <- as.numeric(sum(Canv$AESCostGDP[WhichAES], na.rm=T))
+AESTable$Area[2] <- sum(Canv$FieldArea[WhichAES], na.rm=T)
+AESTable$Fields[2] <- length(Canv$FieldArea[WhichAES])
+AESTable$Landscape[2] <- "Somerset"
+
+
+
+##--------------------------##
+## 4.3 Essex Coast AES Cost ##
+##--------------------------##
+
+## Read in canvas polygons
+Canvshp <- st_read("CleanData/Scenarios/4-AnnotateCanvas/Essex_AnnotatedCanv.shp") |> select(ParcRef)
+
+## Read in annotated canvas as csv
+Canv <- readRDS("CleanData/Scenarios/4-AnnotateCanvas/Essex_AnnotatedCanv.rds")
+
+## Join polygons to annotations
+Canv <- left_join(Canv, Canvshp, by = "ParcRef") |> st_as_sf()
+rm(Canvshp)
+
+## If any parcels are current reserve, AES-only or opportunity then apply some simple additional masks
+## This will remove any fields that are not suitable for wader management
+Canv <- mutate(Canv, 
+               Category = ifelse(Mask_G1 > 0.5 & !Category == "NoOpp", "Masked Hab", Category), # apply a mask to canvas (priority habs, monuments...etc)
+               WaterCoverage = ifelse(is.na(WaterCoverage)==T, 0, WaterCoverage), # Any fields that did not get a water coverage value just get a zero
+               Fence_Coverage = ifelse(Fence_Coverage == 0 | is.na(Fence_Coverage) == T, "N", "Y"), # match RF variable format
+               ParcArea = m2_to_ha(ParcArea), # match RF variable format
+               GroupArea = m2_to_ha(GroupArea), # convert to hectares
+               Perim = st_length(st_cast(geometry,"MULTILINESTRING")),
+               # initiate columns for wader abundance
+               SnipeAbund = NA, 
+               LapAbund = NA,
+               RedAbund = NA) |> 
+        rename(FieldArea=ParcArea)
+
+
+##-- Calculate the costs of the AES agreements in the canvas --##
+
+## Calculate the costs of the AES agreements in the canvas
+
+## Read in the AES scheme
+## Remove the small field supplement as not going to use this option for now
+AES_Costs <- read.csv("RawData/AES Costings/CSS_Cost_Sheet.csv")
+SmallSup <-  AES_Costs |> filter(CSS_Code == "SP1")
+AES_Costs <-  AES_Costs |> filter(!CSS_Code == "SP1")
+
+
+## Initiate a column for creating the costings
+Canv$AESCostGDP <- 0
+
+## Work out which rows in the data set are AES fields
+## This includes AES Only fields and reserve fields with AES
+WhichAES <- which(is.na(Canv$AES_options) == F)
+
+## Now using the list column of the different AES schemes this function looks through all the AES codes
+## Then ti works out the total payment for those fields based on the AES payment rates and the area of the field
+for(j in 1:nrow(AES_Costs)){
+
+  ## create columns used to track AES payment
+  Canv$Add <- NA
+  Canv$AddAmount <- 0
+
+  ## Work out which fields have the the current AES scheme or not (TRUE/FALSE)
+  Canv$Add[WhichAES] <- lapply(Canv$AES_options[WhichAES], FUN=function(x){any(x %in% AES_Costs$CSS_Code[j])})
+
+  ## Calculate the cost for that field of the current AES scheme
+  ## Add this costs onto any existing costs from other schemes calculated earlier in the loop
+  ## Also if the field is less then 1ha add on a small field supplement
+  Canv[WhichAES,] <- Canv[WhichAES,] %>%
+                     mutate(AddAmount = case_when(Add==T & AES_Costs$Unit[j]=="ha" & AES_Costs$Annual[j]=="Y" ~ FieldArea*AES_Costs$Cost[j],
+                                                  Add==T & AES_Costs$Unit[j]=="m" & AES_Costs$Annual[j]=="Y" ~ as.numeric(Perim)*AES_Costs$Cost[j],
+                                                  Add==T & AES_Costs$Unit[j]=="ha" & AES_Costs$Annual[j]=="N" ~ FieldArea*(AES_Costs$Cost[j]/Yrs),
+                                                  Add==T & AES_Costs$Unit[j]=="item" & AES_Costs$Annual[j]=="N" ~ ((2*AES_Costs$Cost[j])/Yrs),
+                                                  .default = 0),
+                            AddAmount = ifelse(FieldArea<1, AddAmount+(FieldArea*SmallSup$Cost), AddAmount),
+                            AESCostGDP = AESCostGDP + AddAmount)
+
+  if(j == nrow(AES_Costs)){Canv <- Canv |> select(-c(Add, AddAmount))}
+}
+
+## Calculate the costs in £1000's of pounds
+AESTable$Cost[3] <- as.numeric(sum(Canv$AESCostGDP[WhichAES], na.rm=T))
+AESTable$Area[3] <- sum(Canv$FieldArea[WhichAES], na.rm=T)
+AESTable$Fields[3] <- length(Canv$FieldArea[WhichAES])
+AESTable$Landscape[3] <- "Essex"
+
+
+
+
+##------------------------------##
+## 4.1 Norfolk Broads AES Costs ##
+##------------------------------##
+
+## Read in canvas polygons
+Canvshp <- st_read("CleanData/Scenarios/4-AnnotateCanvas/Broads_AnnotatedCanv.shp") |> select(ParcRef)
+
+## Read in annotated canvas as csv
+Canv <- readRDS("CleanData/Scenarios/4-AnnotateCanvas/Broads_AnnotatedCanv.rds")
+
+## Join polygons to annotations
+Canv <- left_join(Canv, Canvshp, by = "ParcRef") |> st_as_sf()
+rm(Canvshp)
+
+## If any parcels are current reserve, AES-only or opportunity then apply some simple additional masks
+## This will remove any fields that are not suitable for wader management
+Canv <- mutate(Canv, 
+               Category = ifelse(Mask_G1 > 0.5 & !Category == "NoOpp", "Masked Hab", Category), # apply a mask to canvas (priority habs, monuments...etc)
+               WaterCoverage = ifelse(is.na(WaterCoverage)==T, 0, WaterCoverage), # Any fields that did not get a water coverage value just get a zero
+               Fence_Coverage = ifelse(Fence_Coverage == 0 | is.na(Fence_Coverage) == T, "N", "Y"), # match RF variable format
+               ParcArea = m2_to_ha(ParcArea), # match RF variable format
+               GroupArea = m2_to_ha(GroupArea), # convert to hectares
+               Perim = st_length(st_cast(geometry,"MULTILINESTRING")),
+               # initiate columns for wader abundance
+               SnipeAbund = NA, 
+               LapAbund = NA,
+               RedAbund = NA) |> 
+        rename(FieldArea=ParcArea)
+
+
+
+##-- Calculate the costs of the AES agreements in the canvas --##
+
+## Calculate the costs of the AES agreements in the canvas
+
+## Read in the AES scheme
+## Remove the small field supplement as not going to use this option for now
+AES_Costs <- read.csv("RawData/AES Costings/CSS_Cost_Sheet.csv")
+SmallSup <-  AES_Costs |> filter(CSS_Code == "SP1")
+AES_Costs <-  AES_Costs |> filter(!CSS_Code == "SP1")
+
+
+## Initiate a column for creating the costings
+Canv$AESCostGDP <- 0
+
+## Work out which rows in the data set are AES fields
+## This includes AES Only fields and reserve fields with AES
+WhichAES <- which(is.na(Canv$AES_options) == F)
+
+## Now using the list column of the different AES schemes this function looks through all the AES codes
+## Then ti works out the total payment for those fields based on the AES payment rates and the area of the field
+for(j in 1:nrow(AES_Costs)){
+
+  ## create columns used to track AES payment
+  Canv$Add <- NA
+  Canv$AddAmount <- 0
+
+  ## Work out which fields have the the current AES scheme or not (TRUE/FALSE)
+  Canv$Add[WhichAES] <- lapply(Canv$AES_options[WhichAES], FUN=function(x){any(x %in% AES_Costs$CSS_Code[j])})
+
+  ## Calculate the cost for that field of the current AES scheme
+  ## Add this costs onto any existing costs from other schemes calculated earlier in the loop
+  ## Also if the field is less then 1ha add on a small field supplement
+  Canv[WhichAES,] <- Canv[WhichAES,] %>%
+                     mutate(AddAmount = case_when(Add==T & AES_Costs$Unit[j]=="ha" & AES_Costs$Annual[j]=="Y" ~ FieldArea*AES_Costs$Cost[j],
+                                                  Add==T & AES_Costs$Unit[j]=="m" & AES_Costs$Annual[j]=="Y" ~ as.numeric(Perim)*AES_Costs$Cost[j],
+                                                  Add==T & AES_Costs$Unit[j]=="ha" & AES_Costs$Annual[j]=="N" ~ FieldArea*(AES_Costs$Cost[j]/Yrs),
+                                                  Add==T & AES_Costs$Unit[j]=="item" & AES_Costs$Annual[j]=="N" ~ ((2*AES_Costs$Cost[j])/Yrs),
+                                                  .default = 0),
+                            AddAmount = ifelse(FieldArea<1, AddAmount+(FieldArea*SmallSup$Cost), AddAmount),
+                            AESCostGDP = AESCostGDP + AddAmount)
+
+  if(j == nrow(AES_Costs)){Canv <- Canv |> select(-c(Add, AddAmount))}
+}
+
+## Calculate the costs in £1000's of pounds
+AESTable$Cost[4] <- as.numeric(sum(Canv$AESCostGDP[WhichAES], na.rm=T))
+AESTable$Area[4] <- sum(Canv$FieldArea[WhichAES], na.rm=T)
+AESTable$Fields[4] <- length(Canv$FieldArea[WhichAES])
+AESTable$Landscape[4] <- "Norfolk"
+
+
+
+
+##-----------------------------##
+## 4.5 Summarise the AES costs ##
+##-----------------------------##
+
+## see the regional results
+print(AESTable)
+
+## Calculate mean value
+mean(AESTable$Cost)
+mean(AESTable$Area)
+mean(AESTable$Fields)
+
+## 10%/20% and 50% expenditure
+mean(AESTable$Cost)*0.1
+mean(AESTable$Cost)*0.2
+mean(AESTable$Cost)*0.5
+
+## Finally write out the table so I can use it in other scripts
+write_csv(AESTable, file = "CleanData/Scenarios/4-AnnotateCanvas/Total_AES_Expenditure.csv")
+
+
+
+
+
+##-------------------------------------##
+#### 5.0 Reserve level wader density ####
+##-------------------------------------##
+
+##-- North Kent --##
+
+## Read in canvas polygons
+Canvshp <- st_read("CleanData/Scenarios/4-AnnotateCanvas/NKent_AnnotatedCanv.shp") |> select(ParcRef)
+table(duplicated(Canvshp$ParcRef))
+
+## Read in annotated canvas as csv
+CanvNK <- readRDS("CleanData/Scenarios/4-AnnotateCanvas/NKent_AnnotatedCanv.rds")
+table(duplicated(CanvNK$ParcRef))
+
+## Join polygons to annotations
+CanvNK <- left_join(CanvNK, Canvshp, by = "ParcRef") |> st_as_sf()
+rm(Canvshp)
+
+## If any parcels are current reserve, AES-only or opportunity then apply some simple additional masks
+## This will remove any fields that are not suitable for wader management
+CanvNK <- mutate(CanvNK, 
+               Category = ifelse(Mask_G1 > 0.5 & !Category == "NoOpp", "Masked Hab", Category), # apply a mask to canvas (priority habs, monuments...etc)
+               WaterCoverage = ifelse(is.na(WaterCoverage)==T, 0, WaterCoverage), # Any fields that did not get a water coverage value just get a zero
+               Fence_Coverage = ifelse(Fence_Coverage == 0 | is.na(Fence_Coverage) == T, "N", "Y"), # match RF variable format
+               ParcArea = m2_to_ha(ParcArea), # match RF variable format
+               GroupArea = m2_to_ha(GroupArea), # convert to hectares
+               Perim = st_length(st_cast(geometry,"MULTILINESTRING"))) |> 
+        rename(FieldArea=ParcArea) |> 
+        select(ReserveGroup, Category, RSPB, FieldArea, Tot_abund, Landscape)
+
+
+
+##-- Somerset Levels --##
+ 
+## Read in canvas polygons
+Canvshp <- st_read("CleanData/Scenarios/4-AnnotateCanvas/Som_AnnotatedCanv.shp") |> select(ParcRef)
+
+## Read in annotated canvas as csv
+CanvSom <- readRDS("CleanData/Scenarios/4-AnnotateCanvas/Som_AnnotatedCanv.rds")
+
+## Join polygons to annotations
+CanvSom <- left_join(CanvSom, Canvshp, by = "ParcRef") |> st_as_sf()
+rm(Canvshp)
+
+## If any parcels are current reserve, AES-only or opportunity then apply some simple additional masks
+## This will remove any fields that are not suitable for wader management
+CanvSom <- mutate(CanvSom, 
+               Category = ifelse(Mask_G1 > 0.5 & !Category == "NoOpp", "Masked Hab", Category), # apply a mask to canvas (priority habs, monuments...etc)
+               WaterCoverage = ifelse(is.na(WaterCoverage)==T, 0, WaterCoverage), # Any fields that did not get a water coverage value just get a zero
+               Fence_Coverage = ifelse(Fence_Coverage == 0 | is.na(Fence_Coverage) == T, "N", "Y"), # match RF variable format
+               ParcArea = m2_to_ha(ParcArea), # match RF variable format
+               GroupArea = m2_to_ha(GroupArea), # convert to hectares
+               Perim = st_length(st_cast(geometry,"MULTILINESTRING"))) |> 
+        rename(FieldArea=ParcArea) |> 
+        select(ReserveGroup, Category, RSPB, FieldArea, Tot_abund, Landscape)
+  
+  
+  
+##-- Essex Coast --##  
+
+## Read in canvas polygons
+Canvshp <- st_read("CleanData/Scenarios/4-AnnotateCanvas/Essex_AnnotatedCanv.shp") |> select(ParcRef)
+
+## Read in annotated canvas as csv
+CanvEs <- readRDS("CleanData/Scenarios/4-AnnotateCanvas/Essex_AnnotatedCanv.rds")
+
+## Join polygons to annotations
+CanvEs <- left_join(CanvEs, Canvshp, by = "ParcRef") |> st_as_sf()
+rm(Canvshp)
+
+## Read in a data set of Wallasea ISland F_LOC_IDs that are not wet grassland but actually saltmarsh
+Wall <- read.csv("RawData/RSPB Reserves/WallaseaIsland_NonWetgrass.csv")
+
+## If any parcels are current reserve, AES-only or opportunity then apply some simple additional masks
+## This will remove any fields that are not suitable for wader management
+CanvEs <- mutate(CanvEs, 
+               Category = ifelse(Mask_G1 > 0.5 & !Category == "NoOpp", "Masked Hab", Category), # apply a mask to canvas (priority habs, monuments...etc)
+               Category = ifelse(F_LOC_ID %in% Wall$F_LOC_ID, "NoOpp", Category),
+               WaterCoverage = ifelse(is.na(WaterCoverage)==T, 0, WaterCoverage), # Any fields that did not get a water coverage value just get a zero
+               Fence_Coverage = ifelse(Fence_Coverage == 0 | is.na(Fence_Coverage) == T, "N", "Y"), # match RF variable format
+               ParcArea = m2_to_ha(ParcArea), # match RF variable format
+               GroupArea = m2_to_ha(GroupArea), # convert to hectares
+               Perim = st_length(st_cast(geometry,"MULTILINESTRING")),
+               ) |> 
+        rename(FieldArea=ParcArea) |> 
+        select(ReserveGroup, Category, RSPB, FieldArea, Tot_abund, Landscape)
+
+
+
+
+##-- Norfolk Broads --##
+
+
+## Read in canvas polygons
+Canvshp <- st_read("CleanData/Scenarios/4-AnnotateCanvas/Broads_AnnotatedCanv.shp") |> select(ParcRef)
+
+## Read in annotated canvas as csv
+CanvBr <- readRDS("CleanData/Scenarios/4-AnnotateCanvas/Broads_AnnotatedCanv.rds")
+
+## Join polygons to annotations
+CanvBr <- left_join(CanvBr, Canvshp, by = "ParcRef") |> st_as_sf()
+rm(Canvshp)
+
+## If any parcels are current reserve, AES-only or opportunity then apply some simple additional masks
+## This will remove any fields that are not suitable for wader management
+CanvBr <- mutate(CanvBr, 
+               Category = ifelse(Mask_G1 > 0.5 & !Category == "NoOpp", "Masked Hab", Category), # apply a mask to canvas (priority habs, monuments...etc)
+               WaterCoverage = ifelse(is.na(WaterCoverage)==T, 0, WaterCoverage), # Any fields that did not get a water coverage value just get a zero
+               Fence_Coverage = ifelse(Fence_Coverage == 0 | is.na(Fence_Coverage) == T, "N", "Y"), # match RF variable format
+               ParcArea = m2_to_ha(ParcArea), # match RF variable format
+               GroupArea = m2_to_ha(GroupArea), # convert to hectares
+               Perim = st_length(st_cast(geometry,"MULTILINESTRING"))) |> 
+        rename(FieldArea=ParcArea)|> 
+        select(ReserveGroup, Category, RSPB, FieldArea, Tot_abund, Landscape)
+
+
+##-- Calculate breeding wader density --##
+
+## Join all the regions together
+AllCanv <- rbind(CanvNK, CanvSom, CanvEs, CanvBr)
+
+## Calculate the wader density
+WaderDens <- AllCanv |>
+             filter(is.na(ReserveGroup)==F) |>
+             filter(is.na(Tot_abund) == F) |> 
+             filter(Category == "Reserve") |>
+             group_by(ReserveGroup, RSPB, Landscape) |>
+             summarise(TotArea = sum(FieldArea),
+                       TotWader = sum(Tot_abund, na.rm=T),
+                       WaderDensity = TotWader/TotArea) |> 
+             mutate(Cutoff = ifelse(Landscape == "Somerset Levels and Moors", 0.15, 0.3),
+                    ResQual = ifelse(WaderDensity > Cutoff, "HighQ", "LowQ"))
+
+
+## finally write out the breeding wader densities
+write_csv(WaderDens |> st_drop_geometry(), "CleanData/Scenarios/4-AnnotateCanvas/ReserveWaderDensity.csv")
+
 
 

@@ -699,6 +699,9 @@ Pairs <- Pairs |>
          CORRECT_PAIRS = ifelse(PropVisCov == 0, 0, ESTIMATED_PAIRS/PropVisCov),
          yday =yday(VISIT_DATE))
 
+## How many fields have less than 100% coverage
+Tabs <- table(Pairs$PropVisCov<0.99)
+(Tabs[2]/sum(Tabs))*100 # percentage fo fields with less than 100% coverage
 
 
 ## Summary of species-level conversions

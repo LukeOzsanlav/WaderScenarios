@@ -45,7 +45,7 @@ plot(LC_NK) # free up space
 
 ## Read in full BWWM data set that has each wader cluster labelled
 Reg_Fields <- st_read("CleanData/Scenarios/2-DefineWaderSites/All Regions/All_BWWM_Fields_Clusters.shp") |> 
-              filter(Region == "Essex") 
+              filter(Region == "Kent") 
 InterFields <- Reg_Fields |> st_intersection(NKOutline)
 Reg_Fields <- Reg_Fields |> filter(F_LOC_ID %in% InterFields$F_LOC_ID)
 
@@ -78,13 +78,13 @@ LargeSites <- PopSize |> filter(ClustPop > 50) |> st_as_sf()
 ## RSPB reserves, crop to large wader sites to see which RSPB reserves I want
 RSPB <- st_read("RawData/RSPB Reserves/EnglandWales_RSPBReserves.shp") 
 Inter <- RSPB |> st_intersection(LargeSites)
-plot(Inter$geometry); table(Inter$Att3Value)
+#plot(Inter$geometry); table(Inter$Att3Value)
 RSPB <- filter(RSPB, Att3Value %in% c("CLIFFE POOLS", "HIGHAM MARSHES", "NORTHWARD HILL", "SHORNE MARSHES", "GREAT BELLS FARM")) |> select(geometry)
 
 ## National Nature Reserves, crop to large wader sites
 NNR <- st_read("RawData/Other Reserves/National_Nature_Reserves_EnglandPolygon.shp")
 Inter <- NNR |> st_intersection(LargeSites)
-plot(Inter$geometry); table(Inter$nnr_name)
+#plot(Inter$geometry); table(Inter$nnr_name)
 NNR <- filter(NNR, nnr_name == "Elmley") |> select(geometry)
 
 ## Rasterize the selected RSPB reserves and NNR's
@@ -1058,14 +1058,14 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "Better Grading") +
-  ggtitle("North Kent: Better Grading") +
+  ggtitle("North Kent: Better Grading G1") +
   ## set them
   theme_light() + 
   GeneralThemeing
 rm(CanvasGrBetter)
 
 ## save plot as png
-ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_G1_Better.png", width = 20, height = 20, units = "cm")
+ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_G1_Better.png", width = 20, height = 12, units = "cm")
 
 
 
@@ -1088,14 +1088,14 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "Bigger Grading") +
-  ggtitle("North Kent: Bigger Grading") +
+  ggtitle("North Kent: Bigger Grading G1") +
   ## set them
   theme_light() + 
   GeneralThemeing
 rm(CanvasGrBig)
 
 ## save plot as png
-ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_G1_Bigger.png", width = 20, height = 20, units = "cm")
+ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_G1_Bigger.png", width = 20, height = 12, units = "cm")
 
 
 
@@ -1118,14 +1118,14 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "More Grading") +
-  ggtitle("North Kent: More Grading") +
+  ggtitle("North Kent: More Grading G1") +
   ## set them
   theme_light() + 
   GeneralThemeing
 rm(CanvasGrMore)
 
 ## save plot as png
-ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_G1_More.png", width = 20, height = 20, units = "cm")
+ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_G1_More.png", width = 20, height = 12, units = "cm")
 
 
 
@@ -1151,14 +1151,14 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "Arable Grading") +
-  ggtitle("North Kent: Arable Reversion Grading") +
+  ggtitle("North Kent: Arable Reversion G1") +
   ## set them
   theme_light() +
   GeneralThemeing
 rm(CanvasArG1)
 
 ## save plot as png
-ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_G1_ArableRev.png", width = 20, height = 20, units = "cm")
+ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_G1_ArableRev.png", width = 20, height = 12, units = "cm")
 
 
 
@@ -1193,7 +1193,7 @@ ggplot() +
   theme(legend.position = "none")
 
 ## save plot as png
-ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_LandscapeMap.png", width = 20, height = 20, units = "cm")
+ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_LandscapeMap.png", width = 20, height = 12, units = "cm")
 
 
 
@@ -1225,7 +1225,7 @@ ggplot() +
 rm(CanvasGrBetter)
 
 ## save plot as png
-ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_G2_Better.png", width = 20, height = 20, units = "cm")
+ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_G2_Better.png", width = 20, height = 12, units = "cm")
       
 
 
@@ -1255,7 +1255,7 @@ ggplot() +
 rm(CanvasGrBig)
 
 ## save plot as png
-ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_G2_Bigger.png", width = 20, height = 20, units = "cm")
+ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_G2_Bigger.png", width = 20, height = 12, units = "cm")
 
 
 
@@ -1285,7 +1285,7 @@ ggplot() +
 rm(CanvasGrMore)
 
 ## save plot as png
-ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_G2_More.png", width = 20, height = 20, units = "cm")
+ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_G2_More.png", width = 20, height = 12, units = "cm")
 
 
 
@@ -1311,14 +1311,14 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "Arable Grading") +
-  ggtitle("North Kent: Arable Reversion Grading") +
+  ggtitle("North Kent: Arable Reversion G2") +
   ## set them
   theme_light() +
   GeneralThemeing
 rm(CanvasArG2)
 
 ## save plot as png
-ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_G2_ArableRev.png", width = 20, height = 20, units = "cm")
+ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_G2_ArableRev.png", width = 20, height = 12, units = "cm")
 
 
 

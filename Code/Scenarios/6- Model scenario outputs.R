@@ -30,7 +30,7 @@ ListSet <- list()
 ## Create a vector of input paths for each region
 Paths <- c("CleanData/Scenarios/5-ScenarioCreation/Broads/",
            "CleanData/Scenarios/5-ScenarioCreation/Essex/",
-           #"CleanData/Scenarios/5-ScenarioCreation/Kent/",
+           "CleanData/Scenarios/5-ScenarioCreation/Kent/",
            "CleanData/Scenarios/5-ScenarioCreation/Som/")
 
 ## Create vector of the species that are used for each region
@@ -41,7 +41,7 @@ Species <- c("LapRed", "LapRed", "LapRed", "Snipe")
 for(j in 1:length(Paths)){ 
   
   ## number of years to spread one off costs over
-  Yr=15
+  Yr=20
   
   ## First create a data set that can be used to create a bar plot that covers all scenarios
   files <- c(dir(paste0(Paths[j], "rand/"), pattern  = "Track_Add", full.names  = T),
@@ -64,9 +64,9 @@ for(j in 1:length(Paths)){
                      ChangeWaders = (Lapwing+Redshank) - (BaseLapwing+BaseRedshank),
                      ChangeWadersnoF = (Lapwing_unfenced+Redshank_unfenced) - (BaseLapwing+BaseRedshank),
                      ChangeCostsFG = ifelse(NewCat=="AES Only", NewAESCost - BaseAESCost,
-                                          ifelse(NewCat=="Reserve", (NewResMaintCost+(NewResCreatCost/Yr)+(FencingCost/Yr)+ForegoneCost)-BaseResMaintCost, 0)),
+                                          ifelse(NewCat=="Reserve", (NewResMaintCost+(NewResCreatCost/Yr)+(FencingCost/15)+ForegoneCost)-BaseResMaintCost, 0)),
                      ChangeCostsPU = ifelse(NewCat=="AES Only", NewAESCost - BaseAESCost,
-                                          ifelse(NewCat=="Reserve", (NewResMaintCost+(NewResCreatCost/Yr)+(FencingCost/Yr)+(PurchaseCost/Yr))-BaseResMaintCost, 0)),
+                                          ifelse(NewCat=="Reserve", (NewResMaintCost+(NewResCreatCost/Yr)+(FencingCost/15)+(PurchaseCost/Yr))-BaseResMaintCost, 0)),
                      ChangeCostsNoF = ifelse(NewCat=="AES Only", NewAESCost - BaseAESCost,
                                           ifelse(NewCat=="Reserve", (NewResMaintCost+(NewResCreatCost/Yr)+ForegoneCost)-BaseResMaintCost, 0)),
                      PlotCat = paste0(NewCat, ifelse(Plus==T, "+", "-"), " ", ifelse(OppCat== "Arable Opp", "Arable", "")),
@@ -116,17 +116,18 @@ library(performance)
 library(emmeans)
 library(effects)
 
-## Look at the structure of the data set
-glimpse(Set)
 
 
 
 ##-- Organize data for models --##
 
+## Look at the structure of the data set
+glimpse(Set)
+
 ## Select columns for model and calculate change in abundance
 SetD <- Set |> select(WaderTot, BaseWaderTot, ChangeCostsFG, ScenType, Strategy, NewCat, Plus, Landscape, OppCat) |> 
-  mutate(AbChange = WaderTot-BaseWaderTot) |> 
-  filter(!OppCat == "Arable Opp")
+  mutate(AbChange = WaderTot-BaseWaderTot,
+         NewCat = ifelse(OppCat == "Arable Opp", paste0(NewCat, "_Arable"), NewCat))
 
 
 ## Set the right format for each column
@@ -142,40 +143,106 @@ with(SetD,
   as.data.frame(table(ScenType, Strategy, NewCat, Plus, Landscape)))
 scale(SetD$WaderTot)
 
+## Re-level certain factors for better plotting
+SetD <- SetD |> 
+  mutate(Landscape= fct_relevel(Landscape, "Somerset Levels and Moors"), 
+         ScenType= fct_relevel(ScenType, "random"))
+
+
 
 
 
 ##-- Running Model --##
 
 ## baseline: random cluster, better
-Mod1 <- glmmTMB(AbChange ~ BaseWaderTot*ChangeCostsFG + ScenType + Strategy + NewCat + Plus,
+Mod1 <- glmmTMB((AbChange/(ChangeCostsFG/100000)) ~ Landscape + ScenType + Strategy + NewCat + Plus,
                 data = SetD,
                 family = t_family(link = "identity")) # Chose t-family as data has long tail
 
 summary(Mod1)
 confint(Mod1)
 
+
+##-- Plot model outputs --##
+
+
+## Forest plot from model
+## get the estimates and confidence intervals from the models
+Ests <- cbind(confint(Mod1))
+rownames(Ests) <- c("Intercept", "Region: Broads", "Region: Essex", "Region: North Kent", "Targetting: Large Sites", "Targetting: Small Sites ", "Location: Bigger", 
+                    "Location: More", "Mechanism: Reserve", "Mechanism: Reserve from Arable", "Mechanism: Higher quality")
+Ests <- Ests[!rownames(Ests)=="Intercept",] # remove the intercept
+Ests <- Ests |> as.data.frame()
+
+Ests$Pos <- c(8, 9, 10, 3, 4, 1, 2, 5, 6, 7)
+Ests <- Ests[order(Ests$Pos), ]
+
+
+## make a forest plot fo the model estimates
+Ests <- Ests %>%
+        mutate(Param = rownames(Ests),
+               Sig = ifelse( (`2.5 %` >0 & `97.5 %` >0) | (`2.5 %` <0 & `97.5 %` <0), "red", "grey"))
+
+
+## this vector might be useful for other plots/analyses
+level_order <- c(Ests$Param)
+
+
+## Create forest plot
+ggplot(Ests) +
+        #geom_vline(xintercept = 0, linetype = "dashed", alpha =0.5) +
+        geom_errorbarh(aes(y= factor(Param, level = rev(level_order)), xmin= `2.5 %`, xmax=`97.5 %`), height = 0.2, linewidth =0.5) +
+        geom_point(aes(y= factor(Param, level = rev(level_order)), x= Estimate, colour = Sig), size = 2.5) +
+        theme_bw() +
+        ylab("") +
+        scale_color_manual(values=c("#E74C3C")) +
+        theme(panel.grid.minor.y = element_blank(),
+              #panel.grid.major.x = element_blank(),
+              panel.grid.major.y = element_blank(),
+              axis.title=element_text(size=16), 
+              legend.title=element_text(size=14),
+              axis.text=element_text(size=14), 
+              legend.text=element_text(size=12),
+              panel.grid.minor.x = element_blank(),
+              legend.position = "none") 
+
+## save the plot
+ggsave(plot=last_plot(), filename= "CleanData/Scenarios/6-ModelOutputs/Parameter_ForestPlot.png", units = "in", height = 8, width = 11)
+  
+
+
+
+##-- Comparisons --##
+
 glimpse(SetD)
-## baseline: random cluster, better, non-plus
-Mod2 <- glmmTMB(AbChange ~ BaseWaderTot + ScenType + Strategy + NewCat + Plus + 
-                           ScenType*Strategy*Plus*NewCat,
-                data = SetD,
-                #offset = scale(ChangeCostsFG),
-                family = t_family(link = "identity"))
+emmeans(Mod1, specs = pairwise ~ ScenType + Strategy)
+emm <- emmeans(Mod1, ~ ScenType + Strategy)
+simp <- pairs(emm, simple = "each")
+pairs
 
-summary(Mod2)
-confint(Mod2)
+(Emm_ScenType <- emmeans(Mod1, "ScenType"))
+confint(pairs(Emm_ScenType))
+emmeans(Mod1, ~ ScenType) |> plot()
+
+(Emm_Strategy <- emmeans(Mod1, "Strategy"))
+pairs(Emm_Strategy)
+emmeans(Mod1, ~ Strategy) |> plot()
+ 
+(Emm_NewCat <- emmeans(Mod1, "NewCat"))
+pairs(Emm_NewCat)
+emmeans(Mod1, ~ NewCat) |> plot()
+
+(Emm_Plus <- emmeans(Mod1, "Plus"))
+pairs(Emm_Plus)
+emmeans(Mod1, ~ Plus) |> plot()
 
 
-noise.emm <- emmeans(Mod2, ~ ScenType*Strategy*Plus*NewCat)
-
-contrast(noise.emm, "pairwise", simple = "each", combine = T, adjust = "mvt")
-
-joint_tests(Mod2)
 
 
 
-#, lines=list(multiline=TRUE)
+
+
+
 
 
 ##-- Model Diagnostics --##

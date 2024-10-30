@@ -1326,13 +1326,13 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "Better Grading") +
-  ggtitle("Essex Coast: Better Grading") +
+  ggtitle("Essex Coast: Better Grading G1") +
   ## set them
   theme_light() + 
   GeneralThemeing
 
 ## save plot as png
-ggsave(filename = "CleanData/Guideline Creation/Plots/Essex_G1_Better.png", width = 20, height = 20, units = "cm")
+ggsave(filename = "CleanData/Guideline Creation/Plots/Essex_G1_Better.png", width = 20, height = 13, units = "cm")
       
 
 
@@ -1355,13 +1355,13 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "Bigger Grading") +
-  ggtitle("Essex Coast: Bigger Grading") +
+  ggtitle("Essex Coast: Bigger Grading G1") +
   ## set them
   theme_light() + 
   GeneralThemeing
 
 ## save plot as png
-ggsave(filename = "CleanData/Guideline Creation/Plots/Essex_G1_Bigger.png", width = 20, height = 20, units = "cm")
+ggsave(filename = "CleanData/Guideline Creation/Plots/Essex_G1_Bigger.png", width = 20, height = 13, units = "cm")
 
 
 
@@ -1384,13 +1384,13 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "More Grading") +
-  ggtitle("Essex Coast: More Grading") +
+  ggtitle("Essex Coast: More Grading G1") +
   ## set them
   theme_light() + 
   GeneralThemeing
 
 ## save plot as png
-ggsave(filename = "CleanData/Guideline Creation/Plots/Essex_G1_More.png", width = 20, height = 20, units = "cm")
+ggsave(filename = "CleanData/Guideline Creation/Plots/Essex_G1_More.png", width = 20, height = 13, units = "cm")
 
 
 
@@ -1414,14 +1414,14 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "Arable Grading") +
-  ggtitle("Essex Coast: Arable Reversion Grading") +
+  ggtitle("Essex Coast: Arable Reversion G1") +
   ## set them
   theme_light() + 
   GeneralThemeing
 rm(CanvasArG1)
 
 ## save plot as png
-ggsave(filename = "CleanData/Guideline Creation/Plots/Essex_G1_ArableRev.png", width = 20, height = 20, units = "cm")
+ggsave(filename = "CleanData/Guideline Creation/Plots/Essex_G1_ArableRev.png", width = 20, height = 13, units = "cm")
 
 
 
@@ -1449,7 +1449,7 @@ ggplot() +
   ## Set plot extent so all plots have the same extent
   PlotExt +
   ## Add North arrow and scale bar
-  annotation_scale(location = "br", line_width = unit(0.25, "cm"), height = unit(0.1, "cm"), pad_y = unit(0.1, "in")) +
+  #annotation_scale(location = "br", line_width = unit(0.25, "cm"), height = unit(0.1, "cm"), pad_y = unit(0.1, "in")) +
   # annotation_north_arrow(location = "br", which_north = "true",
   #                        pad_x = unit(0.13, "in"), pad_y = unit(0.25, "in"),
   #                        style = north_arrow_orienteering,
@@ -1464,7 +1464,7 @@ ggplot() +
   theme(legend.position = "none")
 
 ## save plot as png
-ggsave(filename = "CleanData/Guideline Creation/Plots/Essex_LandscapeMap.png", width = 20, height = 20, units = "cm")
+ggsave(filename = "CleanData/Guideline Creation/Plots/Essex_LandscapeMap.png", width = 20, height = 13, units = "cm")
 
 
 
@@ -1495,7 +1495,7 @@ ggplot() +
   GeneralThemeing
 
 ## save plot as png
-ggsave(filename = "CleanData/Guideline Creation/Plots/Essex_G2_Better.png", width = 20, height = 20, units = "cm")
+ggsave(filename = "CleanData/Guideline Creation/Plots/Essex_G2_Better.png", width = 20, height = 13, units = "cm")
       
 
 
@@ -1524,7 +1524,7 @@ ggplot() +
   GeneralThemeing
 
 ## save plot as png
-ggsave(filename = "CleanData/Guideline Creation/Plots/Essex_G2_Bigger.png", width = 20, height = 20, units = "cm")
+ggsave(filename = "CleanData/Guideline Creation/Plots/Essex_G2_Bigger.png", width = 20, height = 13, units = "cm")
 
 
 
@@ -1553,7 +1553,7 @@ ggplot() +
   GeneralThemeing
 
 ## save plot as png
-ggsave(filename = "CleanData/Guideline Creation/Plots/Essex_G2_More.png", width = 20, height = 20, units = "cm")
+ggsave(filename = "CleanData/Guideline Creation/Plots/Essex_G2_More.png", width = 20, height = 13, units = "cm")
 
 
 
@@ -1578,11 +1578,11 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "Arable Grading") +
-  ggtitle("Essex Coast: Arable Reversion Grading") +
+  ggtitle("Essex Coast: Arable Reversion G2") +
   ## set them
   theme_light() + 
   GeneralThemeing
 rm(CanvasArG2)
 
 ## save plot as png
-ggsave(filename = "CleanData/Guideline Creation/Plots/Essex_G2_ArableRev.png", width = 20, height = 20, units = "cm")
+ggsave(filename = "CleanData/Guideline Creation/Plots/Essex_G2_ArableRev.png", width = 20, height = 13, units = "cm")

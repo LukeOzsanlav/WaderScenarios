@@ -58,6 +58,10 @@ Lanscap <- st_read(here("RawData", "Priority Landscapes", "EnglandWales_Priority
 Lanscap <- filter(Lanscap, Att3Value %in% c("Somerset Levels and Moors", "Greater Thames", 
                                             "Broads", "Suffolk Coast")) # Filter out the landscapes I am focusing on
 
+## Read in RSPB priority landscapes, with greater Thames landscape split in two
+SplitLanscape <- st_read("RawData/Priority Landscapes/Split Priority Landscapes/EnglandWales_PriorityLandscapes.shp") |> 
+                        filter(Att3Value %in% c("Somerset Levels and Moors", "Broads", "Greater Thames", "North Kent", "Essex"))
+
 ## Read in the UKCEH landcover data
 LC <- rast(here("RawData", "LandCover", "gblcm25m2021.tif"))
 LC <- LC[[1]]
@@ -201,7 +205,7 @@ Int3 <- ggplot() +
 
 
 ##-----------------------------------------------------##
-#### 2. Join Pair Estimates and Spatial Calculations ####
+#### 2.1 Join Pair Estimates and Spatial Calculations ####
 ##-----------------------------------------------------##
 
 ## Trim Fields data set for join
@@ -214,6 +218,27 @@ nrow(Wader) == PreL
 
 
 
+##-------------------------##
+#### 2.2 Summary of data ####
+##-------------------------##
+
+## filter out the fields in priority landscapes
+PL_data <- filter(Wader, is.na(Landscape)==F)
+nrow(PL_data) # the number of fields across all landscapes
+sum(PL_data$FieldArea)/10000 # total survey area in hectares
+
+## summarise the data by landscape
+PL_data |> 
+  group_by(Landscape) |> 
+  summarise(TotArea = sum(FieldArea)/10000,
+            TotFields = n())
+
+## calculate the number of fields with only one visit
+Visits <- table(PL_data$N_visits)
+Visits[1]/sum(Visits)
+
+
+
 
 ##------------------------------##
 #### 3. Field Selection Step  ####
@@ -222,6 +247,7 @@ nrow(Wader) == PreL
 ##** CRITERIA 1: Priority Landscape filter ##
 ## Remove any fields that are not in the buffered priority landscape
 PFields <- filter(Wader, is.na(Landscape)==F)
+StartLength <- nrow(PFields) # record how many fields before filtering
 
 
 ## Work out dominant habitat in each field and the proportion of each field that is grassland
@@ -268,6 +294,16 @@ PFields <- filter(PFields, !Arable_Hab == 1)
 ## remove any fields that were assigned as none-grassland from the UKCEH land cover maps
 ## AND that were identified as unsuitable or suitable other in every survey visit
 SelectFields <- filter(PFields, !(DomHab %in% c(1, 2, 3, 12, 13, 14, 15, 16, 17, 18, 20, 21) & (Unsuit_Hab == 1 | Other_Hab == 1)))
+
+
+## Check size of current data set
+nrow(PFields) # number of fields left
+StartLength-nrow(PFields) # number of fields removed
+((StartLength-nrow(PFields))/StartLength)*100 # % of fields removed
+PFields |> 
+  group_by(Landscape) |> 
+  summarise(TotArea = sum(FieldArea)/10000,
+            TotFields = n())
 
 
 

@@ -1059,7 +1059,7 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "Better Grading") +
-  ggtitle("Broads: Better Grading") +
+  ggtitle("Broads: Better Grading G1") +
   ## set them
   theme_light() + 
   GeneralThemeing
@@ -1089,7 +1089,7 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "Bigger Grading") +
-  ggtitle("Broads: Bigger Grading") +
+  ggtitle("Broads: Bigger Grading G1") +
   ## set them
   theme_light() + 
   GeneralThemeing
@@ -1119,7 +1119,7 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "More Grading") +
-  ggtitle("Broads: More Grading") +
+  ggtitle("Broads: More Grading G1") +
   ## set them
   theme_light() + 
   GeneralThemeing
@@ -1151,7 +1151,7 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "Arable Grading") +
-  ggtitle("Broads: Arable Reversion Grading") +
+  ggtitle("Broads: Arable Reversion G1") +
   ## set them
   theme_light() +
   GeneralThemeing
@@ -1310,7 +1310,7 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "Arable Grading") +
-  ggtitle("Norfolk Broads: Arable Reversion Grading") +
+  ggtitle("Norfolk Broads: Arable Reversion G2") +
   ## set them
   theme_light() +
   GeneralThemeing
