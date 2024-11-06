@@ -770,7 +770,7 @@ writeRaster(Gen_mask, "CleanData/Guideline Creation/Norfolk/Broads_MasksAll_Gen.
 ## Group 1: Combine better guidelines ##
 ##------------------------------------##
 
-Bett_G1 <- LowGrassDens + Hydro_HeightLow + UnitSize + LandownerDens + ElevSD + WaterAvail
+Bett_G1 <- LowGrassDens + Hydro_HeightLow + UnitSize + LandownerDens + ElevSD
 names(Bett_G1) <- "Better"
 
 ggplot() + geom_spatraster(data=Bett_G1) + labs(fill = "Grading") + scale_fill_viridis_c(na.value = "lightgrey") + theme_light() 
@@ -800,16 +800,26 @@ ggplot() + geom_spatraster(data=More_G1) + scale_fill_viridis_c(na.value = "ligh
 writeRaster(More_G1, "CleanData/Guideline Creation/Norfolk/Broads_More_G1.tif", overwrite=TRUE) # read out grading
 
 
+##----------------------------------------------------##
+## Group 1: Combine agri-conversion Bigger guidelines ##
+##----------------------------------------------------##
 
-##---------------------------------------------##
-## Group 1: Combine agri-conversion guidelines ##
-##---------------------------------------------##
+ArableBig_G1 <- LowGrassDens + WaderSitesDist + HistoricGrass + Big_G1
+names(ArableBig_G1) <- "ArableConv"
 
-ArableConv_G1 <- Hydro_HeightLow + LowGrassDens + WaderSitesDist + HistoricGrass
-names(ArableConv_G1) <- "ArableConv"
+ggplot() + geom_spatraster(data=ArableBig_G1) + scale_fill_viridis_c(na.value = "lightgrey") + theme_light()
+writeRaster(ArableBig_G1, "CleanData/Guideline Creation/Norfolk/Broads_ArableBig_G1.tif", overwrite=TRUE)
 
-ggplot() + geom_spatraster(data=ArableConv_G1) + scale_fill_viridis_c(na.value = "lightgrey") + theme_light()
-writeRaster(ArableConv_G1, "CleanData/Guideline Creation/Norfolk/Broads_ArableRev_G1.tif", overwrite=TRUE)
+
+##--------------------------------------------------##
+## Group 1: Combine agri-conversion More guidelines ##
+##--------------------------------------------------##
+
+ArableMore_G1 <- LowGrassDens + WaderSitesDist + HistoricGrass + More_G1
+names(ArableMore_G1) <- "ArableConv"
+
+ggplot() + geom_spatraster(data=ArableMore_G1) + scale_fill_viridis_c(na.value = "lightgrey") + theme_light()
+writeRaster(ArableMore_G1, "CleanData/Guideline Creation/Norfolk/Broads_ArableMore_G1.tif", overwrite=TRUE)
 
 
 
@@ -868,18 +878,26 @@ ggplot() + geom_spatraster(data= More_G2) + scale_fill_viridis_c(na.value = "lig
 writeRaster(More_G2, "CleanData/Guideline Creation/Norfolk/Broads_More_G2.tif", overwrite=TRUE) # read out grading
 
 
+##----------------------------------------------------##
+## Group 2: Combine agri-conversion Bigger guidelines ##
+##----------------------------------------------------##
 
-##----------------------------------------------##
-## Group 2: Combine agri-conversion guidelines ##
-##---------------------------------------------##
+ArableBig_G2 <- AgriGrades + Big_G2
+names(ArableBig_G2) <- "ArableConv"
 
-## Add together all rules and assign name to layer
-ArableConv_G2 <- Hydro_HeightLow + AgriGrades + ExpandClust
-names(ArableConv_G2) <- "ArableConv"
+ggplot() + geom_spatraster(data=ArableBig_G2) + scale_fill_viridis_c(na.value = "lightgrey") + theme_light()
+writeRaster(ArableBig_G2, "CleanData/Guideline Creation/Norfolk/Broads_ArableBig_G2.tif", overwrite=TRUE)
 
-## Plot combined grading layer and save as a tif file
-ggplot() + geom_spatraster(data=ArableConv_G2) + scale_fill_viridis_c(na.value = "lightgrey") + theme_light()
-writeRaster(ArableConv_G2, "CleanData/Guideline Creation/Norfolk/Broads_ArableRev_G2.tif", overwrite=TRUE)
+
+##--------------------------------------------------##
+## Group 2: Combine agri-conversion More guidelines ##
+##--------------------------------------------------##
+
+ArableMore_G2 <- AgriGrades + More_G2
+names(ArableMore_G2) <- "ArableConv"
+
+ggplot() + geom_spatraster(data=ArableMore_G2) + scale_fill_viridis_c(na.value = "lightgrey") + theme_light()
+writeRaster(ArableMore_G2, "CleanData/Guideline Creation/Norfolk/Broads_ArableMore_G2.tif", overwrite=TRUE)
 
 
 
@@ -948,18 +966,18 @@ plot(CanvasAr$geometry)
 
 ##-- Extract the grades/masks for each of the Lawton strategies --##
 
-## Code to read in the rules if needed
-G1_mask <- rast("CleanData/Guideline Creation/Norfolk/Broads_MasksAll_G1.tif")
-Bett_G1 <- rast("CleanData/Guideline Creation/Norfolk/Broads_Better_G1.tif")
-Big_G1 <- rast("CleanData/Guideline Creation/Norfolk/Broads_Bigger_G1.tif")
-More_G1 <- rast("CleanData/Guideline Creation/Norfolk/Broads_More_G1.tif")
-ArableConv_G1 <- rast("CleanData/Guideline Creation/Norfolk/Broads_ArableRev_G1.tif")
-
-G2_mask <- rast("CleanData/Guideline Creation/Norfolk/Broads_MasksAll_G2.tif")
-Bett_G2 <- rast("CleanData/Guideline Creation/Norfolk/Broads_Better_G2.tif")
-Big_G2 <- rast("CleanData/Guideline Creation/Norfolk/Broads_Bigger_G2.tif")
-More_G2 <- rast("CleanData/Guideline Creation/Norfolk/Broads_More_G2.tif")
-ArableConv_G2 <- rast("CleanData/Guideline Creation/Norfolk/Broads_ArableRev_G2.tif")
+# ## Code to read in the rules if needed
+# G1_mask <- rast("CleanData/Guideline Creation/Norfolk/Broads_MasksAll_G1.tif")
+# Bett_G1 <- rast("CleanData/Guideline Creation/Norfolk/Broads_Better_G1.tif")
+# Big_G1 <- rast("CleanData/Guideline Creation/Norfolk/Broads_Bigger_G1.tif")
+# More_G1 <- rast("CleanData/Guideline Creation/Norfolk/Broads_More_G1.tif")
+# ArableConv_G1 <- rast("CleanData/Guideline Creation/Norfolk/Broads_ArableRev_G1.tif")
+# 
+# G2_mask <- rast("CleanData/Guideline Creation/Norfolk/Broads_MasksAll_G2.tif")
+# Bett_G2 <- rast("CleanData/Guideline Creation/Norfolk/Broads_Better_G2.tif")
+# Big_G2 <- rast("CleanData/Guideline Creation/Norfolk/Broads_Bigger_G2.tif")
+# More_G2 <- rast("CleanData/Guideline Creation/Norfolk/Broads_More_G2.tif")
+# ArableConv_G2 <- rast("CleanData/Guideline Creation/Norfolk/Broads_ArableRev_G2.tif")
 
 
 ## More strategy
@@ -981,10 +999,14 @@ CanvasGr$BetterGrade_G1 <- BetterGrades$Better
 CanvasGr$BetterGrade_G2 <- BetterGrades2$Better
 
 ## Arable reversion Strategy
-ArableGrades <- extract(ArableConv_G1, CanvasAr, fun = mean, na.rm = T)
-ArableGrades2 <- extract(ArableConv_G2, CanvasAr, fun = mean, na.rm = T)
-CanvasAr$ArableGrade_G1 <- ArableGrades$ArableConv
-CanvasAr$ArableGrade_G2 <- ArableGrades2$ArableConv
+ArableBig1 <- extract(ArableBig_G1, CanvasAr, fun = mean, na.rm = T)
+ArableMore1 <- extract(ArableMore_G1, CanvasAr, fun = mean, na.rm = T)
+ArableBig2 <- extract(ArableBig_G2, CanvasAr, fun = mean, na.rm = T)
+ArableMore2 <- extract(ArableMore_G2, CanvasAr, fun = mean, na.rm = T)
+CanvasAr$ArableBig_G1 <- ArableBig1$ArableConv
+CanvasAr$ArableBig_G2 <- ArableBig2$ArableConv
+CanvasAr$ArableMore_G1 <- ArableMore1$ArableConv
+CanvasAr$ArableMore_G2 <- ArableMore2$ArableConv
 
 
 ## Add on cluster size to the Better grading
@@ -1059,7 +1081,7 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "Better Grading") +
-  ggtitle("Broads: Better Grading G1") +
+  ggtitle("Broads: Better (Conservationists)") +
   ## set them
   theme_light() + 
   GeneralThemeing
@@ -1089,7 +1111,7 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "Bigger Grading") +
-  ggtitle("Broads: Bigger Grading G1") +
+  ggtitle("Broads: Bigger (Conservationists)") +
   ## set them
   theme_light() + 
   GeneralThemeing
@@ -1119,7 +1141,7 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "More Grading") +
-  ggtitle("Broads: More Grading G1") +
+  ggtitle("Broads: More (Conservationists)") +
   ## set them
   theme_light() + 
   GeneralThemeing
@@ -1130,10 +1152,9 @@ ggsave(filename = "CleanData/Guideline Creation/Plots/Broads_G1_More.png", width
 
 
 
-
-##-----------------------------------------------##
-## 11.6 Group 1: Plot arable reversion grading ####
-##-----------------------------------------------##
+##-----------------------------------------##
+## 11.6 Group 1: Plot arable big grading ####
+##-----------------------------------------##
 
 ## Plot the better grading
 ## Filter out fields withing population clusters and not masked
@@ -1144,27 +1165,60 @@ ggplot() +
   ## add landscape outline
   geom_sf(data=BrOutline, mapping=aes(geometry=geometry), colour = "grey", fill = NA) +
   ## add polygons
-  geom_sf(data=CanvasArG1, mapping=aes(geometry=geometry, fill = ArableGrade_G1), colour = NA) +
+  geom_sf(data=CanvasArG1, mapping=aes(geometry=geometry, fill = ArableBig_G1), colour = NA) +
   ## give a viridis fill to shapes
   scale_fill_viridis_c(na.value = "lightgrey") +
   ## Set plot extent so all plots have the same extent
   PlotExt +
   ## set labels
   labs(fill = "Arable Grading") +
-  ggtitle("Broads: Arable Reversion G1") +
+  ggtitle("Broads: Arable Reversion for Bigger (Conservationists)") +
   ## set them
   theme_light() +
   GeneralThemeing
 rm(CanvasArG1)
 
 ## save plot as png
-ggsave(filename = "CleanData/Guideline Creation/Plots/Broads_G1_ArableRev.png", width = 20, height = 20, units = "cm")
+ggsave(filename = "CleanData/Guideline Creation/Plots/Broads_G1_ArableBig.png", width = 20, height = 20, units = "cm")
+
+
+
+##------------------------------------------##
+## 11.7 Group 1: Plot arable more grading ####
+##------------------------------------------##
+
+## Plot the better grading
+## Filter out fields withing population clusters and not masked
+CanvasArG1 <- filter(CanvasAr, (Mask_G1 > 0.5) & is.na(ClustPop)==T)
+
+## make plot
+ggplot() +
+  ## add landscape outline
+  geom_sf(data=BrOutline, mapping=aes(geometry=geometry), colour = "grey", fill = NA) +
+  ## add polygons
+  geom_sf(data=CanvasArG1, mapping=aes(geometry=geometry, fill = ArableMore_G1), colour = NA) +
+  ## give a viridis fill to shapes
+  scale_fill_viridis_c(na.value = "lightgrey") +
+  ## Set plot extent so all plots have the same extent
+  PlotExt +
+  ## set labels
+  labs(fill = "Arable Grading") +
+  ggtitle("Broads: Arable Reversion for More (Conservationists)") +
+  ## set them
+  theme_light() +
+  GeneralThemeing
+rm(CanvasArG1)
+
+## save plot as png
+ggsave(filename = "CleanData/Guideline Creation/Plots/Broads_G1_ArableMore.png", width = 20, height = 20, units = "cm")
+
+
 
 
 
 
 ##---------------------------------------##
-## 11.7 Group 1: Plot Map of Landscape ####
+## 11.8 Group 1: Plot Map of Landscape ####
 ##---------------------------------------##
 
 ## Read in priority landscape boundary
@@ -1200,7 +1254,7 @@ ggsave(filename = "CleanData/Guideline Creation/Plots/Broads_LandscapeMap.png", 
 
 
 ##-------------------------------------##
-## 11.8 Group 2: Plot better grading ####
+## 11.9 Group 2: Plot better grading ####
 ##-------------------------------------##
 
 ## Plot the better grading
@@ -1219,7 +1273,7 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "Better Grading") +
-  ggtitle("Broads: Better Grading G2") +
+  ggtitle("Broads: Better (Public Bodies)") +
   ## set them
   theme_light() + 
   GeneralThemeing
@@ -1231,7 +1285,7 @@ ggsave(filename = "CleanData/Guideline Creation/Plots/Broads_G2_Better.png", wid
 
 
 ##-------------------------------------##
-## 11.9 Group 2: Plot bigger grading ####
+## 11.10 Group 2: Plot bigger grading ####
 ##-------------------------------------##
 
 ## filter out data that is not 50% covered by mask and is not in a cluster
@@ -1249,7 +1303,7 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "Bigger Grading") +
-  ggtitle("Broads: Bigger Grading G2") +
+  ggtitle("Broads: Bigger (Public Bodies)") +
   ## set them
   theme_light() + 
   GeneralThemeing
@@ -1261,7 +1315,7 @@ ggsave(filename = "CleanData/Guideline Creation/Plots/Broads_G2_Bigger.png", wid
 
 
 ##-----------------------------------##
-## 11.10 Group 2: Plot more grading ####
+## 11.11 Group 2: Plot more grading ####
 ##-----------------------------------##
 
 ## filter out data that is not 50% covered by mask and is not in a cluster
@@ -1279,7 +1333,7 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "More Grading") +
-  ggtitle("Broads: More Grading G2") +
+  ggtitle("Broads: More (Public Bodies)") +
   ## set them
   theme_light() + 
   GeneralThemeing
@@ -1290,9 +1344,9 @@ ggsave(filename = "CleanData/Guideline Creation/Plots/Broads_G2_More.png", width
 
 
 
-##------------------------------------------------##
-## 11.11 Group 2: Plot arable reversion grading ####
-##------------------------------------------------##
+##------------------------------------------##
+## 11.12 Group 2: Plot arable big grading ####
+##------------------------------------------##
 
 ## Plot the better grading
 ## Filter out fields withing population clusters and not masked
@@ -1303,21 +1357,53 @@ ggplot() +
   ## add landscape outline
   geom_sf(data=BrOutline, mapping=aes(geometry=geometry), colour = "grey", fill = NA) +
   ## add polygons
-  geom_sf(data=CanvasArG2, mapping=aes(geometry=geometry, fill = ArableGrade_G2), colour = NA) +
+  geom_sf(data=CanvasArG2, mapping=aes(geometry=geometry, fill = ArableBig_G2), colour = NA) +
   ## give a viridis fill to shapes
   scale_fill_viridis_c(na.value = "lightgrey") +
   ## Set plot extent so all plots have the same extent
   PlotExt +
   ## set labels
   labs(fill = "Arable Grading") +
-  ggtitle("Norfolk Broads: Arable Reversion G2") +
+  ggtitle("Broads: Arable Reversion for Bigger (Public Bodies)") +
   ## set them
   theme_light() +
   GeneralThemeing
 rm(CanvasArG2)
 
 ## save plot as png
-ggsave(filename = "CleanData/Guideline Creation/Plots/Broads_G2_ArableRev.png", width = 20, height = 20, units = "cm")
+ggsave(filename = "CleanData/Guideline Creation/Plots/Broads_G2_ArableBig.png", width = 20, height = 20, units = "cm")
+
+
+
+##-------------------------------------------##
+## 11.13 Group 2: Plot arable more grading ####
+##-------------------------------------------##
+
+## Plot the better grading
+## Filter out fields withing population clusters and not masked
+CanvasArG2 <- filter(CanvasAr, (Mask_G2 > 0.5) & is.na(ClustPop)==T)
+
+## make plot
+ggplot() +
+  ## add landscape outline
+  geom_sf(data=BrOutline, mapping=aes(geometry=geometry), colour = "grey", fill = NA) +
+  ## add polygons
+  geom_sf(data=CanvasArG2, mapping=aes(geometry=geometry, fill = ArableMore_G2), colour = NA) +
+  ## give a viridis fill to shapes
+  scale_fill_viridis_c(na.value = "lightgrey") +
+  ## Set plot extent so all plots have the same extent
+  PlotExt +
+  ## set labels
+  labs(fill = "Arable Grading") +
+  ggtitle("Broads: Arable Reversion for More (Public Bodies)") +
+  ## set them
+  theme_light() +
+  GeneralThemeing
+rm(CanvasArG2)
+
+## save plot as png
+ggsave(filename = "CleanData/Guideline Creation/Plots/Broads_G2_ArableMore.png", width = 20, height = 20, units = "cm")
+
 
 
 

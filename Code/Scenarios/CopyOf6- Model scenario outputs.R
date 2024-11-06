@@ -127,7 +127,7 @@ summary(SetD) # summary of data
 
 ## baseline: random cluster, better
 Mod1 <- glmmTMB(PairCost ~ Landscape + Budget + Strategy + Mechanism + 
-                  Landscape*Strategy + Budget*Strategy + Landscape*Mechanism + Budget*Mechanism,
+                  Budget*Strategy + Budget*Mechanism,
                 data = SetD,
                 family = t_family(link = "identity")) # Chose t-family as data has long tail
 
@@ -141,13 +141,15 @@ glimpse(SetD)
 emmeans(Mod1, ~ Landscape) |> plot()
 
 (Emm_Strategy <- emmeans(Mod1, "Budget"))
-emmeans(Mod1, ~ Budget) |> plot()
+emmeans(Mod1, ~ Budget ) |> plot()
  
-(Emm_NewCat <- emmeans(Mod1, "Strategy"))
-emmeans(Mod1, ~ Strategy) |> plot()
+(Emm_NewCat <- emmeans(Mod1, "Strategy", by = Budget))
+emmeans(Mod1, pairwise ~ Strategy | Budget) |> plot()
+emmeans(Mod1, pairwise ~ Strategy | Budget) |> confint()
 
 (Emm_Plus <- emmeans(Mod1, "Mechanism"))
-emmeans(Mod1, ~ Mechanism) |> plot()
+emmeans(Mod1, pairwise ~ Mechanism | Budget) |> plot()
+emmeans(Mod1, pairwise ~ Mechanism | Budget) |> confint()
 
 
 

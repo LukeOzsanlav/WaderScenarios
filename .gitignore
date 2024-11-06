@@ -3,6 +3,11 @@
 .RData
 .Ruserdata
 
-/CleanData
+
 /RawData
 /Supporting Docs
+
+/CleanData/Optimisation
+/CleanData/Scenarios
+/CleanData/Wader Abundance
+/CleanData/Xtra

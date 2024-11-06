@@ -1848,12 +1848,12 @@ PlotScenario <- function(inpath,
   ## Set a general theme for the bar plots
   BarPlotTheme <- theme_light() +
                   theme(panel.grid.minor = element_blank(),
-                        strip.text = element_text(size = 13, face = "bold"),
-                        axis.title = element_text(size = 15),
-                        axis.text.y = element_text(size = 13),
-                        axis.text.x = element_text(size = 13, angle = 45, vjust = 0.5),
-                        legend.title = element_text(size = 13, face = "bold"),
-                        legend.text = element_text(size = 13),
+                        strip.text = element_text(size = 17, face = "bold"),
+                        axis.title = element_text(size = 18),
+                        axis.text.y = element_text(size = 16),
+                        axis.text.x = element_text(size = 16, angle = 45, vjust = 0.5),
+                        legend.title = element_text(size = 17, face = "bold"),
+                        legend.text = element_text(size = 16),
                         legend.position = "top")
   
   
@@ -1865,8 +1865,8 @@ PlotScenario <- function(inpath,
   
   ## First create a data set that can be used to create a bar plot that covers all scenarios
   ScenSum <- AllScn2 |>
-    mutate(PlotCatFull = paste0(Strategy, " & ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
-           PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
+    mutate(PlotCatFull = paste0(Strategy, " for ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
+           PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
     group_by(PlotCatFull, ScenType, PlusFull, Plus, NewCat, Strategy) |>
     summarise(StEr = sd(Waders_100Ha)/sqrt(n()),
               t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
@@ -1902,8 +1902,8 @@ PlotScenario <- function(inpath,
   
   ## First create a data set that can be used to create a bar plot that covers all scenarios
   ScenSumCost <- AllScn2 |>
-    mutate(PlotCatFull = paste0(Strategy, " & ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
-           PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
+    mutate(PlotCatFull = paste0(Strategy, " for ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
+           PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
     group_by(PlotCatFull, ScenType, PlusFull, Plus, NewCat, Strategy) |>
     summarise(StEr = sd(PairCost)/sqrt(n()),
               t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
@@ -1948,8 +1948,8 @@ PlotScenario <- function(inpath,
                       MeanWaders_100Ha = mean(Waders_100Ha)) |>
             ungroup() |>
             mutate(PlotCatOther = paste0(NewCat, " ", ifelse(Plus==T, "+", "-")),
-                   PlotCatFull= paste0(Strategy, " & ", PlotCatOther),
-                   PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling"),
+                   PlotCatFull= paste0(Strategy, " for ", PlotCatOther),
+                   PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality"),
                    LowerCI = MeanWaders_100Ha - (t_score * StEr),
                    UpperCI = MeanWaders_100Ha + (t_score * StEr)) 
   
@@ -1986,8 +1986,8 @@ PlotScenario <- function(inpath,
                       t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
                       Ave_PairCost = mean(PairCost)) |>
             mutate(PlotCatOther = paste0(NewCat, " ", ifelse(Plus==T, "+", "-")),
-                   PlotCatFull= paste0(Strategy, " & ", PlotCatOther),
-                   PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling"),
+                   PlotCatFull= paste0(Strategy, " for ", PlotCatOther),
+                   PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality"),
                    LowerCI = Ave_PairCost - (t_score * StEr),
                    UpperCI = Ave_PairCost + (t_score * StEr))
   
@@ -2022,8 +2022,8 @@ PlotScenario <- function(inpath,
   ScenSumCost_NoFence <- AllScn2 |>
   filter(!OppCat == "Arable Opp") |> 
     mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
-           PlotCatFull = paste0(Strategy, " & ", NewCat, Arable2),
-           PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
+           PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
+           PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
     group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
     summarise(StEr = sd(PairCostNoF)/sqrt(n()),
               t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
@@ -2038,8 +2038,8 @@ PlotScenario <- function(inpath,
   ScenSumCost_Fence <- AllScn2 |>
     filter(!OppCat == "Arable Opp") |> 
     mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
-           PlotCatFull = paste0(Strategy, " & ", NewCat, Arable2),
-           PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
+           PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
+           PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
     group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
     summarise(StEr = sd(PairCost)/sqrt(n()),
               t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
@@ -2053,8 +2053,8 @@ PlotScenario <- function(inpath,
   ## Calculate the change in pairs per unit cost for AES only land
   ScenSumCost_AES <- AllScn2 |>
     mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
-           PlotCatFull = paste0(Strategy, " & ", NewCat, Arable2),
-           PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
+           PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
+           PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
     group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
     summarise(StEr = sd(PairCost)/sqrt(n()),
               t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
@@ -2071,8 +2071,8 @@ PlotScenario <- function(inpath,
   ScenSumCost_NoFArable <- AllScn2 |>
     filter(OppCat == "Arable Opp") |> 
     mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
-           PlotCatFull = paste0(Strategy, " & ", NewCat, Arable2),
-           PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
+           PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
+           PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
     group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
     summarise(StEr = sd(PairCostNoF)/sqrt(n()),
               t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
@@ -2087,8 +2087,8 @@ PlotScenario <- function(inpath,
   ScenSumCost_FenceArable <- AllScn2 |>
     filter(OppCat == "Arable Opp") |> 
     mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
-           PlotCatFull = paste0(Strategy, " & ", NewCat, Arable2),
-           PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
+           PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
+           PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
     group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
     summarise(StEr = sd(PairCost)/sqrt(n()),
               t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
@@ -2135,8 +2135,8 @@ PlotScenario <- function(inpath,
   ScenSumCost_FG <- AllScn2 |>
     filter(!OppCat == "Arable Opp") |> 
     mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
-           PlotCatFull = paste0(Strategy, " & ", NewCat, Arable2),
-           PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
+           PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
+           PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
     group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
     summarise(StEr = sd(PairCost)/sqrt(n()),
               t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
@@ -2151,8 +2151,8 @@ PlotScenario <- function(inpath,
   ScenSumCost_PU <- AllScn2 |>
     filter(!OppCat == "Arable Opp") |> 
     mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
-           PlotCatFull = paste0(Strategy, " & ", NewCat, Arable2),
-           PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
+           PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
+           PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
     group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
     summarise(StEr = sd(PairCostPU)/sqrt(n()),
               t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
@@ -2170,8 +2170,8 @@ PlotScenario <- function(inpath,
   ScenSumCost_FGArable <- AllScn2 |>
     filter(OppCat == "Arable Opp") |> 
     mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
-           PlotCatFull = paste0(Strategy, " & ", NewCat, Arable2),
-           PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
+           PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
+           PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
     group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
     summarise(StEr = sd(PairCost)/sqrt(n()),
               t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
@@ -2186,8 +2186,8 @@ PlotScenario <- function(inpath,
   ScenSumCost_PUArable <- AllScn2 |>
     filter(OppCat == "Arable Opp") |> 
     mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
-           PlotCatFull = paste0(Strategy, " & ", NewCat, Arable2),
-           PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
+           PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
+           PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
     group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
     summarise(StEr = sd(PairCostPU)/sqrt(n()),
               t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
@@ -2202,8 +2202,8 @@ PlotScenario <- function(inpath,
   ## Calculate change in breeding pairs for AES creation
   ScenSumCost_AES <- AllScn2 |>
     mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
-           PlotCatFull = paste0(Strategy, " & ", NewCat, Arable2),
-           PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
+           PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
+           PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
     group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
     summarise(StEr = sd(PairCost)/sqrt(n()),
               t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
@@ -2249,8 +2249,8 @@ PlotScenario <- function(inpath,
 
   ## First create a data set that can be used to create a bar plot that covers all scenarios
   ScenSum <- AllScn2 |>
-    mutate(PlotCatFull = paste0(Strategy, " & ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
-           PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
+    mutate(PlotCatFull = paste0(Strategy, " for ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
+           PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
     group_by(PlotCatFull, ScenType, PlusFull, Plus, NewCat, Strategy) |>
     summarise(StEr = sd(ClustActual)/sqrt(n()),
               t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
@@ -2321,8 +2321,8 @@ PlotScenario <- function(inpath,
     ## Calculate the change in Lapwing pairs per unit cost
     ScenSumLap <- AllScn2 |>
       mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
-             PlotCatFull = paste0(Strategy, " & ", NewCat, Arable2),
-             PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
+             PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
+             PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
       group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
       summarise(StEr = sd(PairCostLap)/sqrt(n()),
                 t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
@@ -2335,8 +2335,8 @@ PlotScenario <- function(inpath,
     ## Calculate the change in Redshank pairs per unit cost
     ScenSumRed <- AllScn2 |>
       mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
-             PlotCatFull = paste0(Strategy, " & ", NewCat, Arable2),
-             PlusFull = ifelse(Plus==FALSE, "Normal Sampling", "Plus Sampling")) |>
+             PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
+             PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
       group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
       summarise(StEr = sd(PairCostRed)/sqrt(n()),
                 t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),

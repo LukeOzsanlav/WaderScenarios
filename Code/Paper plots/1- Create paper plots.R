@@ -91,7 +91,9 @@ PlotExt <- coord_sf(xlim = c(ext(Broads)[1]-2000, ext(Broads)[2]+2000), ylim = c
 ##-----------------------------------##
 
 ## filter the canvas so that I just have land that is in scope
-CanvCat <- filter(Canv, !Category %in% c("NoOpp", "Masked Hab"))
+CanvCat <- filter(Canv, !Category %in% c("NoOpp", "Masked Hab")) |> 
+           mutate(Category = ifelse(Category== "AES Only", "Wader-AES", Category))
+
 
 
 ## make plot of the different categories in the landscape
@@ -106,7 +108,7 @@ Categories <- ggplot() +
   
   ## Add the canvas categories
   geom_sf(data = CanvCat, mapping = aes(geometry = geometry, fill = Category), colour = NA) +
-  scale_fill_manual(values = c("#DD4CC0", "#DDB24C", "#4CDD6A", "#4C77DD"), name="Categories") +
+  scale_fill_manual(values = c("#DDB24C", "#4CDD6A", "#4C77DD", "#DD4CC0"), name="Categories") +
   
   ## Set plot extent so all plots have the same extent
   PlotExt +

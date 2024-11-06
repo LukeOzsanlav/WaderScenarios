@@ -1549,14 +1549,14 @@ PlotScenario <- function(inpath,
   
   ## Set a general theme for the bar plots
   BarPlotTheme <- theme_light() +
-                  theme(panel.grid.minor = element_blank(),
-                        strip.text = element_text(size = 13, face = "bold"),
-                        axis.title = element_text(size = 15),
-                        axis.text.y = element_text(size = 13),
-                        axis.text.x = element_text(size = 13, angle = 45, vjust = 0.5),
-                        legend.title = element_text(size = 13, face = "bold"),
-                        legend.text = element_text(size = 13),
-                        legend.position = "top")
+                theme(panel.grid.minor = element_blank(),
+                      strip.text = element_text(size = 17, face = "bold"),
+                      axis.title = element_text(size = 18),
+                      axis.text.y = element_text(size = 16),
+                      axis.text.x = element_text(size = 16, angle = 45, vjust = 0.5),
+                      legend.title = element_text(size = 17, face = "bold"),
+                      legend.text = element_text(size = 16),
+                      legend.position = "top")
   
   
   
@@ -1566,7 +1566,7 @@ PlotScenario <- function(inpath,
   
   ## First create a data set that can be used to create a bar plot that covers all scenarios
   ScenSum <- AllScn |>
-    mutate(PlotCatFull = paste0(Strategy, " & ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""))) |>
+    mutate(PlotCatFull = paste0(Strategy, " for ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""))) |>
     group_by(PlotCatFull, NewCat, Strategy) |>
     summarise(StEr = sd(Waders_100Ha)/sqrt(n()),
               t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
@@ -1601,7 +1601,7 @@ PlotScenario <- function(inpath,
   
   ## First create a data set that can be used to create a bar plot that covers all scenarios
   ScenSumCost <- AllScn |>
-    mutate(PlotCatFull = paste0(Strategy, " & ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""))) |>
+    mutate(PlotCatFull = paste0(Strategy, " for ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""))) |>
     group_by(PlotCatFull, NewCat, Strategy) |>
     summarise(StEr = sd(PairCost)/sqrt(n()),
               t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
@@ -1637,7 +1637,7 @@ PlotScenario <- function(inpath,
   
   ## First create a data set that can be used to create a bar plot that covers all scenarios
   ScenSum <- AllScn |>
-    mutate(PlotCatFull = paste0(Strategy, " & ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
+    mutate(PlotCatFull = paste0(Strategy, " for ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
            BudgetW = ifelse(Budget==max(Budget), paste0("High: £", round(max(Budget)/1000), "k"),
                            ifelse(Budget==min(Budget), paste0("Low: £", round(min(Budget)/1000), "k"),
                                   paste0("Medium: £", round(median(Budget)/1000), "k")))) |>
@@ -1674,7 +1674,7 @@ PlotScenario <- function(inpath,
   
   ## First create a data set that can be used to create a bar plot that covers all scenarios
   ScenSumCost <- AllScn |>
-    mutate(PlotCatFull = paste0(Strategy, " & ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
+    mutate(PlotCatFull = paste0(Strategy, " for ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
            BudgetW = ifelse(Budget==max(Budget), paste0("High: £", round(max(Budget)/1000), "k"),
                            ifelse(Budget==min(Budget), paste0("Low: £", round(min(Budget)/1000), "k"),
                                   paste0("Medium: £", round(median(Budget)/1000), "k")))) |>
@@ -1710,7 +1710,7 @@ PlotScenario <- function(inpath,
 
   ## First create a data set that can be used to create a bar plot that covers all scenarios
   ScenSumCost <- AllScn |>
-    mutate(PlotCatFull = paste0(Strategy, " & ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
+    mutate(PlotCatFull = paste0(Strategy, " for ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
            BudgetW = ifelse(Budget==max(Budget), paste0("High: £", round(max(Budget)/1000), "k"),
                            ifelse(Budget==min(Budget), paste0("Low: £", round(min(Budget)/1000), "k"),
                                   paste0("Medium: £", round(median(Budget)/1000), "k")))) |>
@@ -1747,7 +1747,7 @@ PlotScenario <- function(inpath,
 
   ## First create a data set that can be used to create a bar plot that covers all scenarios
   ScenSize <- AllScn |>
-  mutate(PlotCatFull = paste0(Strategy, " & ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
+  mutate(PlotCatFull = paste0(Strategy, " for ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
          BudgetW = ifelse(Budget==max(Budget), paste0("High: £", round(max(Budget)/1000), "k"),
                          ifelse(Budget==min(Budget), paste0("Low: £", round(min(Budget)/1000), "k"),
                                 paste0("Medium: £", round(median(Budget)/1000), "k")))) |>
@@ -1784,7 +1784,7 @@ PlotScenario <- function(inpath,
 
   ## First create a data set that can be used to create a bar plot that covers all scenarios
   ClustSize <- AllScn |>
-  mutate(PlotCatFull = paste0(Strategy, " & ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
+  mutate(PlotCatFull = paste0(Strategy, " for ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
          BudgetW = ifelse(Budget==max(Budget), paste0("High: £", round(max(Budget)/1000), "k"),
                          ifelse(Budget==min(Budget), paste0("Low: £", round(min(Budget)/1000), "k"),
                                 paste0("Medium: £", round(median(Budget)/1000), "k")))) |>
@@ -1822,7 +1822,7 @@ PlotScenario <- function(inpath,
   ## First create a data set that can be used to create a bar plot that covers all scenarios
   WClustSize <- AllScn |>
   filter(NewCat == "Reserve") |> 
-  mutate(PlotCatFull = paste0(Strategy, " & ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
+  mutate(PlotCatFull = paste0(Strategy, " for ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
          BudgetW = ifelse(Budget==max(Budget), paste0("High: £", round(max(Budget)/1000), "k"),
                          ifelse(Budget==min(Budget), paste0("Low: £", round(min(Budget)/1000), "k"),
                                 paste0("Medium: £", round(median(Budget)/1000), "k")))) |>

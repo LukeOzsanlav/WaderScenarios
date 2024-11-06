@@ -1155,7 +1155,7 @@ writeRaster(Gen_mask, "CleanData/Guideline Creation/Somerset/Som_MasksAll_Gen.ti
 ## Group 1: Combine better guidelines ##
 ##------------------------------------##
 
-Bett_G1 <- Hydro_Height + WaterAbstr + Priority_HabExp
+Bett_G1 <- WaterAbstr + Priority_HabExp + (SiltSoil/2) + FloodCurry
 names(Bett_G1) <- "Better"
 #Bett_G1 <- Bett_G1*G1_mask*Better_Oppr
 ggplot() + geom_spatraster(data=Bett_G1) + labs(fill = "Grading") +
@@ -1198,16 +1198,28 @@ writeRaster(More_G1, "CleanData/Guideline Creation/Somerset/Som_More_G1.tif", ov
 # ggplot() + geom_spatraster(data=rn2) + scale_fill_viridis_c() + theme_light()
 
 
-##---------------------------------------------##
-## Group 1: Combine agri-conversion guidelines ##
-##---------------------------------------------##
+##--------------------------------------------##
+## Group 1: agri-conversion bigger guidelines ##
+##--------------------------------------------##
 
-ArableConv_G1 <- CropsMaize 
-names(ArableConv_G1) <- "ArableConv"
-#ArableConv_G1 <- ArableConv_G1*G1_mask*Arable_Opp
-ggplot() + geom_spatraster(data=ArableConv_G1) + scale_fill_viridis_c(na.value = "lightgrey") + theme_light()
-writeRaster(ArableConv_G1, "CleanData/Guideline Creation/Somerset/Som_ArableRev_G1.tif", overwrite=TRUE)
+ArableBig_G1 <- CropsMaize + Big_G1
+names(ArableBig_G1) <- "ArableConv"
 
+## Plot combined grading layer and save as a tif file
+ggplot() + geom_spatraster(data=ArableBig_G1) + scale_fill_viridis_c(na.value = "lightgrey") + theme_light()
+writeRaster(ArableBig_G1, "CleanData/Guideline Creation/Somerset/Som_ArableBig_G1.tif", overwrite=TRUE)
+
+
+##------------------------------------------##
+## Group 1: agri-conversion more guidelines ##
+##------------------------------------------##
+
+ArableMore_G1 <- CropsMaize + More_G1
+names(ArableMore_G1) <- "ArableConv"
+
+## Plot combined grading layer and save as a tif file
+ggplot() + geom_spatraster(data=ArableMore_G1) + scale_fill_viridis_c(na.value = "lightgrey") + theme_light()
+writeRaster(ArableMore_G1, "CleanData/Guideline Creation/Somerset/Som_ArableMore_G1.tif", overwrite=TRUE)
 
 
 
@@ -1269,17 +1281,29 @@ ggplot() + geom_spatraster(data=More_G2) + scale_fill_viridis_c(na.value = "ligh
 writeRaster(More_G2, "CleanData/Guideline Creation/Somerset/Som_More_G2.tif", overwrite=TRUE)
 
 
-##----------------------------------------------##
-## Group 2: Combine agri-conversion guidelines ##
-##---------------------------------------------##
+##--------------------------------------------##
+## Group 2: agri-conversion bigger guidelines ##
+##--------------------------------------------##
 
-## Add together all rules and assign name to layer
-ArableConv_G2 <- CropsMaize + (LowGrassDens/2) + (LowGrassDist/2) + DistToRWLA 
-names(ArableConv_G2) <- "ArableConv"
+ArableBig_G2 <- CropsMaize + (LowGrassDens/2) + (LowGrassDist/2) + DistToRWLA + (Big_G2 - RWLA)
+names(ArableBig_G2) <- "ArableConv"
 
 ## Plot combined grading layer and save as a tif file
-ggplot() + geom_spatraster(data=ArableConv_G2) + scale_fill_viridis_c(na.value = "lightgrey") + theme_light()
-writeRaster(ArableConv_G2, "CleanData/Guideline Creation/Somerset/Som_ArableRev_G2.tif", overwrite=TRUE)
+ggplot() + geom_spatraster(data=ArableBig_G2) + scale_fill_viridis_c(na.value = "lightgrey") + theme_light()
+writeRaster(ArableBig_G2, "CleanData/Guideline Creation/Somerset/Som_ArableBig_G2.tif", overwrite=TRUE)
+
+
+##------------------------------------------##
+## Group 2: agri-conversion more guidelines ##
+##------------------------------------------##
+
+ArableMore_G2 <- CropsMaize + (LowGrassDens/2) + (LowGrassDist/2) + DistToRWLA + (More_G2 - RWLA)
+names(ArableMore_G2) <- "ArableConv"
+
+## Plot combined grading layer and save as a tif file
+ggplot() + geom_spatraster(data=ArableMore_G2) + scale_fill_viridis_c(na.value = "lightgrey") + theme_light()
+writeRaster(ArableMore_G2, "CleanData/Guideline Creation/Somerset/Som_ArableMore_G2.tif", overwrite=TRUE)
+
 
 
 
@@ -1342,17 +1366,28 @@ ggplot() + geom_spatraster(data=More_G3) + scale_fill_viridis_c(na.value = "ligh
 writeRaster(More_G3, "CleanData/Guideline Creation/Somerset/Som_More_G3.tif", overwrite=TRUE)
 
 
-##----------------------------------------------##
-## Group 3: Combine agri-conversion guidelines ##
-##---------------------------------------------##
+##--------------------------------------------##
+## Group 3: agri-conversion bigger guidelines ##
+##--------------------------------------------##
 
-## Add together all rules and assign name to layer
-ArableConv_G3 <- CropsMaize + PeatSoils
-names(ArableConv_G3) <- "ArableConv"
+ArableBig_G3 <- CropsMaize + PeatSoils + Big_G3
+names(ArableBig_G3) <- "ArableConv"
 
 ## Plot combined grading layer and save as a tif file
-ggplot() + geom_spatraster(data=ArableConv_G3) + scale_fill_viridis_c(na.value = "lightgrey") + theme_light()
-writeRaster(ArableConv_G3, "CleanData/Guideline Creation/Somerset/Som_ArableRev_G3.tif", overwrite=TRUE)
+ggplot() + geom_spatraster(data=ArableBig_G3) + scale_fill_viridis_c(na.value = "lightgrey") + theme_light()
+writeRaster(ArableBig_G3, "CleanData/Guideline Creation/Somerset/Som_ArableBig_G3.tif", overwrite=TRUE)
+
+
+##------------------------------------------##
+## Group 3: agri-conversion more guidelines ##
+##------------------------------------------##
+
+ArableMore_G3 <- CropsMaize + PeatSoils + More_G3
+names(ArableMore_G3) <- "ArableConv"
+
+## Plot combined grading layer and save as a tif file
+ggplot() + geom_spatraster(data=ArableMore_G3) + scale_fill_viridis_c(na.value = "lightgrey") + theme_light()
+writeRaster(ArableMore_G3, "CleanData/Guideline Creation/Somerset/Som_ArableMore_G3.tif", overwrite=TRUE)
 
 
 
@@ -1388,9 +1423,36 @@ Canvas <- Canvas |>
           filter(WetGrassProp > 0.50) |> select(-WetGrassProp)
 plot(Canvas$geometry)
 
-## Crop the canvas to just the piority landscape
+## Crop the canvas to just the priority landscape
 Canvas <- Canvas |> st_intersection(SomOutline)
 plot(Canvas$geometry)
+
+
+
+##-- Label arable opportunity fields --##
+
+## Read in the Broads canvas with all land parcel polygons
+CanvasAr <- st_read("CleanData/Scenarios/1-Starting Canvas/Som_Canvas.shp")
+plot(CanvasAr$geometry)
+
+## Read in a raster I created of lowland wet grassland extent in the Broads
+SuitArable <- rast("CleanData/Scenarios/3-DefineActionAreas/Som_ArableSuitable.tif")
+plot(SuitArable)
+
+## Extract the average score from the lowland wet grassland raster (1=wet grass. 0=other habitats)
+Scores <- terra::extract(SuitArable, vect(CanvasAr), fun = mean, na.rm = T)
+
+## Classify land parcels as arable land if it was more than 50% covered by arable pixels
+CanvasAr <- CanvasAr |>
+          mutate(SuitArabProp = Scores[,2]) |>
+          filter(SuitArabProp > 0.50) |> select(-SuitArabProp)
+plot(CanvasAr$geometry)
+rm(Scores); gc()
+
+## Crop the canvas to just the priority landscape
+CanvasAr <- CanvasAr |> st_intersection(SomOutline)
+plot(CanvasAr$geometry)
+
 
 
 ##-- Extract the grades/masks for each of the Lawton strategies --##
@@ -1420,9 +1482,25 @@ Canvas$BetterGrade_G2 <- BetterGrades2$Better
 Canvas$BetterGrade_G3 <- BetterGrades3$Better
 
 
+## Arable reversion Strategy
+ArableBig1 <- extract(ArableBig_G1, CanvasAr, fun = mean, na.rm = T)
+ArableMore1 <- extract(ArableMore_G1, CanvasAr, fun = mean, na.rm = T)
+ArableBig2 <- extract(ArableBig_G2, CanvasAr, fun = mean, na.rm = T)
+ArableMore2 <- extract(ArableMore_G2, CanvasAr, fun = mean, na.rm = T)
+ArableBig3 <- extract(ArableBig_G3, CanvasAr, fun = mean, na.rm = T)
+ArableMore3 <- extract(ArableMore_G3, CanvasAr, fun = mean, na.rm = T)
+CanvasAr$ArableBig_G1 <- ArableBig1$ArableConv
+CanvasAr$ArableMore_G1 <- ArableMore1$ArableConv
+CanvasAr$ArableBig_G2 <- ArableBig2$ArableConv
+CanvasAr$ArableMore_G2 <- ArableMore2$ArableConv
+CanvasAr$ArableBig_G3 <- ArableBig3$ArableConv
+CanvasAr$ArableMore_G3 <- ArableMore3$ArableConv
+
+
 ## Add on cluster size to the Better grading
 PopSize <- PopSize |> select(ClustPop, F_LOC_ID) |> mutate(ClustPop = Inv_scale_vals(ClustPop)) # extract population cluster sizes
 Canvas <- left_join(Canvas, PopSize, by = "F_LOC_ID") # add these pop sizes to the fields (if they are in a cluster)
+CanvasAr <- left_join(CanvasAr, PopSize, by = "F_LOC_ID") # add these pop sizes to the fields (if they are in a cluster)
 ## Do the final addition to work out grade
 Canvas <- Canvas |> mutate(ClustPop2 = ifelse(is.na(ClustPop)==T, 0, ClustPop), 
                            BetterGrade_G1 = BetterGrade_G1+ClustPop2,
@@ -1447,6 +1525,15 @@ OppScore3 <- extract(SomMasks3, Canvas, fun = mean, na.rm = T)
 Canvas$Mask_G1 <- OppScore$layer
 Canvas$Mask_G2 <- OppScore2$layer
 Canvas$Mask_G3 <- OppScore3$layer
+
+## re do this for the arable canvas
+OppScore <- extract(SomMasks, CanvasAr, fun = mean, na.rm = T)
+OppScore2 <- extract(SomMasks2, CanvasAr, fun = mean, na.rm = T)
+OppScore3 <- extract(SomMasks3, CanvasAr, fun = mean, na.rm = T)
+CanvasAr$Mask_G1 <- OppScore$layer
+CanvasAr$Mask_G2 <- OppScore2$layer
+CanvasAr$Mask_G3 <- OppScore3$layer
+
 
 
 
@@ -1490,7 +1577,7 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "Better Grading") +
-  ggtitle("Somerset Levels: Better Grading G1") +
+  ggtitle("Somerset: Better (Conservationists)") +
   ## set them
   theme_light() + 
   GeneralThemeing
@@ -1519,7 +1606,7 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "Bigger Grading") +
-  ggtitle("Somerset Levels: Bigger Grading G1") +
+  ggtitle("Somerset: Bigger (Conservationists)") +
   ## set them
   theme_light() + 
   GeneralThemeing
@@ -1548,7 +1635,7 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "More Grading") +
-  ggtitle("Somerset Levels: More Grading G1") +
+  ggtitle("Somerset: More (Conservationists)") +
   ## set them
   theme_light() + 
   GeneralThemeing
@@ -1558,8 +1645,67 @@ ggsave(filename = "CleanData/Guideline Creation/Plots/Somerset_G1_More.png", wid
 
 
 
+##-----------------------------------------##
+## 12.6 Group 1: Plot arable big grading ####
+##-----------------------------------------##
+
+## filter out data that is not 50% covered by mask and is not in a cluster
+CanvasArBig <- filter(CanvasAr, (Mask_G1 > 0.5) & is.na(ClustPop)==T)
+
+## make plot
+ggplot() + 
+  ## add landscape outline
+  geom_sf(data=SomOutline, mapping=aes(geometry=geometry), colour = "grey", fill = NA) + 
+  ## add polygons
+  geom_sf(data=CanvasArBig, mapping=aes(geometry=geometry, fill = ArableBig_G1), colour = NA) + 
+  ## give a viridis fill to shapes
+  scale_fill_viridis_c(na.value = "lightgrey") + 
+  ## Set plot extent so all plots have the same extent
+  PlotExt +
+  ## set labels
+  labs(fill = "More Grading") +
+  ggtitle("Somerset: Arable Reversion for Bigger (Conservationists)") +
+  ## set them
+  theme_light() + 
+  GeneralThemeing
+
+## save plot as png
+ggsave(filename = "CleanData/Guideline Creation/Plots/Somerset_G1_ArableBig.png", width = 20, height = 20, units = "cm")
+
+
+
+##------------------------------------------##
+## 12.7 Group 1: Plot arable more grading ####
+##------------------------------------------##
+
+## filter out data that is not 50% covered by mask and is not in a cluster
+CanvasArMore <- filter(CanvasAr, (Mask_G1 > 0.5) & is.na(ClustPop)==T)
+
+## make plot
+ggplot() + 
+  ## add landscape outline
+  geom_sf(data=SomOutline, mapping=aes(geometry=geometry), colour = "grey", fill = NA) + 
+  ## add polygons
+  geom_sf(data=CanvasArMore, mapping=aes(geometry=geometry, fill = ArableMore_G1), colour = NA) + 
+  ## give a viridis fill to shapes
+  scale_fill_viridis_c(na.value = "lightgrey") + 
+  ## Set plot extent so all plots have the same extent
+  PlotExt +
+  ## set labels
+  labs(fill = "More Grading") +
+  ggtitle("Somerset: Arable Reversion for More (Conservationists)") +
+  ## set them
+  theme_light() + 
+  GeneralThemeing
+
+## save plot as png
+ggsave(filename = "CleanData/Guideline Creation/Plots/Somerset_G1_ArableMore.png", width = 20, height = 20, units = "cm")
+
+
+
+
 ##---------------------------------------##
-## 12.6 Group 1: Plot Map of Landscape ####
+## 12.8 Group 1: Plot Map of Landscape ####
 ##---------------------------------------##
 
 ## Read in priority landscape boundary
@@ -1603,7 +1749,7 @@ ggsave(filename = "CleanData/Guideline Creation/Plots/Somerset_LandscapeMap.png"
 
 
 ##-------------------------------------##
-## 12.7 Group 2: Plot better grading ####
+## 12.9 Group 2: Plot better grading ####
 ##-------------------------------------##
 
 ## Plot the better grading
@@ -1622,7 +1768,7 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "Better Grading") +
-  ggtitle("Somerset Levels: Better Grading G2") +
+  ggtitle("Somerset: Better (Public Bodies)") +
   ## set them
   theme_light() + 
   GeneralThemeing
@@ -1633,7 +1779,7 @@ ggsave(filename = "CleanData/Guideline Creation/Plots/Somerset_G2_Better.png", w
 
 
 ##-------------------------------------##
-## 12.8 Group 2: Plot bigger grading ####
+## 12.10 Group 2: Plot bigger grading ####
 ##-------------------------------------##
 
 ## filter out data that is not 50% covered by mask and is not in a cluster
@@ -1651,7 +1797,7 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "Bigger Grading") +
-  ggtitle("Somerset Levels: Bigger Grading G2") +
+  ggtitle("Somerset: Bigger (Public Bodies)") +
   ## set them
   theme_light() + 
   GeneralThemeing
@@ -1662,7 +1808,7 @@ ggsave(filename = "CleanData/Guideline Creation/Plots/Somerset_G2_Bigger.png", w
 
 
 ##-----------------------------------##
-## 12.9 Group 2: Plot more grading ####
+## 12.11 Group 2: Plot more grading ####
 ##-----------------------------------##
 
 ## filter out data that is not 50% covered by mask and is not in a cluster
@@ -1680,7 +1826,7 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "More Grading") +
-  ggtitle("Somerset Levels: More Grading G2") +
+  ggtitle("Somerset: More (Public Bodies)") +
   ## set them
   theme_light() + 
   GeneralThemeing
@@ -1690,8 +1836,68 @@ ggsave(filename = "CleanData/Guideline Creation/Plots/Somerset_G2_More.png", wid
 
 
 
+##-----------------------------------------##
+## 12.12 Group 2: Plot arable big grading ####
+##-----------------------------------------##
+
+## filter out data that is not 50% covered by mask and is not in a cluster
+CanvasArBig <- filter(CanvasAr, (Mask_G2 > 0.5) & is.na(ClustPop)==T)
+
+## make plot
+ggplot() + 
+  ## add landscape outline
+  geom_sf(data=SomOutline, mapping=aes(geometry=geometry), colour = "grey", fill = NA) + 
+  ## add polygons
+  geom_sf(data=CanvasArBig, mapping=aes(geometry=geometry, fill = ArableBig_G2), colour = NA) + 
+  ## give a viridis fill to shapes
+  scale_fill_viridis_c(na.value = "lightgrey") + 
+  ## Set plot extent so all plots have the same extent
+  PlotExt +
+  ## set labels
+  labs(fill = "Bigger Grading") +
+  ggtitle("Somerset: Arable Reversion for Bigger (Public Bodies)") +
+  ## set them
+  theme_light() + 
+  GeneralThemeing
+
+## save plot as png
+ggsave(filename = "CleanData/Guideline Creation/Plots/Somerset_G2_ArableBig.png", width = 20, height = 20, units = "cm")
+
+
+
+##------------------------------------------##
+## 12.13 Group 2: Plot arable more grading ####
+##------------------------------------------##
+
+## filter out data that is not 50% covered by mask and is not in a cluster
+CanvasArMore <- filter(CanvasAr, (Mask_G2 > 0.5) & is.na(ClustPop)==T)
+
+## make plot
+ggplot() + 
+  ## add landscape outline
+  geom_sf(data=SomOutline, mapping=aes(geometry=geometry), colour = "grey", fill = NA) + 
+  ## add polygons
+  geom_sf(data=CanvasArMore, mapping=aes(geometry=geometry, fill = ArableMore_G2), colour = NA) + 
+  ## give a viridis fill to shapes
+  scale_fill_viridis_c(na.value = "lightgrey") + 
+  ## Set plot extent so all plots have the same extent
+  PlotExt +
+  ## set labels
+  labs(fill = "More Grading") +
+  ggtitle("Somerset: Arable Reversion for More (Public Bodies)") +
+  ## set them
+  theme_light() + 
+  GeneralThemeing
+
+## save plot as png
+ggsave(filename = "CleanData/Guideline Creation/Plots/Somerset_G2_ArableMore.png", width = 20, height = 20, units = "cm")
+
+
+
+
+
 ##--------------------------------------##
-## 12.10 Group 3: Plot better grading ####
+## 12.14 Group 3: Plot better grading ####
 ##--------------------------------------##
 
 ## Plot the better grading
@@ -1710,7 +1916,7 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "Better Grading") +
-  ggtitle("Somerset Levels: Better Grading G3") +
+  ggtitle("Somerset: Better (Land managers)") +
   ## set them
   theme_light() + 
   GeneralThemeing
@@ -1721,7 +1927,7 @@ ggsave(filename = "CleanData/Guideline Creation/Plots/Somerset_G3_Better.png", w
 
 
 ##--------------------------------------##
-## 12.11 Group 3: Plot bigger grading ####
+## 12.15 Group 3: Plot bigger grading ####
 ##--------------------------------------##
 
 ## filter out data that is not 50% covered by mask and is not in a cluster
@@ -1739,7 +1945,7 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "Bigger Grading") +
-  ggtitle("Somerset Levels: Bigger Grading G3") +
+  ggtitle("Somerset: Bigger (Land managers)") +
   ## set them
   theme_light() + 
   GeneralThemeing
@@ -1750,7 +1956,7 @@ ggsave(filename = "CleanData/Guideline Creation/Plots/Somerset_G3_Bigger.png", w
 
 
 ##------------------------------------##
-## 12.12 Group 3: Plot more grading ####
+## 12.16 Group 3: Plot more grading ####
 ##------------------------------------##
 
 ## filter out data that is not 50% covered by mask and is not in a cluster
@@ -1768,7 +1974,7 @@ ggplot() +
   PlotExt +
   ## set labels
   labs(fill = "More Grading") +
-  ggtitle("Somerset Levels: More Grading G3") +
+  ggtitle("Somerset: More (Land managers)") +
   ## set them
   theme_light() + 
   GeneralThemeing
@@ -1778,6 +1984,61 @@ ggsave(filename = "CleanData/Guideline Creation/Plots/Somerset_G3_More.png", wid
 
 
 
+##-----------------------------------------##
+## 12.17 Group 2: Plot arable big grading ####
+##-----------------------------------------##
+
+## filter out data that is not 50% covered by mask and is not in a cluster
+CanvasArBig <- filter(CanvasAr, (Mask_G3 > 0.5) & is.na(ClustPop)==T)
+
+## make plot
+ggplot() + 
+  ## add landscape outline
+  geom_sf(data=SomOutline, mapping=aes(geometry=geometry), colour = "grey", fill = NA) + 
+  ## add polygons
+  geom_sf(data=CanvasArBig, mapping=aes(geometry=geometry, fill = ArableBig_G3), colour = NA) + 
+  ## give a viridis fill to shapes
+  scale_fill_viridis_c(na.value = "lightgrey") + 
+  ## Set plot extent so all plots have the same extent
+  PlotExt +
+  ## set labels
+  labs(fill = "Bigger Grading") +
+  ggtitle("Somerset: Arable Reversion for Bigger (Land managers)") +
+  ## set them
+  theme_light() + 
+  GeneralThemeing
+
+## save plot as png
+ggsave(filename = "CleanData/Guideline Creation/Plots/Somerset_G3_ArableBig.png", width = 20, height = 20, units = "cm")
+
+
+
+##------------------------------------------##
+## 12.18 Group 2: Plot arable more grading ####
+##------------------------------------------##
+
+## filter out data that is not 50% covered by mask and is not in a cluster
+CanvasArMore <- filter(CanvasAr, (Mask_G3 > 0.5) & is.na(ClustPop)==T)
+
+## make plot
+ggplot() + 
+  ## add landscape outline
+  geom_sf(data=SomOutline, mapping=aes(geometry=geometry), colour = "grey", fill = NA) + 
+  ## add polygons
+  geom_sf(data=CanvasArMore, mapping=aes(geometry=geometry, fill = ArableMore_G3), colour = NA) + 
+  ## give a viridis fill to shapes
+  scale_fill_viridis_c(na.value = "lightgrey") + 
+  ## Set plot extent so all plots have the same extent
+  PlotExt +
+  ## set labels
+  labs(fill = "More Grading") +
+  ggtitle("Somerset: Arable Reversion for More (Land managers)") +
+  ## set them
+  theme_light() + 
+  GeneralThemeing
+
+## save plot as png
+ggsave(filename = "CleanData/Guideline Creation/Plots/Somerset_G3_ArableMore.png", width = 20, height = 20, units = "cm")
 
 
 

@@ -170,7 +170,7 @@ confint(Mod1)
 ## get the estimates and confidence intervals from the models
 Ests <- cbind(confint(Mod1))
 rownames(Ests) <- c("Intercept", "Region: Broads", "Region: Essex", "Region: North Kent", "Targetting: Large Sites", "Targetting: Small Sites ", "Location: Bigger", 
-                    "Location: More", "Mechanism: Reserve", "Mechanism: Reserve from Arable", "Mechanism: Higher quality")
+                    "Location: More", "Mechanism: Reserve", "Mechanism: Reserve from Arable", "Quality: High-quality")
 Ests <- Ests[!rownames(Ests)=="Intercept",] # remove the intercept
 Ests <- Ests |> as.data.frame()
 
@@ -225,7 +225,7 @@ confint(pairs(Emm_ScenType))
 emmeans(Mod1, ~ ScenType) |> plot()
 
 (Emm_Strategy <- emmeans(Mod1, "Strategy"))
-pairs(Emm_Strategy)
+confint(pairs(Emm_Strategy))
 emmeans(Mod1, ~ Strategy) |> plot()
  
 (Emm_NewCat <- emmeans(Mod1, "NewCat"))
@@ -235,12 +235,6 @@ emmeans(Mod1, ~ NewCat) |> plot()
 (Emm_Plus <- emmeans(Mod1, "Plus"))
 pairs(Emm_Plus)
 emmeans(Mod1, ~ Plus) |> plot()
-
-
-
-
-
-
 
 
 
@@ -269,7 +263,225 @@ check_model(Mod1)
 
 
 
+##---------------------------------##
+#### 3. Model Regional Abundance ####
+##---------------------------------##
+
+
+##-- Model for Somerset --##
+
+## baseline: random cluster, better
+Som <- SetD |> filter(Landscape == "Somerset Levels and Moors")
+ModS <- glmmTMB((AbChange/(ChangeCostsFG/100000)) ~ ScenType + Strategy + NewCat + Plus,
+                data = Som,
+                family = t_family(link = "identity")) # Chose t-family as data has long tail
+summary(ModS)
+
+(Emm_ScenType <- emmeans(ModS, "ScenType"))
+confint(pairs(Emm_ScenType))
+emmeans(ModS, ~ ScenType) |> plot()
+
+(Emm_Strategy <- emmeans(ModS, "Strategy"))
+confint(pairs(Emm_Strategy))
+emmeans(ModS, ~ Strategy) |> plot()
+ 
+(Emm_NewCat <- emmeans(ModS, "NewCat"))
+confint(pairs(Emm_NewCat))
+emmeans(ModS, ~ NewCat) |> plot()
+
+(Emm_Plus <- emmeans(ModS, "Plus"))
+confint(pairs(Emm_Plus))
+emmeans(ModS, ~ Plus) |> plot()
+
+
+
+## Forest plot from model
+## get the estimates and confidence intervals from the models
+Ests <- cbind(confint(ModS))
+## make a forest plot fo the model estimates
+Ests <- Ests %>%
+        as.data.frame() |> 
+        mutate(Param = rownames(Ests),
+               Sig = ifelse( (`2.5 %` >0 & `97.5 %` >0) | (`2.5 %` <0 & `97.5 %` <0), "red", "grey"))
+## Create forest plot
+ggplot(Ests) +
+        #geom_vline(xintercept = 0, linetype = "dashed", alpha =0.5) +
+        geom_errorbarh(aes(y= Param, xmin= `2.5 %`, xmax=`97.5 %`), height = 0.2, linewidth =0.5) +
+        geom_point(aes(y= Param, x= Estimate, colour = Sig), size = 2.5) +
+        theme_bw() +
+        ylab("") +
+        scale_color_manual(values=c("#E74C3C")) +
+        theme(panel.grid.minor.y = element_blank(),
+              #panel.grid.major.x = element_blank(),
+              panel.grid.major.y = element_blank(),
+              axis.title=element_text(size=16), 
+              legend.title=element_text(size=14),
+              axis.text=element_text(size=14), 
+              legend.text=element_text(size=12),
+              panel.grid.minor.x = element_blank(),
+              legend.position = "none") 
 
 
 
 
+##-- Model for Broads --##
+
+## baseline: random cluster, better
+Broads <- SetD |> filter(Landscape == "Broads")
+ModB <- glmmTMB((AbChange/(ChangeCostsFG/100000)) ~ ScenType + Strategy + NewCat + Plus,
+                data = Broads,
+                family = t_family(link = "identity")) # Chose t-family as data has long tail
+summary(ModB)
+
+(Emm_ScenType <- emmeans(ModB, "ScenType"))
+confint(pairs(Emm_ScenType))
+emmeans(ModB, ~ ScenType) |> plot()
+
+(Emm_Strategy <- emmeans(ModB, "Strategy"))
+confint(pairs(Emm_Strategy))
+emmeans(ModB, ~ Strategy) |> plot()
+ 
+(Emm_NewCat <- emmeans(ModB, "NewCat"))
+confint(pairs(Emm_NewCat))
+emmeans(ModB, ~ NewCat) |> plot()
+
+(Emm_Plus <- emmeans(ModB, "Plus"))
+confint(pairs(Emm_Plus))
+emmeans(ModB, ~ Plus) |> plot()
+
+
+## Forest plot from model
+## get the estimates and confidence intervals from the models
+Ests <- cbind(confint(ModB))
+## make a forest plot fo the model estimates
+Ests <- Ests %>%
+        as.data.frame() |> 
+        mutate(Param = rownames(Ests),
+               Sig = ifelse( (`2.5 %` >0 & `97.5 %` >0) | (`2.5 %` <0 & `97.5 %` <0), "red", "grey"))
+## Create forest plot
+ggplot(Ests) +
+        #geom_vline(xintercept = 0, linetype = "dashed", alpha =0.5) +
+        geom_errorbarh(aes(y= Param, xmin= `2.5 %`, xmax=`97.5 %`), height = 0.2, linewidth =0.5) +
+        geom_point(aes(y= Param, x= Estimate, colour = Sig), size = 2.5) +
+        theme_bw() +
+        ylab("") +
+        scale_color_manual(values=c("#E74C3C")) +
+        theme(panel.grid.minor.y = element_blank(),
+              #panel.grid.major.x = element_blank(),
+              panel.grid.major.y = element_blank(),
+              axis.title=element_text(size=16), 
+              legend.title=element_text(size=14),
+              axis.text=element_text(size=14), 
+              legend.text=element_text(size=12),
+              panel.grid.minor.x = element_blank(),
+              legend.position = "none") 
+
+
+
+
+##-- Model for North Kent --##
+
+## baseline: random cluster, better
+NKent <- SetD |> filter(Landscape == "North Kent")
+ModNK <- glmmTMB((AbChange/(ChangeCostsFG/100000)) ~ ScenType + Strategy + NewCat + Plus,
+                data = NKent,
+                family = t_family(link = "identity")) # Chose t-family as data has long tail
+summary(ModNK)
+
+(Emm_ScenType <- emmeans(ModNK, "ScenType"))
+confint(pairs(Emm_ScenType))
+emmeans(ModNK, ~ ScenType) |> plot()
+
+(Emm_Strategy <- emmeans(ModNK, "Strategy"))
+confint(pairs(Emm_Strategy))
+emmeans(ModNK, ~ Strategy) |> plot()
+ 
+(Emm_NewCat <- emmeans(ModNK, "NewCat"))
+confint(pairs(Emm_NewCat))
+emmeans(ModNK, ~ NewCat) |> plot()
+
+(Emm_Plus <- emmeans(ModNK, "Plus"))
+pairs(Emm_Plus)
+emmeans(ModNK, ~ Plus) |> plot()
+
+
+## Forest plot from model
+## get the estimates and confidence intervals from the models
+Ests <- cbind(confint(ModNK))
+## make a forest plot fo the model estimates
+Ests <- Ests %>%
+        as.data.frame() |> 
+        mutate(Param = rownames(Ests),
+               Sig = ifelse( (`2.5 %` >0 & `97.5 %` >0) | (`2.5 %` <0 & `97.5 %` <0), "red", "grey"))
+## Create forest plot
+ggplot(Ests) +
+        #geom_vline(xintercept = 0, linetype = "dashed", alpha =0.5) +
+        geom_errorbarh(aes(y= Param, xmin= `2.5 %`, xmax=`97.5 %`), height = 0.2, linewidth =0.5) +
+        geom_point(aes(y= Param, x= Estimate, colour = Sig), size = 2.5) +
+        theme_bw() +
+        ylab("") +
+        scale_color_manual(values=c("#E74C3C", "grey")) +
+        theme(panel.grid.minor.y = element_blank(),
+              #panel.grid.major.x = element_blank(),
+              panel.grid.major.y = element_blank(),
+              axis.title=element_text(size=16), 
+              legend.title=element_text(size=14),
+              axis.text=element_text(size=14), 
+              legend.text=element_text(size=12),
+              panel.grid.minor.x = element_blank(),
+              legend.position = "none") 
+
+
+
+
+##-- Model for Essex --##
+
+## baseline: random cluster, better
+Essex <- SetD |> filter(Landscape == "Essex")
+ModEs <- glmmTMB((AbChange/(ChangeCostsFG/100000)) ~ ScenType + Strategy + NewCat + Plus,
+                data = Essex,
+                family = t_family(link = "identity")) # Chose t-family as data has long tail
+summary(ModEs)
+
+(Emm_ScenType <- emmeans(ModEs, "ScenType"))
+confint(pairs(Emm_ScenType))
+emmeans(ModEs, ~ ScenType) |> plot()
+
+(Emm_Strategy <- emmeans(ModEs, "Strategy"))
+confint(pairs(Emm_Strategy))
+emmeans(ModEs, ~ Strategy) |> plot()
+ 
+(Emm_NewCat <- emmeans(ModEs, "NewCat"))
+pairs(Emm_NewCat)
+emmeans(ModEs, ~ NewCat) |> plot()
+
+(Emm_Plus <- emmeans(ModEs, "Plus"))
+pairs(Emm_Plus)
+emmeans(ModEs, ~ Plus) |> plot()
+
+
+## Forest plot from model
+## get the estimates and confidence intervals from the models
+Ests <- cbind(confint(ModEs))
+## make a forest plot fo the model estimates
+Ests <- Ests %>%
+        as.data.frame() |> 
+        mutate(Param = rownames(Ests),
+               Sig = ifelse( (`2.5 %` >0 & `97.5 %` >0) | (`2.5 %` <0 & `97.5 %` <0), "red", "grey"))
+## Create forest plot
+ggplot(Ests) +
+        #geom_vline(xintercept = 0, linetype = "dashed", alpha =0.5) +
+        geom_errorbarh(aes(y= Param, xmin= `2.5 %`, xmax=`97.5 %`), height = 0.2, linewidth =0.5) +
+        geom_point(aes(y= Param, x= Estimate, colour = Sig), size = 2.5) +
+        theme_bw() +
+        ylab("") +
+        scale_color_manual(values=c("#E74C3C", "grey")) +
+        theme(panel.grid.minor.y = element_blank(),
+              #panel.grid.major.x = element_blank(),
+              panel.grid.major.y = element_blank(),
+              axis.title=element_text(size=16), 
+              legend.title=element_text(size=14),
+              axis.text=element_text(size=14), 
+              legend.text=element_text(size=12),
+              panel.grid.minor.x = element_blank(),
+              legend.position = "none") 
