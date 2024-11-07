@@ -1,0 +1,64 @@
+---
+title: "Ref Generate"
+format: pdf
+---
+
+In the end it was not possible to run all three group of stakeholders in each priority landscape, apart from the Somerset Levels, and we ended up only being able to run the activities with 2 of the groups above in three of the landscape
+
+
+```{R, echo=F, warning = F, output = F}
+library(readxl)
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+```
+
+
+
+```{R, echo=F, warning = F, output = F}
+
+Rules <- readxl::read_excel("All Guidelines Sheet v2.xlsx", sheet = "Guidelines for MS")
+
+Citations <- readxl::read_excel("All Guidelines Sheet v2.xlsx", sheet = "Ref List")
+
+
+SomG1 <- dplyr::filter(Rules, Region == "Somerset" & Group == 1) |> select("Strategies", "Guideline", "Reference", "Implementation")
+SomG2 <- dplyr::filter(Rules, Region == "Somerset" & Group == 2) |> select("Strategies", "Guideline", "Reference", "Implementation")
+SomG3 <- dplyr::filter(Rules, Region == "Somerset" & Group == 3) |> select("Strategies", "Guideline", "Reference", "Implementation")
+
+KeG1 <- dplyr::filter(Rules, Region == "Kent" & Group == 1) |> select("Strategies", "Guideline", "Reference", "Implementation")
+KeG2 <- dplyr::filter(Rules, Region == "Kent" & Group == 2) |> select("Strategies", "Guideline", "Reference", "Implementation")
+
+
+EsG1 <- dplyr::filter(Rules, Region == "Essex" & Group == 1) |> select("Strategies", "Guideline", "Reference", "Implementation")
+EsG2 <- dplyr::filter(Rules, Region == "Essex" & Group == 2) |> select("Strategies", "Guideline", "Reference", "Implementation")
+
+
+NorG1 <- dplyr::filter(Rules, Region == "Norfolk" & Group == 1) |> select("Strategies", "Guideline", "Reference", "Implementation")
+NorG2 <- dplyr::filter(Rules, Region == "Norfolk" & Group == 2) |> select("Strategies", "Guideline", "Reference", "Implementation")
+```
+
+```{R, echo=F, warning = F, output = T}
+#| label: tbl-NorG1
+#| tbl-cap: "Stakeholder rules generated during a workshop for the Broads group 1 (conservationists). See @tbl-Citations for full citation of each reference"
+
+kbl(NorG1, longtable = T) %>% 
+  kable_styling(latex_options = c("repeat_header", "striped"), font_size = 7, full_width = F) |> 
+  row_spec(0, font_size = 8, bold = T) |> 
+  column_spec(1, width = "7em") |> 
+  column_spec(2, width = "10em") |>
+  column_spec(3, width = "13em") |>
+  column_spec(4, width = "30em")
+```
+
+{{< pagebreak >}}
+
+
+
+
+
+
+
+
+
+

@@ -9,7 +9,7 @@
 
 
 ## Load in packages
-pacman::p_load(tidyverse, data.table, sf, terra, tidyterra, leastcostpath, ggspatial)
+pacman::p_load(tidyverse, data.table, sf, terra, tidyterra, ggnewscale, basemaps, leastcostpath, ggspatial)
 options(scipen=999) # turn off scientific notation
 
 ## Load in various helper functions
@@ -1056,8 +1056,13 @@ GeneralThemeing <- theme(
           panel.background = element_rect(fill = "#f5f5f2", color = NA))
 
 ## Set the plot extent so that all plots have the same area no matter if they have different land parcels
-PlotExt <- coord_sf(xlim = c(ext(CanvasGr)[1]-20, ext(CanvasGr)[2]+20), ylim = c(ext(CanvasGr)[3]-20, ext(CanvasGr)[4]+20), 
+PlotExt <- coord_sf(xlim = c(ext(CanvasGr)[1]-250, ext(CanvasGr)[2]+250), ylim = c(ext(CanvasGr)[3]-250, ext(CanvasGr)[4]+250), 
                     crs = 27700, expand = FALSE) 
+
+## Read in an outline of the UK to put in the background of the maps
+Coast <- st_read("RawData/UK_Coastline/UK_Coatline.shp")
+## crop to area just around the Broads priority landscape
+Coast <- st_transform(Coast, crs = st_crs(NKOutline)) |> st_crop(NKOutline |> st_buffer(dist = 4000))
 
 
 
@@ -1070,9 +1075,11 @@ PlotExt <- coord_sf(xlim = c(ext(CanvasGr)[1]-20, ext(CanvasGr)[2]+20), ylim = c
 CanvasGrBetter <- filter(CanvasGr, (Mask_G1 > 0.5) & is.na(ClustPop)==F)
 
 ## make plot
-ggplot() + 
+ggplot() +
+  ## Add Coastline
+  geom_sf(data=Coast, mapping=aes(geometry=geometry), fill="lightgrey", colour = NA) +
   ## add landscape outline
-  geom_sf(data=NKOutline, mapping=aes(geometry=geometry), colour = "grey", fill = NA) +
+  geom_sf(data=NKOutline, mapping=aes(geometry=geometry), colour = "#273746", fill = NA) +
   ## add polygons
   geom_sf(data=CanvasGrBetter, mapping=aes(geometry=geometry, fill = BetterGrade_G1), colour = NA) + 
   ## give a viridis fill to shapes
@@ -1098,11 +1105,14 @@ ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_G1_Better.png", 
 
 ## filter out data that is not 50% covered by mask and is not in a cluster
 CanvasGrBig <- filter(CanvasGr, (Mask_G1 > 0.5) & is.na(ClustPop)==T)
+CanvasGrBig <- st_intersection(CanvasGrBig, NKOutline |> st_buffer(dist=1500))
 
 ## make plot
-ggplot() + 
+ggplot() +
+  ## Add Coastline
+  geom_sf(data=Coast, mapping=aes(geometry=geometry), fill="lightgrey", colour = NA) +
   ## add landscape outline
-  geom_sf(data=NKOutline, mapping=aes(geometry=geometry), colour = "grey", fill = NA) +
+  geom_sf(data=NKOutline, mapping=aes(geometry=geometry), colour = "#273746", fill = NA) +
   ## add polygons
   geom_sf(data=CanvasGrBig, mapping=aes(geometry=geometry, fill = BigGrade_G1), colour = NA) + 
   ## give a viridis fill to shapes
@@ -1128,11 +1138,14 @@ ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_G1_Bigger.png", 
 
 ## filter out data that is not 50% covered by mask and is not in a cluster
 CanvasGrMore <- filter(CanvasGr, (Mask_G1 > 0.5) & is.na(ClustPop)==T)
+CanvasGrMore <- st_intersection(CanvasGrMore, NKOutline |> st_buffer(dist=1500))
 
 ## make plot
-ggplot() + 
+ggplot() +
+  ## Add Coastline
+  geom_sf(data=Coast, mapping=aes(geometry=geometry), fill="lightgrey", colour = NA) +
   ## add landscape outline
-  geom_sf(data=NKOutline, mapping=aes(geometry=geometry), colour = "grey", fill = NA) +
+  geom_sf(data=NKOutline, mapping=aes(geometry=geometry), colour = "#273746", fill = NA) +
   ## add polygons
   geom_sf(data=CanvasGrMore, mapping=aes(geometry=geometry, fill = MoreGrade_G1), colour = NA) + 
   ## give a viridis fill to shapes
@@ -1159,11 +1172,14 @@ ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_G1_More.png", wi
 ## Plot the better grading
 ## Filter out fields withing population clusters and not masked
 CanvasArG1 <- filter(CanvasAr, (Mask_G1 > 0.5) & is.na(ClustPop)==T)
+CanvasArG1 <- st_intersection(CanvasArG1, NKOutline |> st_buffer(dist=1500))
 
 ## make plot
 ggplot() +
+  ## Add Coastline
+  geom_sf(data=Coast, mapping=aes(geometry=geometry), fill="lightgrey", colour = NA) +
   ## add landscape outline
-  geom_sf(data=NKOutline, mapping=aes(geometry=geometry), colour = "grey", fill = NA) +
+  geom_sf(data=NKOutline, mapping=aes(geometry=geometry), colour = "#273746", fill = NA) +
   ## add polygons
   geom_sf(data=CanvasArG1, mapping=aes(geometry=geometry, fill = ArableBig_G1), colour = NA) +
   ## give a viridis fill to shapes
@@ -1190,11 +1206,14 @@ ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_G1_ArableBig.png
 ## Plot the better grading
 ## Filter out fields withing population clusters and not masked
 CanvasArG1 <- filter(CanvasAr, (Mask_G1 > 0.5) & is.na(ClustPop)==T)
+CanvasArG1 <- st_intersection(CanvasArG1, NKOutline |> st_buffer(dist=1500))
 
 ## make plot
 ggplot() +
+  ## Add Coastline
+  geom_sf(data=Coast, mapping=aes(geometry=geometry), fill="lightgrey", colour = NA) +
   ## add landscape outline
-  geom_sf(data=NKOutline, mapping=aes(geometry=geometry), colour = "grey", fill = NA) +
+  geom_sf(data=NKOutline, mapping=aes(geometry=geometry), colour = "#273746", fill = NA) +
   ## add polygons
   geom_sf(data=CanvasArG1, mapping=aes(geometry=geometry, fill = ArableMore_G1), colour = NA) +
   ## give a viridis fill to shapes
@@ -1229,26 +1248,91 @@ Kent <- MyBoxes |> filter(Att3Value == "North Kent")
 Reserves <- st_read("RawData/RSPB Reserves/EnglandWales_RSPBReserves.shp")
 ReservesEss <- st_crop(Reserves, (NK |> st_buffer(dist=500)))
 
+
+## Plot the better grading
+## Filter out fields withing population clusters and not masked
+CanvasArr <- filter(CanvasAr, (Mask_G1 > 0.5)) |> mutate(Habb = "#ffd166") |> select(Habb)
+CanvasGrr <- filter(CanvasGr, (Mask_G1 > 0.5)) |> mutate(Habb = "#06d6a0") |> select(Habb)
+Canv <- rbind(CanvasArr, CanvasGrr)
+
+
 ## make plot
-ggplot() + 
+ggplot() +
+  ## Add in the OS basemap
+  basemap_gglayer(Kent |> st_buffer(dist = 4000), map_service = "osm", map_type = "streets") +
+  scale_fill_identity() +
+  coord_sf(expand = FALSE) +
+  
+  ## add landscape outline
+  geom_sf(data=Kent |> st_transform(crs=3857), mapping=aes(geometry=geometry), colour = "#273746", fill = NA, linewidth = 0.5) +
+  coord_sf(expand = FALSE) + 
+  
   ## add polygons
-  geom_sf(data=Kent, mapping=aes(geometry=geometry), fill = "lightblue", colour = NA) + 
-  geom_sf(data=ReservesEss, mapping=aes(geometry=geometry), fill = "red", alpha = 0.5, colour = NA) + 
-  ## give a viridis fill to shapes
-  scale_fill_viridis_c(na.value = "lightgrey") + 
-  ## Set plot extent so all plots have the same extent
-  PlotExt +
+  new_scale_fill() +
+  geom_sf(data=Canv |> st_transform(crs=3857), mapping=aes(geometry=geometry, fill = Habb), colour = NA, alpha =0.8) +
+  coord_sf(expand = FALSE) + 
+  scale_fill_manual(name = "Opportunity\nHabitat",   # Change legend title
+                    values = c("#06d6a0", "#ffd166"),
+                    labels = c("Grassland", "Arable")) +
+
   ## Add North arrow and scale bar
   annotation_scale(location = "br", line_width = unit(0.25, "cm"), height = unit(0.1, "cm"), pad_y = unit(0.1, "in")) +
   ## set labels
-  ggtitle("North Kent") +
+  ggtitle("North Kent: Opportunity Habitat") +
   ## set them
-  theme_light() + 
-  GeneralThemeing +
-  theme(legend.position = "none")
+  theme(legend.position = "right", 
+        axis.text.y = element_text(hjust=0.7,angle=45,vjust=0.3),
+        text = element_text(color = "#2D2D2E"), 
+        panel.grid = element_line(color = "#ebebe5", linewidth = 0.2),
+        panel.background = element_rect(fill = "#f5f5f2", color = NA),
+        axis.title = element_blank()) 
 
 ## save plot as png
-ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_LandscapeMap.png", width = 20, height = 12, units = "cm")
+ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_OpportunityHabitatMap.png", width = 20, height = 20, units = "cm")
+
+
+
+## Plot the better grading
+## Filter out fields withing population clusters and not masked
+CanvasArr <- filter(CanvasAr, (Mask_G1 > 0.5)) |> mutate(Habb = "Arable") |> select(Habb, ClustPop)
+CanvasGrr <- filter(CanvasGr, (Mask_G1 > 0.5)) |> mutate(Habb = "Grassland") |> select(Habb, ClustPop)
+Canv <- rbind(CanvasGrr, CanvasArr) |> mutate(ClustPop= ifelse(is.na(ClustPop)==T, "#ef476f", "#118ab2"))
+
+## make plot
+ggplot() +
+  ## Add in the OS basemap
+  basemap_gglayer(Kent |> st_buffer(dist = 4000), map_service = "osm", map_type = "streets") +
+  scale_fill_identity() +
+  coord_sf(expand = FALSE) +
+
+  ## add landscape outline
+  geom_sf(data=Kent |> st_transform(crs=3857), mapping=aes(geometry=geometry), colour = "#273746", fill = NA, linewidth = 0.5) +
+  coord_sf(expand = FALSE) + 
+  
+  ## add field polygons
+  new_scale_fill() +
+  geom_sf(data=Canv |> st_transform(crs=3857), mapping=aes(geometry=geometry, fill = ClustPop), colour = NA, alpha =0.75) +
+  coord_sf(expand = FALSE) + 
+  scale_fill_manual(name = "Strategy",   # Change legend title
+                    values = c("#ef476f", "#118ab2"),
+                    labels = c("Better", "Bigger/More")) +
+  
+  ## Add North arrow and scale bar
+  annotation_scale(location = "br", line_width = unit(0.25, "cm"), height = unit(0.1, "cm"), pad_y = unit(0.05, "in")) +
+  ## set labels
+  ggtitle("North Kent: Targetting Strategy") +
+  ## set them
+  theme(legend.position = "right", 
+        axis.text.y = element_text(hjust=0.7,angle=45,vjust=0.3),
+        text = element_text(color = "#2D2D2E"), 
+        panel.grid = element_line(color = "#ebebe5", linewidth = 0.2),
+        panel.background = element_rect(fill = "#f5f5f2", color = NA),
+        axis.title = element_blank()) 
+
+## save plot as png
+ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_LawtonPrincipleMap.png", width = 20, height = 20, units = "cm")
+
+
 
 
 
@@ -1260,11 +1344,14 @@ ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_LandscapeMap.png
 ## Plot the better grading
 ## Filter out fields withing population clusters and not masked
 CanvasGrBetter <- filter(CanvasGr, (Mask_G2 > 0.5) & is.na(ClustPop)==F)
+CanvasGrBetter <- st_intersection(CanvasGrBetter, NKOutline |> st_buffer(dist=1500))
 
 ## make plot
-ggplot() + 
+ggplot() +
+  ## Add Coastline
+  geom_sf(data=Coast, mapping=aes(geometry=geometry), fill="lightgrey", colour = NA) +
   ## add landscape outline
-  geom_sf(data=NKOutline, mapping=aes(geometry=geometry), colour = "grey", fill = NA) +
+  geom_sf(data=NKOutline, mapping=aes(geometry=geometry), colour = "#273746", fill = NA) +
   ## add polygons
   geom_sf(data=CanvasGrBetter, mapping=aes(geometry=geometry, fill = BetterGrade_G2), colour = NA) + 
   ## give a viridis fill to shapes
@@ -1290,11 +1377,14 @@ ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_G2_Better.png", 
 
 ## filter out data that is not 50% covered by mask and is not in a cluster
 CanvasGrBig <- filter(CanvasGr, (Mask_G2 > 0.5) & is.na(ClustPop)==T)
+CanvasGrBig <- st_intersection(CanvasGrBig, NKOutline |> st_buffer(dist=1500))
 
 ## make plot
-ggplot() + 
+ggplot() +
+  ## Add Coastline
+  geom_sf(data=Coast, mapping=aes(geometry=geometry), fill="lightgrey", colour = NA) +
   ## add landscape outline
-  geom_sf(data=NKOutline, mapping=aes(geometry=geometry), colour = "grey", fill = NA) +
+  geom_sf(data=NKOutline, mapping=aes(geometry=geometry), colour = "#273746", fill = NA) +
   ## add polygons
   geom_sf(data=CanvasGrBig, mapping=aes(geometry=geometry, fill = BigGrade_G2), colour = NA) + 
   ## give a viridis fill to shapes
@@ -1321,11 +1411,14 @@ ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_G2_Bigger.png", 
 
 ## filter out data that is not 50% covered by mask and is not in a cluster
 CanvasGrMore <- filter(CanvasGr, (Mask_G2 > 0.5) & is.na(ClustPop)==T)
+CanvasGrMore <- st_intersection(CanvasGrMore, NKOutline |> st_buffer(dist=1500))
 
 ## make plot
-ggplot() + 
+ggplot() +
+  ## Add Coastline
+  geom_sf(data=Coast, mapping=aes(geometry=geometry), fill="lightgrey", colour = NA) +
   ## add landscape outline
-  geom_sf(data=NKOutline, mapping=aes(geometry=geometry), colour = "grey", fill = NA) +
+  geom_sf(data=NKOutline, mapping=aes(geometry=geometry), colour = "#273746", fill = NA) +
   ## add polygons
   geom_sf(data=CanvasGrMore, mapping=aes(geometry=geometry, fill = MoreGrade_G2), colour = NA) + 
   ## give a viridis fill to shapes
@@ -1353,11 +1446,14 @@ ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_G2_More.png", wi
 ## Plot the better grading
 ## Filter out fields withing population clusters and not masked
 CanvasArG2 <- filter(CanvasAr, (Mask_G2 > 0.5) & is.na(ClustPop)==T)
+CanvasArG2 <- st_intersection(CanvasArG2, NKOutline |> st_buffer(dist=1500))
 
 ## make plot
 ggplot() +
+  ## Add Coastline
+  geom_sf(data=Coast, mapping=aes(geometry=geometry), fill="lightgrey", colour = NA) +
   ## add landscape outline
-  geom_sf(data=NKOutline, mapping=aes(geometry=geometry), colour = "grey", fill = NA) +
+  geom_sf(data=NKOutline, mapping=aes(geometry=geometry), colour = "#273746", fill = NA) +
   ## add polygons
   geom_sf(data=CanvasArG2, mapping=aes(geometry=geometry, fill = ArableBig_G2), colour = NA) +
   ## give a viridis fill to shapes
@@ -1385,11 +1481,14 @@ ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_G2_ArableBig.png
 ## Plot the better grading
 ## Filter out fields withing population clusters and not masked
 CanvasArG2 <- filter(CanvasAr, (Mask_G2 > 0.5) & is.na(ClustPop)==T)
+CanvasArG2 <- st_intersection(CanvasArG2, NKOutline |> st_buffer(dist=1500))
 
 ## make plot
 ggplot() +
+  ## Add Coastline
+  geom_sf(data=Coast, mapping=aes(geometry=geometry), fill="lightgrey", colour = NA) +
   ## add landscape outline
-  geom_sf(data=NKOutline, mapping=aes(geometry=geometry), colour = "grey", fill = NA) +
+  geom_sf(data=NKOutline, mapping=aes(geometry=geometry), colour = "#273746", fill = NA) +
   ## add polygons
   geom_sf(data=CanvasArG2, mapping=aes(geometry=geometry, fill = ArableMore_G2), colour = NA) +
   ## give a viridis fill to shapes
