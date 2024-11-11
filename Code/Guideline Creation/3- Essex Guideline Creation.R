@@ -1235,18 +1235,19 @@ plot(CanvasAr$geometry)
 
 ## Code to read in the rules if needed
 
-# G1_mask <- rast("CleanData/Guideline Creation/Essex/Ess_MasksAll_G1.tif")
-# Bett_G1 <- rast("CleanData/Guideline Creation/Essex/Ess_Better_G1.tif")
-# Big_G1 <- rast("CleanData/Guideline Creation/Essex/Ess_Bigger_G1.tif")
-# More_G1 <- rast("CleanData/Guideline Creation/Essex/Ess_More_G1.tif")
-# ArableConv_G1 <- rast("CleanData/Guideline Creation/Essex/Ess_ArableRev_G1.tif")
-# 
-# G2_mask <- rast("CleanData/Guideline Creation/Essex/Ess_MasksAll_G2.tif")
-# Bett_G2 <- rast("CleanData/Guideline Creation/Essex/Ess_Better_G2.tif")
-# Big_G2 <- rast("CleanData/Guideline Creation/Essex/Ess_Bigger_G2.tif")
-# More_G2 <- rast("CleanData/Guideline Creation/Essex/Ess_More_G2.tif")
-# ArableConv_G2 <- rast("CleanData/Guideline Creation/Essex/Ess_ArableRev_G2.tif")
+G1_mask <- rast("CleanData/Guideline Creation/Essex/Ess_MasksAll_G1.tif")
+Bett_G1 <- rast("CleanData/Guideline Creation/Essex/Ess_Better_G1.tif")
+Big_G1 <- rast("CleanData/Guideline Creation/Essex/Ess_Bigger_G1.tif")
+More_G1 <- rast("CleanData/Guideline Creation/Essex/Ess_More_G1.tif")
+ArableBig_G1 <- rast("CleanData/Guideline Creation/Essex/Ess_ArableBig_G1.tif")
+ArableMore_G1 <- rast("CleanData/Guideline Creation/Essex/Ess_ArableMore_G1.tif")
 
+G2_mask <- rast("CleanData/Guideline Creation/Essex/Ess_MasksAll_G2.tif")
+Bett_G2 <- rast("CleanData/Guideline Creation/Essex/Ess_Better_G2.tif")
+Big_G2 <- rast("CleanData/Guideline Creation/Essex/Ess_Bigger_G2.tif")
+More_G2 <- rast("CleanData/Guideline Creation/Essex/Ess_More_G2.tif")
+ArableBig_G2 <- rast("CleanData/Guideline Creation/Essex/Ess_ArableBig_G2.tif")
+ArableMore_G2 <- rast("CleanData/Guideline Creation/Essex/Ess_ArableMore_G2.tif")
 
 ## More strategy
 MoreGrades <- extract(More_G1, CanvasGr, fun = mean, na.rm = T)
@@ -1354,7 +1355,7 @@ ggplot() +
   ## Set plot extent so all plots have the same extent
   PlotExt +
   ## set labels
-  labs(fill = "Better Grading") +
+  labs(fill = "Better\nGrading") +
   ggtitle("Essex Coast: Better (Conservationists)") +
   ## set them
   theme_light() + 
@@ -1385,7 +1386,7 @@ ggplot() +
   ## Set plot extent so all plots have the same extent
   PlotExt +
   ## set labels
-  labs(fill = "Bigger Grading") +
+  labs(fill = "Bigger\nGrading") +
   ggtitle("Essex Coast: Bigger (Conservationists)") +
   ## set them
   theme_light() + 
@@ -1416,7 +1417,7 @@ ggplot() +
   ## Set plot extent so all plots have the same extent
   PlotExt +
   ## set labels
-  labs(fill = "More Grading") +
+  labs(fill = "More\nGrading") +
   ggtitle("Essex Coast: More (Conservationists)") +
   ## set them
   theme_light() + 
@@ -1448,7 +1449,7 @@ ggplot() +
   ## Set plot extent so all plots have the same extent
   PlotExt +
   ## set labels
-  labs(fill = "Arable Grading") +
+  labs(fill = "Arable\nGrading") +
   ggtitle("Essex Coast: Arable Reversion for Bigger (Conservationists)") +
   ## set them
   theme_light() +
@@ -1481,7 +1482,7 @@ ggplot() +
   ## Set plot extent so all plots have the same extent
   PlotExt +
   ## set labels
-  labs(fill = "Arable Grading") +
+  labs(fill = "Arable\nGrading") +
   ggtitle("Essex Coast: Arable Reversion for More (Conservationists)") +
   ## set them
   theme_light() +
@@ -1544,7 +1545,7 @@ ggplot() +
         axis.title = element_blank()) 
 
 ## save plot as png
-ggsave(filename = "CleanData/Guideline Creation/Plots/Essex_OpportunityHabitatMap.png", width = 20, height = 20, units = "cm")
+ggsave(filename = "CleanData/Guideline Creation/Plots/Essex_OpportunityHabitatMap.png", width = 20, height = 13, units = "cm")
 
 
 
@@ -1586,7 +1587,7 @@ ggplot() +
         axis.title = element_blank()) 
 
 ## save plot as png
-ggsave(filename = "CleanData/Guideline Creation/Plots/Essex_LawtonPrincipleMap.png", width = 20, height = 20, units = "cm")
+ggsave(filename = "CleanData/Guideline Creation/Plots/Essex_LawtonPrincipleMap.png", width = 20, height = 13, units = "cm")
 
 
 
@@ -1614,7 +1615,7 @@ ggplot() +
   ## Set plot extent so all plots have the same extent
   PlotExt +
   ## set labels
-  labs(fill = "Better Grading") +
+  labs(fill = "Better\nGrading") +
   ggtitle("Essex Coast: Better (Land Managers)") +
   ## set them
   theme_light() + 
@@ -1645,7 +1646,7 @@ ggplot() +
   ## Set plot extent so all plots have the same extent
   PlotExt +
   ## set labels
-  labs(fill = "Bigger Grading") +
+  labs(fill = "Bigger\nGrading") +
   ggtitle("Essex Coast: Bigger (Land Managers)") +
   ## set them
   theme_light() + 
@@ -1676,7 +1677,7 @@ ggplot() +
   ## Set plot extent so all plots have the same extent
   PlotExt +
   ## set labels
-  labs(fill = "More Grading") +
+  labs(fill = "More\nGrading") +
   ggtitle("Essex Coast: More (Land Managers)") +
   ## set them
   theme_light() + 
@@ -1709,7 +1710,7 @@ ggplot() +
   ## Set plot extent so all plots have the same extent
   PlotExt +
   ## set labels
-  labs(fill = "Arable Grading") +
+  labs(fill = "Arable\nGrading") +
   ggtitle("Essex Coast: Arable Reversion for Bigger (Land Managers)") +
   ## set them
   theme_light() +
@@ -1742,7 +1743,7 @@ ggplot() +
   ## Set plot extent so all plots have the same extent
   PlotExt +
   ## set labels
-  labs(fill = "Arable Grading") +
+  labs(fill = "Arable\nGrading") +
   ggtitle("Essex Coast: Arable Reversion for More (Land Managers)") +
   ## set them
   theme_light() +

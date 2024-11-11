@@ -1,0 +1,346 @@
+---
+title: "Stakeholder preferences for breeding wader conservation in the Norfolk Broads"
+author:
+  - name: "Luke Ozsanlav-Harris & Robert Hawkes"
+    email: robert.hawkes@rspb.org.uk
+    affiliation: 
+      - name: RSPB
+date: today
+affiliation: "RSPB"
+format: 
+  pdf: 
+    geometry:
+      - top=30mm
+      - left=30mm
+    colorlinks: true
+    fig-pos: 'H'
+    fontsize: 12pt
+    keep-tex: true
+    include-in-header: 
+      text: |
+        \usepackage{scrlayer-scrpage}
+        \rohead{\includegraphics[height=1.4cm]{qmdimages/RSPB_logo.png}}
+        \lofoot{Norfolk Broads}
+    header-includes: 
+      \usepackage{float} \floatplacement{figure}{H} 
+      \newcommand{\beginsupplement}{\setcounter{table}{0}  \renewcommand{\thetable}{S\arabic{table}} \setcounter{figure}{0} \renewcommand{\thefigure}{S\arabic{figure}}}
+  docx:
+    toc: true
+    number-sections: true
+    highlight-style: github
+editor: source
+bibliography: references.bib
+link-citations: TRUE
+---
+
+```{R, echo=F, warning = F, output = F}
+library(readxl)
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+```
+
+# Summary
+
+This report presents the outputs from stakeholder workshops that aimed to explore where lowland wader conservation would preferably be carried out within the Norfolk Broads. We held a workshop with a varied group of local stakeholders that we were broadly divided into two groups: conservationists and public bodies. During the workshops each stakeholder group created a series of guidelines that could be used to identify areas within the landscape where wader conservation would be preferentially targeted or avoided. As part of the workshops we also introduced participants to three key components of the "Lawton principles of nature restoration" [@lawton2010], i.e. improving the quality of current wildlife sites by better management ('better'), increasing the size of current wildlife sites ('bigger'), and creating new wildlife sites ('more'). This was to allow stakeholders to make their guidelines specific to different principles, thereby trying to transition from theory to practical conservation. Using the guidelines generated in each workshop we generated spatial graded layers that were then combined to rank land in order of preference for each landscape and (where possible) each stakeholder group. These heat maps indicate where wader conservation would be most preferred within each landscape under each of the three Lawton principles.
+
+**Correspondence:** robert.hawkes\@rspb.org.uk
+
+
+{{< pagebreak >}}
+
+# Introduction
+
+Many areas across England have been heavily modified by humans and contain a mixture of land uses and semi-natural habitats [@song2018]. Modified landscapes often harbor important biodiversity, but ongoing intensification of land management threatens what biodiversity remains [@raven2021; @donald2001]. Due to a variety of different land uses in modified landscapes, restoration of biodiversity must compete with numerous other objectives such as, food and timber production, energy production, water resource management and urbanization [@chazdon2016]. Restoring biodiversity at larger scales must therefore carefully balance multiple objectives and working alongside the people living and working in the landscape is an integral part of this process. Involving local stakeholders from the start of ecological restoration and adapting the process along the way with ongoing engagement can help lead to higher levels of mutual understanding as well enhancing mutual benefits [@gamborg2019].
+
+Lowland breeding waders across Europe (order *Charadriiformes*) declined during the 20th century [@roodbergen2011] due to loss and degradation of their preferred habitat, floodplain and coastal grasslands. Habitat was lost due land use change and remaining areas became degraded due to drainage (reduced prey availability, [@eglington2010]); increased stocking and earlier more frequent mowing (nest and brood destruction, [@sabatier2010]); and increased meso-predator density (eggs and chick predation, [@roos2018]). Across much of Europe efforts to restore populations have taken two main avenues:
+
+1.  creation of Protected Areas (PA) through statutory protection (e.g. Sites of Special Scientific Interest, SSSI) and nature reserves. On nature reserves specifically, high-quality breeding habitat is often created through rewetting [@eglington2010], appropriate grazing management [@verhulst2011] and predator exclusion with fences [@malpas2013]. Statutory protection (specifically SSSIs) on its own provides weaker benefits to breeding waders [@smart2014; @hawkes2024].
+
+2.  use of agri-environment schemes on farmed land where payments support bespoke wader-focused measures like that of reserves, but generally lacking predator fences. This produces lesser quality habitat [@smart2014] but it is cheaper to create and maintain and often fits in with the existing land user operations (e.g. beef cattle farming and hay/silage cutting).
+
+Despite widespread uptake of AES and reserve/PA creation, populations of lowland breeding waders have still declined across Europe [@franks2018]. Suggesting improvements in efficacy or further increases in scale are needed to prevent further population declines. The 'Making Space for Nature' report [@lawton2010] set out a spatial targeting approach for landscape-scale restoration that was distilled down to four words, 'better, bigger, more and joined'. Based off the summation of a substantial body of scientific work this report recommended these actions in order of priority: (1) improving the quality of existing habitat, (2) increasing the size and (3) number of sites, and (4) enhancing connectivity among sites for conservation. This provides a starting framework but there are important trade-offs between strategies imposed by limited resources, land, and surrounding context (e.g. wider land-uses, levels of fragmentation and biogeographic context). We focused on the first three principles during workshops as wading birds can likely readily disperse between the existing habitat patches within our landscapes of interest [@jackson1994].
+
+![Map of the four case-study landscapes from this study. Essex and North Kent were formerly part of the same "priority landscape" but split due to differing characteristics and geographic seperation.](qmdimages/AllLandscapePlots.png){#fig-landscapes fig-align="center" width="450"}
+
+We ran stakeholder workshops across four different landscapes to understand where it is possible to deploy these strategies according to people who live and work in the area, thereby trying to link theory to real world situations and landscapes. We focus on three different 'priority landscapes' (formerly known as Environmentally Sensitive Areas, [@nateng2024]): Somerset Levels; Norfolk Broads (hereafter Broads); and Greater Thames (see @fig-landscapes). We subsequently split the Greater Thames landscape up into North Kent and Essex owing to differing land uses and geographic separation. We chose these landscapes as they hold important populations of breeding waders in a national context [@wilson2005] but also have different characteristics (e.g. soil types, land use compositions, wading bird assemblages, uptake of AES and lowland wet grassland distribution, see @tbl-scapestats for landscape specific details). For North Kent, Essex and the Broads we focus on Lapwing *Vanellus vanellus* and Redshank *Tringa totanus* during the workshops and for the Somerset Levels we focused on Lapwing and Snipe *Gallinago gallinago*. We focused on these species as they were the predominant breeding wader species in each landscape. Curlews are a key part of the breeding wader assemblage in the Somerset Levels but there were too few survey records to build a model that predicted abundance, which was a key aspect of the wider project.
+
+Extensive breeding wader surveys were conducted in each landscape in 2021-22 as part of the national breeding wader of wet meadows survey. Up to three visits during the breeding season were made to lowland wet grassland fields (areas below 200m altitude subject to freshwater flooding and water logging) with wading bird abundance and habitat characteristics recorded. An optional fourth 'dusk' visit was also undertaken where Snipe breeding was suspected. As part of the wider project, the four selected landscapes also received further visits in 2023 to survey areas that were missed in 2021-22.
+
+The remainder of the reports details the methods of how the workshop were run and how we turned stakeholder preferences into spatial maps for all landscapes. We then present the heat map of stakeholder preferences for just the Norfolk Broads. 
+
+```{R, echo=F, warning = F, output = T}
+#| label: tbl-scapestats
+#| tbl-cap: "Charactericists for each of the four case study landscapes. The breeding pairs for each landscapes were estimated from the breeding waders of wet meadows survey. The total hectarage for AES excludes reserves that also have AES agreements." 
+TableDat <- data.frame(Broads = c("43,138", "1,151", "5,068", "Floodplain", "Mixed arable & grassland", "Mixed mineral & organic", "775", "Lapwing/ Redshank"),
+                       Essex = c("72,342", "1,636", "1,279", "Coastal", "Mainly arable, some grassland", "Mainly mineral", "825", "Lapwing/ Redshank"), 
+                       NorthKent = c("22,798", "2,151", "1,976 ha", "Coastal", "Mainly grassland, some arable", "Mainly mineral", "1575", "Lapwing/ Redshank"),
+                       Somerset = c("30,905", "1,204", "3,078", "Floodplain", "Mainly grassland", "Mainly organic, some mineral", "225", "Snipe"))
+
+colnames(TableDat) <- c("Broads", "Essex", "North Kent", "Somerset")
+rownames(TableDat) <- c("Total Area (ha)", "Reserve LWG area (ha)", "AES only LWG area (ha)", "LWG type", "Land use", "Soil Type", "Breeding Pairs", "Predominant Species")
+
+kbl(TableDat, longtable = F, booktabs = T, linesep = "\\addlinespace") %>% 
+  kable_styling(latex_options = c("striped"), font_size = 10, full_width = F) |> 
+  row_spec(0, font_size = 12, bold = T) |>    
+  column_spec(1, width = "11.5em") |> 
+  column_spec(2, width = "7.25em") |>
+  column_spec(3, width = "7.25em") |>
+  column_spec(4, width = "7.25em") |> 
+  column_spec(5, width = "7.25em") 
+
+```
+
+# Methods
+
+## Workshop Aim
+
+To create a map of future opportunity for wader conservation for each stakeholder group within each landscape.
+
+This can consist of preferences of where wader conservation could occur as well as defining areas where wader conservation should be avoided. These preferences can also be linked to specific nature restoration strategies (better, bigger, more) and where arable land could be reverted back to lowland wet grassland so that the map of future opportunity can vary depending on the strategy.
+
+## Workshop Attendees
+
+We ran four regional workshops and we aimed to have three different stakeholder groups attend each workshop. The three different groups (and organisations invited) were:
+
+-   Conservationists (RSPB, Wildlife Trust, Wildfowl and wetland trust and Private nature reserves)
+-   Public bodies (Natural England, Environment Agency, Internal drainage board, Local Authorities, Ministry of Defense, regional Farming and Wildlife Advisory Group rep)
+-   Land managers (land owners, farmers, tenant farmers)
+
+These groups were created to align participants in terms of background. This helped to drive more productive group discussions and made it more likely that a consensus would be reached during group activities. The people invited to the workshops were largely already known to regional RSPB members of staff. This may slightly bias the group of people that attended towards those with more of an understanding and preference for conservation. This could have particularly affected the land managers group, for example some tenant farmers rent RSPB land for cattle grazing or carry out wader friendly management on their own farm. This could result in outputs are not fully representative of the wider stakeholder group. Overall, we felt that this bias was tolerable and that a group of more like minded participants would lead to more productive conversations and ultimately result in more usable outputs.
+
+In the end it was not possible to run all three group of stakeholders in each priority landscape, apart from the Somerset Levels. We were only able to run the activities with two groups in three of the landscape, see @tbl-GrpAtt for a breakdown of group attendance.
+
+```{R, echo=F, warning = F, output = T}
+#| label: tbl-GrpAtt
+#| tbl-cap: "Workshop attendance for the three different stakeholder groups across the four priority landscapes. Note if only one member of a stakeholder group attended a workshop then this individual was gnerally moved into one of the other groups. Number of attendees for each group is shown in brackets."
+
+TableDat <- data.frame(Landscape = c("Broads", "Kent", "Essex", "Somerset"),
+                       Conservationists = c("Y (5)", "Y (5)", "Y (7)", "Y (7)"), 
+                       Publicbodies = c("Y (7)", "", "", "Y (6)"),
+                       Landmanagers = c("", "Y (7)", "Y (7)", "Y (8)"))
+
+colnames(TableDat) <- c("Landscape", "Conservationists", "Public Bodies", "Land Managers")
+
+kbl(TableDat, longtable = F, booktabs = T, linesep = "\\addlinespace") %>% 
+  kable_styling(latex_options = c("striped"), font_size = 10, full_width = F) |> 
+  row_spec(0, font_size = 12, bold = T) 
+
+```
+
+## Workshop Activities
+
+In each workshop we gave an introductory presentation followed by three stakeholder-led activities. The introductory presentation was in two parts. Initially we presented the results from the 2021/22 breeding waders of wet meadow survey, including the influence of habitat and land management on breeding populations and the distribution of populations within the landscape. Maps were also provided to participants to the show the distribution of breeding wader populations and the layout of different land uses within the priority landscape. Throughout all activities, we told participants to focus on land within the priority landscape; that the conservation of Lapwing and Redshank was a priority (Lapwing and Snipe in the Somerset Levels); and to imagine what could be possible in the year 2050.
+
+After the presentation we ran three activities. We show below how each task was presented to participants during the workshops.
+
+-   Activity 1
+    -   For each wader habitat intervention card discuss the challenges and opportunities. These can be associated with certain areas, land-uses, farming practices, costs/funding or practicalities. Mediators will record your discussion on the back of each card.
+    -   After the cards provided record any other interventions on the blank cards provided and discuss their challenges/opportunities.
+    -   The cards depicted the following interventions or management strategies for breeding waders: keeping standing water throughout spring; foot drain/scrape creation for wet surface features; grazing to create a varied sward; rush control; delayed cutting on hay/silage fields; predator exclusion using fences; and predator control.
+-   Activity 2
+    -   Discuss any goals for breeding waders. For example, how many waders, in the landscape and which species?
+    -   Are their existing landscape plans that could influence breeding waders?
+    -   Choose conservation strategies and rank them (better, bigger, more and arable reversion). If you can't rank strategies choose priority ones.
+-   Activity 3
+    -   Create guidelines for where each strategy can (preference) and can't (avoidance) be used.
+    -   Mention any data sources that could be used to create the guidelines. Are there specific cut-off points associated with any of the guidelines?
+
+Activity 1 was designed as a primer activity and while we recorded the main points of discussions within stakeholder groups there were no main outputs from this activity. This activity was designed to initiate conversations about wader conservation and the challenges and opportunities in its implementation. This activity helped spark ideas for further activities as it identified where management for breeding waders would be the easiest or hardest to implement (see activity 3).
+
+Activity 2 was designed as another primer activity but we planned that some of these tasks would feed into other aspects of this project (i.e. scenario modelling). Participants discussed goals for breeding waders and identified existing plans that and these discussion fed into the scenario modelling part of the project. Participants also discussed and ranked conservation strategies which was used as a primer for the final task so stakeholders could discuss where their priorities lay between the following conservation strategies: 1) improving existing breeding wader sites (better); 2) expanding existing wader sites (bigger); 3) creating new sites for breeding wader (more); and 4) converting arable land to lowland wet grassland for breeding waders. Although arable reversion is not a Lawton principle, it was defined as a separate option here because stakeholder preferences for wet grassland creation could markedly differ between existing unsuitable grassland and arable land, i.e. preferring reversion of arable land on peaty soils or specific crop types.
+
+Activity 3 generated the main outputs presented in this report and stakeholder generally spent more time on this task than on the other two activities combined. The purpose of this task was for stakeholders to create preferences or avoidance guidelines for where breeding wader conservation could or could not occur within the landscape. Preferences were guidelines that could essentially grade the land into areas of differing favorability, e.g. prefer breeding wader conservation on lower lying land. Avoidance rules mapped out where wader conservation would not be carried out, e.g. avoiding areas of priority habitat lowland fen. Preferences could also be linked to one, multiple or all the conservation strategies outlined in activity 2 (i.e. better, bigger, more, arable reversion). For example, preferring conservation efforts in the smallest existing breeding populations first was linked to the improving existing wader strategy (better), whereas preferring conservation efforts on lower lying land was often associated with all of the conservation strategies. All avoidance guidelines created applied to all the conservation strategies. During stakeholder discussions there was filtering of guidelines by the facilitator to remove any guidelines that we would not be able to map out spatially. If there was any doubt, then the guideline was recorded and if it could not be used then a full explanation is provided in the appendix.
+
+## Compiling Preferences
+
+For each landscape and stakeholder group combination we produced heat maps for the main conservation strategies, better, bigger and more. We also produced heat maps for the bigger and more strategies being realized through arable reversion which involved combing the guidelines for arable reversion and bigger or more. In total, for any stakeholder group this meant the creation of 5 different heat maps.
+
+Each guideline was mapped out onto a 25m x 25m base raster. Each preference guideline became a continuous raster with pixels given a value between 0 (least preferred) and 1 (most preferred) and avoidance rules became a binary raster of 0 (no avoidance) and 1 (avoid). Next, for each 25m x 25m cell, preference rules were subsequently aggregated (summed) to produce an overall preference score. Note, for simplicity, individual preference rules were treated as equal with no form of weighting applied. Last, any cells that was classified as 1 for any of the avoidance rules were excluded from the opportunity area, irrespective of their preference score. A 25m x 25m pixel size was chosen as this is the resolution of the UKCEH land cover maps [@marston2022] that was used to identify areas of suitable grassland and arable land for lowland we grassland creation (see following section). For the creation of each graded raster including the manipulation, processing and analysis we used the packages *sf* [@pebesma2018] and *terra* [@hijmans2024] in the programming language R [@R2023].
+
+## Defining Conservation Strategy Extent
+
+For each conservation strategy there were only certain areas within the landscapes where the strategy could be realized. For all strategies, creation of lowland wet grassland for breeding waders had to be carried out on land where this habitat could feasibly be created. Areas were often unsuitable due to topography, land use of soil type. For better, bigger and more strategies this land had to currently be some form of grassland. When any of these strategies were realized using arable reversion then the starting land use had to be arable. In addition, for the strategy to improve existing wader sites (better) we had to define where existing wader sites were within the landscape. Any areas outside of defined wader sites could be used to expand existing sites (bigger) or create more sites (more). We go into detail of how we define land that has the right characteristics to be lowland wet grassland; current arable land; and breeding wader sites below.
+
+#### Defining candidate lowland wet grassland for restoration
+
+We defined current grassland that has the right characteristics, i.e. elevation and soil type, to be areas where high quality lowland wet grassland could be created, regardless of its current condition. Therefore, this included current high-quality lowland wet grassland as well as dry grassland with drainage. This mapping exercise was done using a base raster with a resolution of 25 meters. Potential lowland wet grassland pixels included fields considered for survey from the 2021/2022 BWWM survey [@hawkes2024]. These fields were historically defined as periodically water-logged permanent grassland below 200 meters above sea level, including grazing marshes, flood meadows, man-made washlands, and water meadows. We supplemented this with areas of semi-natural grassland habitats (Coastal and floodplain grazing marsh; Good quality semi-improved grassland; Lowland meadows; and Purple moor grass and rush pastures) from the Natural England's priority habitat index [@natengland2022]. These supplementary areas also had to overlap with peaty or seasonally wet soils from the NATMAP soil vector data (see @tbl-wetsoil for a full list of acceptable soil types [@nsri2022]) and be at an elevation below the 99.5th quantile of all elevation values within field included in the 2021/2022 BWWM survey [@hawkes2024]. These criteria prevented fields at high elevations being included. Since both data sets were created more before the year of the study we masked out any pixels classified as non-grassland habitats from any of the UKCEH landcover datasets from 2021 [@marston2022], 2022 [@marston2024], or 2023 [@morton2024]. Finally, we visually checked every map to remove obvious arable land, woodland, salt marsh, and golf courses.
+
+In the Somerset Levels and Norfolk Broads in particular, small pockets of trees were not detected in the UKCEH land cover data sets. To remove all trees, we created a canopy model by subtracting the digital terrain model [@envagency2023a] from the first pass digital surface model [@envagency2023b] from the Environment Agency National Lidar Programme dataset. This canopy model had a resolution of 1 meter, which we transformed to our base resolution using nearest neighbor interpolation. We then used this layer to mask out any pixels with a canopy height greater than 2 meters.
+
+```{R, echo=F, warning = F, output = T}
+#| label: tbl-wetsoil
+#| tbl-cap: "List of soil types from the NATMAP vector of soil types that were to be seasonally wet or peaty soils"
+
+TableDat2 <- data.frame(Soiltypes = c("Fen peat soils", 
+                                      "Lime-rich loamy and clayey soils with impeded drainage",
+                                      "Loamy and clayey floodplain soils with naturally high groundwater",
+                                      "Loamy and clayey soils of coastal flats with naturally high groundwater",
+                                      "Loamy and sandy soils with naturally high groundwater and a peaty surface",
+                                      "Loamy soils with naturally high groundwater",
+                                      "Naturally wet very acid sandy and loamy soils",
+                                      "Raised bog peat soils",
+                                      "Slightly acid loamy and clayey soils with impeded drainage",
+                                      "Slowly permeable seasonally wet acid loamy and clayey soils",
+                                      "Slowly permeable seasonally wet slightly acid but base-rich loamy and clayey soils"))
+
+colnames(TableDat2) <- c("Soil types")
+
+kbl(TableDat2, longtable = F, booktabs = T, linesep = "\\addlinespace") %>% 
+  kable_styling(latex_options = c("striped"), font_size = 10, full_width = F) |> 
+  row_spec(0, font_size = 12, bold = T) 
+
+```
+
+#### Defining candidate arable land for restoration
+
+To identify arable land that could be reverted to high quality lowland wet grassland we used a similar method to above. We first identified any land that overlapped with peaty or seasonally wet soils from the NATMAP soil vector data [@nsri2022]. This land also had to be at an elevation below the 99.5th quantile of all elevation values within field included in the 2021/2022 BWWM survey [@hawkes2024]. We then identified arable pixels as any that were identified as arable in at least two of the UKCEH landcover datasets from 2021 [@marston2022], 2022 [@marston2024], or 2023 [@morton2024]. Finally, we visually checked every map to remove obvious woodland, salt marsh, and golf courses and for the Somerset Levels and Norfolk Broads we used the same tree mask as described above.
+
+#### Defining existing wader sites
+
+There is no set definition of what an existing site for nature is, and it could be quantified using habitat type, habitat quality or the current distribution of species. We took the approach that existing sites for breeding wader were the areas already occupied by breeding waders. We used field-level data from the breeding waders of wet meadows survey in 2021/22 and further gap filling surveys in 2023 to define breeding wader sites. A field was defined as occupied if the number of estimated breeding pairs of Lapwing, Redshank or Snipe in a field was greater than 1 (see [@smart2014] for pair estimation methods). We then created polygons around clusters of occupied fields and defined these as breeding wader sites. This clustering approach was used, instead of just using the occupied field centroids, as it allowed us to capture suitable fields recorded as unoccupied due to imperfect detection or factors other than habitat quality. For example, some large reserves have large areas of suitable habitat but not every single parcel is occupied by breeding waders. As we did not carry out breeding surveys over the entire landscapes, this approach could have missed some small breeding populations. However, for all four landscapes, all sites with known wader populations were surveyed unless access was denied. We consulted with regional conservationist and recording bodies to confirm that the surveys did not miss any previously known breeding populations. The full details of are clustering approach are detailed below.
+
+We used the centroids of all occupied fields to run a K-means clustering analysis to identify distinct clusters of breeding wader fields within each of the four landscapes (@fig-kmeansclust). This essentially creates k number of clusters while minimizing the within cluster sum of squares. We explored a range of different values for k between 2 and 25 and chose the one at the elbow of the relationship between within cluster sum of squares and k. For all regions we selected a value of 6 or 7 for k. This analysis was done using the *kmeans* function in the R package stats [@R2023]. For each of the identified clusters we then create a kernel density estimate using the field centroids in each cluster. We created 95% kernel density estimate boundaries using the *hr_kde* in the R package amt [@signer2019] and set the bandwidth parameter to the median field width for each landscape. The median field width ranged from 155.7m in the Somerset Levels to 233.4m in Essex. Any overlapping boundaries between clusters were combined at this stage. This step allowed smoothed polygons to be created around clusters and was preferable to using minimum convex polygons as often single occupied fields, far from cluster centers, expended cluster polygons into unsuitable habitat. With these smoothed polygons we classified individual land parcels as within 'wader sites' if they were more than 50% covered and that the habitat was been previously identified as suitable for lowland wet grassland. Finally, we removed any small sites that contained very few land parcels or had a very small population of waders that were too small to be a viable population. Therefore, we removed clusters that contained three or less land parcels or three or less pairs of breeding waders (@fig-finalclusters).
+
+![Results of k-mean clustering of field centroids for land parcels occupied by breeding wader in the Somerset Levels. A value of 7 for k was chosen based off the elbow point of the relationship between within cluster sum of squares and k](qmdimages/Som_KmeansClusts.png){#fig-kmeansclust fig.pos="h"}
+
+![Final retained 95% kernel density estimate polygons of breeding wader clusters for the Somerset Levels. Each cluster was treated as a separate site](qmdimages/Som_Final_clusters.png){#fig-finalclusters fig.pos="h"}
+
+## Linking this work to the wider project
+
+As part of the wider project we created different scenarios for wading bird conservation in each landscape. These scenarios test which set of conservation decisions lead to the most cost effective use of funding. It tests the influence of the type of habitat management (AES vs reserves), the quality of the management, whether a single large or several small habitat patches are created, and where we create habitat in relation to existing populations (i.e. the 'Lawton principles'). Using the findings from this analysis and the maps provided below we hope that it is possible to work out the best conservation strategy for each landscape and then using the heat maps identify priority areas for habitat creation or restoration under the chosen strategy. 
+
+
+# Results
+
+## Norfolk Broads Results
+
+For the Norfolk Broads we had two different stakeholder groups. Group 1 (G1) was a group of conservationists and group 2 was a group of various public body representatives tasked with wider objectives than the preservation of biodiversity (e.g. Natural England, Internal drainage board, Broads Authority and Norfolk FWAG). The stakeholder guidelines that were generated during the workshops and how these were converted into a graded map can be found in @tbl-NorG1 for group 1 and @tbl-NorG2 for group 2. The fields identified as grassland or arable land that have the right characteristics to be lowland wet grassland, regardless of their current condition, can be seen in @fig-BroadsSuitHab and existing wader sites can be seen in @fig-BroadsLawton.
+
+![Parcels in the Norfolk Broads that were identified as having the right soil types and elevation to become lowland wet grassland, regardless of current condition. An OS map is used as the background.](Plots/Broads_OpportunityHabitatMap.png){#fig-BroadsSuitHab fig.pos="h" fig-align="center" width="650"}
+
+![Parcels in the Norfolk Broads that were identified as being part of lowland breeding wader clusters. These clusters were identified using the breeding waders of wet meadows survey data from 2021-23.](Plots/Broads_LawtonPrincipleMap.png){#fig-BroadsLawton fig.pos="h" fig-align="center" width="650"}
+
+{{< pagebreak >}}
+
+### Norfolk Broads: Better
+
+The stakeholder preferences for the better principle of nature restoration for group 1 and group 2 can be visualized in (@fig-BroadsBetterG1) and (@fig-BroadsBetterG2), receptively.
+
+![Stakeholder gradings for group 1 in the Norfolk Broads for the better principle of nature restoration](Plots/Broads_G1_Better.png){#fig-BroadsBetterG1 fig.pos="h" width="650"}
+
+![Stakeholder gradings for group 2 in the Norfolk Broads for the better principle of nature restoration](Plots/Broads_G2_Better.png){#fig-BroadsBetterG2 fig.pos="h" width="650"}
+
+{{< pagebreak >}}
+
+### Norfolk Broads: Bigger
+
+The stakeholder preferences for the bigger principle of nature restoration for group 1 (@fig-BroadsBigG1) and 2 (@fig-BroadsBigG2).
+
+![Stakeholder gradings for group 1 in the Norfolk Broads for the bigger principle of nature restoration](Plots/Broads_G1_Bigger.png){#fig-BroadsBigG1 fig.pos="h" width="650"}
+
+![Stakeholder gradings for group 2 in the Norfolk Broads for the bigger principle of nature restoration](Plots/Broads_G2_Bigger.png){#fig-BroadsBigG2 fig.pos="h" width="650"}
+
+{{< pagebreak >}}
+
+### Norfolk Broads: More
+
+The stakeholder preferences for the more principle of nature restoration for group 1 (@fig-BroadsMoreG1) and 2 (@fig-BroadsMoreG2).
+
+![Stakeholder gradings for group 1 in the Norfolk Broads for the more principle of nature restoration](Plots/Broads_G1_More.png){#fig-BroadsMoreG1 fig.pos="h" width="650"}
+
+![Stakeholder gradings for group 2 in the Norfolk Broads for the more principle of nature restoration](Plots/Broads_G2_More.png){#fig-BroadsMoreG2 fig.pos="h" width="650"}
+
+{{< pagebreak >}}
+
+### Norfolk Broads: Arable Conversion for Bigger
+
+Stakeholder preferences for reversion of arable land to lowland wet grassland under the bigger principle of nature restoration for group 1 (@fig-BroadsArBigG1) and 2 (@fig-BroadsArBigG2).
+
+![Norfolk Broads stakeholder group 1 gradings for the reversion of arable land to lowland wet grassland under the bigger principle of nature restoration](Plots/Broads_G1_ArableBig.png){#fig-BroadsArBigG1 fig.pos="h" width="640"}
+
+![Norfolk Broads stakeholder group 2 gradings for the reversion of arable land to lowland wet grassland under the bigger principle of nature restoration](Plots/Broads_G2_ArableBig.png){#fig-BroadsArBigG2 fig.pos="h" width="650"}
+
+{{< pagebreak >}}
+
+### Norfolk Broads: Arable Conversion for More
+
+Stakeholder preferences for reversion of arable land to lowland wet grassland under the more principle of nature restoration for group 1 (@fig-BroadsArMoreG1) and 2 (@fig-BroadsArMoreG2).
+
+![Norfolk Broads stakeholder group 1 gradings for the reversion of arable land to lowland wet grassland under the more principle of nature restoration](Plots/Broads_G1_ArableMore.png){#fig-BroadsArMoreG1 fig.pos="h" width="640"}
+
+![Norfolk Broads stakeholder group 2 gradings for the reversion of arable land to lowland wet grassland under the more principle of nature restoration](Plots/Broads_G2_ArableMore.png){#fig-BroadsArMoreG2 fig.pos="h" width="650"}
+
+{{< pagebreak >}}
+
+
+## Acknowledgements
+
+We thank thank all the workshop attendees, and a specific thanks to Damon Bridge, Kieran Alexander, Will Tofts, Ian Robinson, Alan Johnson and Mark Smart for helping to organise these workshops. We also thank Malcolm Ausden and the wider lowland wader scenario steering group team for input into the project. We also need to thank NE for funding.
+
+{{< pagebreak >}}
+
+## Bibliography {.unnumbered}
+
+::: {#refs}
+:::
+
+{{< pagebreak >}}
+
+## Appendix
+
+```{=tex}
+\beginsupplement
+```
+```{R, echo=F, warning = F, output = F}
+
+## Read in the spreadsheets
+Rules <- readxl::read_excel("All Guidelines Sheet v2.xlsx", sheet = "Guidelines for MS")
+Citations <- readxl::read_excel("All Guidelines Sheet v2.xlsx", sheet = "Ref List")
+
+NorG1 <- dplyr::filter(Rules, Region == "Norfolk" & Group == 1) |> select("Strategies", "Guideline", "Reference", "Implementation")
+NorG2 <- dplyr::filter(Rules, Region == "Norfolk" & Group == 2) |> select("Strategies", "Guideline", "Reference", "Implementation")
+```
+
+```{R, echo=F, warning = F, output = T}
+#| label: tbl-NorG1
+#| tbl-cap: "Stakeholder rules generated during a workshop for the Broads group 1 (conservationists). See @tbl-Citations for full citation of each reference"
+
+kbl(NorG1, longtable = T) %>% 
+  kable_styling(latex_options = c("repeat_header", "striped"), font_size = 7, full_width = F) |> 
+  row_spec(0, font_size = 8, bold = T) |> 
+  column_spec(1, width = "5em") |> 
+  column_spec(2, width = "10em") |>
+  column_spec(3, width = "15em") |>
+  column_spec(4, width = "30em")
+```
+
+{{< pagebreak >}}
+
+```{R, echo=F, warning = F, output = T}
+#| label: tbl-NorG2
+#| tbl-cap: "Stakeholder rules generated during a workshop for the Broads group 2 (public bodies). See @tbl-Citations for full citation of each reference"
+
+kbl(NorG2, longtable = T) %>% 
+  kable_styling(latex_options = c("repeat_header", "striped"), font_size = 7, full_width = F) |> 
+  row_spec(0, font_size = 8, bold = T) |> 
+  column_spec(1, width = "5em") |> 
+  column_spec(2, width = "10em") |>
+  column_spec(3, width = "15em") |>
+  column_spec(4, width = "30em")
+```
+
+{{< pagebreak >}}
+
+```{R, echo=F, warning = F, output = T}
+#| label: tbl-Citations
+#| tbl-cap: "A full list of citations that were used to turn the stakeholder guildelines into realy world spatially graded layers"
+
+kbl(Citations, longtable = T) %>% 
+  kable_styling(latex_options = c("repeat_header", "striped"), font_size = 7, full_width = F) |> 
+  row_spec(0, font_size = 8, bold = T) |> 
+  column_spec(1, width = "10em") |> 
+  column_spec(2, width = "50em") 
+```
+
+{{< pagebreak >}}

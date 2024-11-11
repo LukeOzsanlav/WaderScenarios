@@ -143,7 +143,7 @@
 \usepackage{xcolor}
 \usepackage{scrlayer-scrpage}
 \rohead{\includegraphics[height=1.4cm]{qmdimages/RSPB_logo.png}}
-\lofoot{Ozsanlav-Harris et al.}
+\lofoot{Report to Natural England}
 \KOMAoption{captions}{tableheading}
 \usepackage{float} \floatplacement{figure}{H} \newcommand{\beginsupplement}{\setcounter{table}{0}  \renewcommand{\thetable}{S\arabic{table}} \setcounter{figure}{0} \renewcommand{\thefigure}{S\arabic{figure}}}
 \makeatletter
@@ -209,13 +209,13 @@
 \title{Stakeholder preferences for breeding wader conservation across
 priority landscapes}
 \author{Luke Ozsanlav-Harris \& Robert Hawkes}
-\date{2024-11-06}
+\date{2024-11-08}
 
 \begin{document}
 \maketitle
 
 
-\subsection{Summary}\label{summary}
+\section{Summary}\label{summary}
 
 This report presents the outputs from stakeholder workshops that aimed
 to explore where lowland wader conservation would preferably be carried
@@ -242,9 +242,15 @@ each of the three Lawton principles.
 
 \textbf{Correspondence:} robert.hawkes@rspb.org.uk
 
+\textbf{Data Availability:} To download any of the maps as png files or
+the spatial files used to create the maps (tif files) then please visit
+\href{https://github.com/LukeOzsanlav/WaderScenarios/tree/main/CleanData/Guideline\%20Creation}{here}.
+To access the code used to create each guideline please visit
+\href{https://github.com/LukeOzsanlav/WaderScenarios/tree/main/Code/Guideline\%20Creation}{here}.
+
 \newpage{}
 
-\subsection{Introduction}\label{introduction}
+\section{Introduction}\label{introduction}
 
 Many areas across England have been heavily modified by humans and
 contain a mixture of land uses and semi-natural habitats
@@ -316,15 +322,16 @@ sites, and (4) enhancing connectivity among sites for conservation. This
 provides a starting framework but there are important trade-offs between
 strategies imposed by limited resources, land, and surrounding context
 (e.g.~wider land-uses, levels of fragmentation and biogeographic
-context). We focused on the first three during workshops as wading birds
-can likely readily disperse between the existing habitat patches within
-our landscapes of interest (NEED REF HERE).
+context). We focused on the first three principles during workshops as
+wading birds can likely readily disperse between the existing habitat
+patches within our landscapes of interest
+(\citeproc{ref-jackson1994}{Jackson 1994}).
 
 \begin{figure}[H]
 
 \centering{
 
-\includegraphics{qmdimages/AllLandscapePlots.png}
+\includegraphics[width=4.6875in,height=\textheight]{qmdimages/AllLandscapePlots.png}
 
 }
 
@@ -398,7 +405,7 @@ Soil Type & Mixed mineral \& organic & Mainly mineral & Mainly mineral & Mainly 
 \addlinespace
 \cellcolor{gray!10}{Breeding Pairs} & \cellcolor{gray!10}{775} & \cellcolor{gray!10}{825} & \cellcolor{gray!10}{1575} & \cellcolor{gray!10}{225}\\
 \addlinespace
-Predominant Species & Lapwing/Redshank & Lapwing/Redshank & Lapwing/Redshank & Snipe\\
+Predominant Species & Lapwing/ Redshank & Lapwing/ Redshank & Lapwing/ Redshank & Snipe\\
 \bottomrule
 \end{tabular}
 \endgroup{}
@@ -407,9 +414,9 @@ Predominant Species & Lapwing/Redshank & Lapwing/Redshank & Lapwing/Redshank & S
 
 \end{table}%
 
-\subsection{Methods}\label{methods}
+\section{Methods}\label{methods}
 
-\subsubsection{Workshop Aim}\label{workshop-aim}
+\subsection{Workshop Aim}\label{workshop-aim}
 
 To create a map of future opportunity for wader conservation for each
 stakeholder group within each landscape.
@@ -421,7 +428,7 @@ strategies (better, bigger, more) and where arable land could be
 reverted back to lowland wet grassland so that the map of future
 opportunity can vary depending on the strategy.
 
-\subsubsection{Workshop Attendees}\label{workshop-attendees}
+\subsection{Workshop Attendees}\label{workshop-attendees}
 
 We ran four regional workshops and we aimed to have three different
 stakeholder groups attend each workshop. The three different groups (and
@@ -490,7 +497,7 @@ Somerset & Y (7) & Y (6) & Y (8)\\
 
 \end{table}%
 
-\subsubsection{Workshop Activities}\label{workshop-activities}
+\subsection{Workshop Activities}\label{workshop-activities}
 
 In each workshop we gave an introductory presentation followed by three
 stakeholder-led activities. The introductory presentation was in two
@@ -609,7 +616,7 @@ that we would not be able to map out spatially. If there was any doubt,
 then the guideline was recorded and if it could not be used then a full
 explanation is provided in the appendix.
 
-\subsubsection{Compiling Preferences}\label{compiling-preferences}
+\subsection{Compiling Preferences}\label{compiling-preferences}
 
 For each landscape and stakeholder group combination we produced heat
 maps for the main conservation strategies, better, bigger and more. We
@@ -637,7 +644,7 @@ used the packages \emph{sf} (\citeproc{ref-pebesma2018}{Pebesma 2018})
 and \emph{terra} (\citeproc{ref-hijmans2024}{Hijmans 2024}) in the
 programming language R (\citeproc{ref-R2023}{R Core Team 2023}).
 
-\subsubsection{Defining Conservation Strategy
+\subsection{Defining Conservation Strategy
 Extent}\label{defining-conservation-strategy-extent}
 
 For each conservation strategy there were only certain areas within the
@@ -844,16 +851,24 @@ Each cluster was treated as a separate site}
 
 \end{figure}%
 
-\subsubsection{Linking this work to the wider
+\subsection{Linking this work to the wider
 project}\label{linking-this-work-to-the-wider-project}
 
-INSERT TEXT HERE
+As part of the wider project we created different scenarios for wading
+bird conservation in each landscape. These scenarios test which set of
+conservation decisions lead to the most cost effective use of funding.
+It tests the influence of the type of habitat management (AES vs
+reserves), the quality of the management, whether a single large or
+several small habitat patches are created, and where we create habitat
+in relation to existing populations (i.e.~the `Lawton principles').
+Using the findings from this analysis and the maps provided below we
+hope that it is possible to work out the best conservation strategy for
+each landscape and then using the heat maps identify priority areas for
+habitat creation or restoration under the chosen strategy.
 
-\newpage{}
+\section{Results}\label{results}
 
-\subsection{Results \& Discussion}\label{results-discussion}
-
-\subsubsection{Norfolk Broads Results}\label{norfolk-broads-results}
+\subsection{Norfolk Broads Results}\label{norfolk-broads-results}
 
 For the Norfolk Broads we had two different stakeholder groups. Group 1
 (G1) was a group of conservationists and group 2 was a group of various
@@ -863,21 +878,21 @@ board, Broads Authority and Norfolk FWAG). The stakeholder guidelines
 that were generated during the workshops and how these were converted
 into a graded map can be found in Table~\ref{tbl-NorG1} for group 1 and
 Table~\ref{tbl-NorG2} for group 2. The fields identified as grassland or
-arable land that has the right characteristics to be lowland wet
-grassland, regardless of it's current condition can be seen in
-Figure~\ref{fig-BroadsSuitHab} and existing wader sits can be seen in
+arable land that have the right characteristics to be lowland wet
+grassland, regardless of their current condition, can be seen in
+Figure~\ref{fig-BroadsSuitHab} and existing wader sites can be seen in
 Figure~\ref{fig-BroadsLawton}.
 
 \begin{figure}[H]
 
 \centering{
 
-\includegraphics[width=6.25in,height=\textheight]{Plots/Broads_OpportunityHabitatMap.png}
+\includegraphics[width=6.77083in,height=\textheight]{Plots/Broads_OpportunityHabitatMap.png}
 
 }
 
-\caption{\label{fig-BroadsSuitHab}Parcels in the Norfolk Broads that we
-identified as having the right, soil types and elevation to become
+\caption{\label{fig-BroadsSuitHab}Parcels in the Norfolk Broads that
+were identified as having the right soil types and elevation to become
 lowland wet grassland, regardless of current condition. An OS map is
 used as the background.}
 
@@ -887,18 +902,20 @@ used as the background.}
 
 \centering{
 
-\includegraphics[width=\textwidth,height=9.375in]{Plots/Broads_LawtonPrincipleMap.png}
+\includegraphics[width=6.77083in,height=\textheight]{Plots/Broads_LawtonPrincipleMap.png}
 
 }
 
-\caption{\label{fig-BroadsLawton}Parcels in the Norfolk Broads that we
-identified as being with or outside of lowland breeding wader clusters
-in the Norfolk Broads. Tehse clusters were identified using the breeding
-waders of wet meadows survey data from 2021-23.}
+\caption{\label{fig-BroadsLawton}Parcels in the Norfolk Broads that were
+identified as being part of lowland breeding wader clusters. These
+clusters were identified using the breeding waders of wet meadows survey
+data from 2021-23.}
 
 \end{figure}%
 
-\paragraph{Norfolk Broads: Better}\label{norfolk-broads-better}
+\newpage{}
+
+\subsubsection{Norfolk Broads: Better}\label{norfolk-broads-better}
 
 The stakeholder preferences for the better principle of nature
 restoration for group 1 and group 2 can be visualized in
@@ -909,7 +926,7 @@ receptively.
 
 \centering{
 
-\includegraphics[width=\textwidth,height=10.9375in]{Plots/Broads_G1_Better.png}
+\includegraphics[width=6.77083in,height=\textheight]{Plots/Broads_G1_Better.png}
 
 }
 
@@ -922,7 +939,7 @@ the Norfolk Broads for the better principle of nature restoration}
 
 \centering{
 
-\includegraphics[width=\textwidth,height=10.41667in]{Plots/Broads_G2_Better.png}
+\includegraphics[width=6.77083in,height=\textheight]{Plots/Broads_G2_Better.png}
 
 }
 
@@ -933,7 +950,7 @@ the Norfolk Broads for the better principle of nature restoration}
 
 \newpage{}
 
-\paragraph{Norfolk Broads: Bigger}\label{norfolk-broads-bigger}
+\subsubsection{Norfolk Broads: Bigger}\label{norfolk-broads-bigger}
 
 The stakeholder preferences for the bigger principle of nature
 restoration for group 1 (Figure~\ref{fig-BroadsBigG1}) and 2
@@ -943,7 +960,7 @@ restoration for group 1 (Figure~\ref{fig-BroadsBigG1}) and 2
 
 \centering{
 
-\includegraphics[width=\textwidth,height=9.89583in]{Plots/Broads_G1_Bigger.png}
+\includegraphics[width=6.77083in,height=\textheight]{Plots/Broads_G1_Bigger.png}
 
 }
 
@@ -956,7 +973,7 @@ Norfolk Broads for the bigger principle of nature restoration}
 
 \centering{
 
-\includegraphics[width=\textwidth,height=9.375in]{Plots/Broads_G2_Bigger.png}
+\includegraphics[width=6.77083in,height=\textheight]{Plots/Broads_G2_Bigger.png}
 
 }
 
@@ -967,7 +984,7 @@ Norfolk Broads for the bigger principle of nature restoration}
 
 \newpage{}
 
-\paragraph{Norfolk Broads: More}\label{norfolk-broads-more}
+\subsubsection{Norfolk Broads: More}\label{norfolk-broads-more}
 
 The stakeholder preferences for the more principle of nature restoration
 for group 1 (Figure~\ref{fig-BroadsMoreG1}) and 2
@@ -977,7 +994,7 @@ for group 1 (Figure~\ref{fig-BroadsMoreG1}) and 2
 
 \centering{
 
-\includegraphics[width=\textwidth,height=9.375in]{Plots/Broads_G1_More.png}
+\includegraphics[width=6.77083in,height=\textheight]{Plots/Broads_G1_More.png}
 
 }
 
@@ -990,7 +1007,7 @@ Norfolk Broads for the more principle of nature restoration}
 
 \centering{
 
-\includegraphics[width=\textwidth,height=9.375in]{Plots/Broads_G2_More.png}
+\includegraphics[width=6.77083in,height=\textheight]{Plots/Broads_G2_More.png}
 
 }
 
@@ -1001,25 +1018,24 @@ Norfolk Broads for the more principle of nature restoration}
 
 \newpage{}
 
-\paragraph{Norfolk Broads: Arable Conversion for
+\subsubsection{Norfolk Broads: Arable Conversion for
 Bigger}\label{norfolk-broads-arable-conversion-for-bigger}
 
-The stakeholder preferences for the conversion of arable land to lowland
-wet grassland under the bigger principle of nature restoration for group
-1 (Figure~\ref{fig-BroadsArBigG1}) and 2
-(Figure~\ref{fig-BroadsArBigG2}).
+Stakeholder preferences for reversion of arable land to lowland wet
+grassland under the bigger principle of nature restoration for group 1
+(Figure~\ref{fig-BroadsArBigG1}) and 2 (Figure~\ref{fig-BroadsArBigG2}).
 
 \begin{figure}[H]
 
 \centering{
 
-\includegraphics[width=\textwidth,height=9.375in]{Plots/Broads_G1_ArableBig.png}
+\includegraphics[width=6.66667in,height=\textheight]{Plots/Broads_G1_ArableBig.png}
 
 }
 
-\caption{\label{fig-BroadsArBigG1}Stakeholder gradings for group 1 in
-the Norfolk Broads for the reversion of arable land to lowland wet
-grassland under the bigger principle of nature restoration}
+\caption{\label{fig-BroadsArBigG1}Norfolk Broads stakeholder group 1
+gradings for the reversion of arable land to lowland wet grassland under
+the bigger principle of nature restoration}
 
 \end{figure}%
 
@@ -1027,23 +1043,23 @@ grassland under the bigger principle of nature restoration}
 
 \centering{
 
-\includegraphics[width=\textwidth,height=9.375in]{Plots/Broads_G2_ArableBig.png}
+\includegraphics[width=6.77083in,height=\textheight]{Plots/Broads_G2_ArableBig.png}
 
 }
 
-\caption{\label{fig-BroadsArBigG2}Stakeholder gradings for group 2 in
-the Norfolk Broads for the reversion of arable land to lowland wet
-grassland under the bigger principle of nature restoration}
+\caption{\label{fig-BroadsArBigG2}Norfolk Broads stakeholder group 2
+gradings for the reversion of arable land to lowland wet grassland under
+the bigger principle of nature restoration}
 
 \end{figure}%
 
 \newpage{}
 
-\paragraph{Norfolk Broads: Arable Conversion for
+\subsubsection{Norfolk Broads: Arable Conversion for
 More}\label{norfolk-broads-arable-conversion-for-more}
 
-The stakeholder preferences for the conversion of arable land to lowland
-wet grassland under the more principle of nature restoration for group 1
+Stakeholder preferences for reversion of arable land to lowland wet
+grassland under the more principle of nature restoration for group 1
 (Figure~\ref{fig-BroadsArMoreG1}) and 2
 (Figure~\ref{fig-BroadsArMoreG2}).
 
@@ -1051,13 +1067,13 @@ wet grassland under the more principle of nature restoration for group 1
 
 \centering{
 
-\includegraphics[width=\textwidth,height=9.375in]{Plots/Broads_G1_ArableMore.png}
+\includegraphics[width=6.66667in,height=\textheight]{Plots/Broads_G1_ArableMore.png}
 
 }
 
-\caption{\label{fig-BroadsArMoreG1}Stakeholder gradings for group 1 in
-the Norfolk Broads for the reversion of arable land to lowland wet
-grassland under the more principle of nature restoration}
+\caption{\label{fig-BroadsArMoreG1}Norfolk Broads stakeholder group 1
+gradings for the reversion of arable land to lowland wet grassland under
+the more principle of nature restoration}
 
 \end{figure}%
 
@@ -1065,32 +1081,68 @@ grassland under the more principle of nature restoration}
 
 \centering{
 
-\includegraphics[width=\textwidth,height=9.375in]{Plots/Broads_G2_ArableMore.png}
+\includegraphics[width=6.77083in,height=\textheight]{Plots/Broads_G2_ArableMore.png}
 
 }
 
-\caption{\label{fig-BroadsArMoreG2}Stakeholder gradings for group 2 in
-the Norfolk Broads for the reversion of arable land to lowland wet
-grassland under the more principle of nature restoration}
+\caption{\label{fig-BroadsArMoreG2}Norfolk Broads stakeholder group 2
+gradings for the reversion of arable land to lowland wet grassland under
+the more principle of nature restoration}
 
 \end{figure}%
 
 \newpage{}
 
-\subsubsection{North Kent Results}\label{north-kent-results}
+\subsection{North Kent Results}\label{north-kent-results}
 
-For North Kent we had two different stakeholder groups. Group 1 (G1) was
-a group of conservationists and group 2 was a group of landowners and
-farmers.
+For North Kent we had two different stakeholder groups. Group 1 was a
+group of conservationists and group 2 was a group of landowners and
+farmers. The stakeholder guidelines that were generated during the
+workshops and how these were converted into a graded map can be found in
+Table~\ref{tbl-KeG1} for group 1 and Table~\ref{tbl-KeG1} for group 2.
+The fields identified as grassland or arable land that have the right
+characteristics to be lowland wet grassland, regardless of their current
+condition, can be seen in Figure~\ref{fig-KentSuitHab} and existing
+wader sites can be seen in Figure~\ref{fig-KentLawton}.
 
-\paragraph{North Kent: Better}\label{north-kent-better}
+\begin{figure}[H]
+
+\centering{
+
+\includegraphics[width=7.29167in,height=\textheight]{Plots/NorthKent_OpportunityHabitatMap.png}
+
+}
+
+\caption{\label{fig-KentSuitHab}Parcels in North Kent that were
+identified as having the right soil type and elevation to become lowland
+wet grassland, regardless of current condition. An OS map is used as the
+background.}
+
+\end{figure}%
+
+\begin{figure}[H]
+
+\centering{
+
+\includegraphics[width=7.29167in,height=\textheight]{Plots/NorthKent_LawtonPrincipleMap.png}
+
+}
+
+\caption{\label{fig-KentLawton}Parcels in North Kent that we identified
+as being part of lowland breeding wader clusters. These clusters were
+identified using the breeding waders of wet meadows survey data from
+2021-23.}
+
+\end{figure}%
+
+\newpage{}
+
+\subsubsection{North Kent: Better}\label{north-kent-better}
 
 The stakeholder preferences for the better principle of nature
 restoration for group 1 and group 2 can be visualized in
 (Figure~\ref{fig-NKBetterG1}) and (Figure~\ref{fig-NKBetterG2}),
-receptively. The stakeholder guidelines that were used to produce these
-maps can be found in Table~\ref{tbl-KeG1} for group 1 and
-Table~\ref{tbl-KeG2} for group 2.
+receptively.
 
 \begin{figure}[H]
 
@@ -1116,7 +1168,7 @@ Kent for the better principle of nature restoration}
 
 \newpage{}
 
-\paragraph{North Kent: Bigger}\label{north-kent-bigger}
+\subsubsection{North Kent: Bigger}\label{north-kent-bigger}
 
 The stakeholder preferences for the bigger principle of nature
 restoration for group 1 (Figure~\ref{fig-NKBigG1}) and 2
@@ -1150,7 +1202,7 @@ Kent for the bigger principle of nature restoration}
 
 \newpage{}
 
-\paragraph{North Kent: More}\label{north-kent-more}
+\subsubsection{North Kent: More}\label{north-kent-more}
 
 The stakeholder preferences for the more principle of nature restoration
 for group 1 (Figure~\ref{fig-NKMoreG1}) and 2
@@ -1184,7 +1236,7 @@ Kent for the more principle of nature restoration}
 
 \newpage{}
 
-\paragraph{North Kent: Arable Reversion for
+\subsubsection{North Kent: Arable Reversion for
 Bigger}\label{north-kent-arable-reversion-for-bigger}
 
 The stakeholder preferences for the reversion of arable land to lowland
@@ -1223,7 +1275,7 @@ bigger principle of nature restoration}
 
 \newpage{}
 
-\paragraph{North Kent: Arable Reversion for
+\subsubsection{North Kent: Arable Reversion for
 More}\label{north-kent-arable-reversion-for-more}
 
 The stakeholder preferences for the reversion of arable land to lowland
@@ -1262,20 +1314,56 @@ bigger principle of nature restoration}
 
 \newpage{}
 
-\subsubsection{Essex Results}\label{essex-results}
+\subsection{Essex Results}\label{essex-results}
 
-For Essex we had two different stakeholder groups. Group 1 (G1) was a
-group of conservationists and group 2 was a group of landowners and
-farmers.
+For Essex we had two different stakeholder groups. Group 1 was a group
+of conservationists and group 2 was a group of landowners and farmers.
+The stakeholder guidelines that were generated during the workshops and
+how these were converted into a graded map can be found in
+Table~\ref{tbl-EsG1} for group 1 and Table~\ref{tbl-EsG2} for group 2.
+The fields identified as grassland or arable land that have the right
+characteristics to be lowland wet grassland, regardless of their current
+condition, can be seen in Figure~\ref{fig-EssexSuitHab} and existing
+wader sites can be seen in Figure~\ref{fig-EssexLawton}.
 
-\paragraph{Essex: Better}\label{essex-better}
+\begin{figure}[H]
+
+\centering{
+
+\includegraphics[width=7.29167in,height=\textheight]{Plots/Essex_OpportunityHabitatMap.png}
+
+}
+
+\caption{\label{fig-EssexSuitHab}Parcels in Essext that were identified
+as having the right soil type and elevation to become lowland wet
+grassland, regardless of current condition. An OS map is used as the
+background.}
+
+\end{figure}%
+
+\begin{figure}[H]
+
+\centering{
+
+\includegraphics[width=7.29167in,height=\textheight]{Plots/Essex_LawtonPrincipleMap.png}
+
+}
+
+\caption{\label{fig-EssexLawton}Parcels in Essex that we identified as
+being part of lowland breeding wader clusters. These clusters were
+identified using the breeding waders of wet meadows survey data from
+2021-23.}
+
+\end{figure}%
+
+\newpage{}
+
+\subsubsection{Essex: Better}\label{essex-better}
 
 The stakeholder preferences for the better principle of nature
 restoration for group 1 and group 2 can be visualized in
 (Figure~\ref{fig-EsBetterG1}) and (Figure~\ref{fig-EsBetterG2}),
-receptively. The stakeholder guidelines that were used to produce these
-maps can be found in Table~\ref{tbl-EsG1} for group 1 and
-Table~\ref{tbl-EsG2} for group 2.
+receptively.
 
 \begin{figure}[H]
 
@@ -1305,7 +1393,7 @@ for the better principle of nature restoration}
 
 \newpage{}
 
-\paragraph{Essex: Bigger}\label{essex-bigger}
+\subsubsection{Essex: Bigger}\label{essex-bigger}
 
 The stakeholder preferences for the bigger principle of nature
 restoration for group 1 (Figure~\ref{fig-EsBigG1}) and 2
@@ -1339,7 +1427,7 @@ for the bigger principle of nature restoration}
 
 \newpage{}
 
-\paragraph{Essex: More}\label{essex-more}
+\subsubsection{Essex: More}\label{essex-more}
 
 The stakeholder preferences for the more principle of nature restoration
 for group 1 (Figure~\ref{fig-EsMoreG1}) and 2
@@ -1373,12 +1461,12 @@ for the more principle of nature restoration}
 
 \newpage{}
 
-\paragraph{Essex: Arable Conversion for
+\subsubsection{Essex: Arable Conversion for
 Bigger}\label{essex-arable-conversion-for-bigger}
 
-The stakeholder preferences for the conversion of arable land to lowland
-wet grassland under the bigger principle of nature restoration for group
-1 (Figure~\ref{fig-EsArBigG1}) and 2 (Figure~\ref{fig-EsArBigG2}).
+Stakeholder preferences for reversion of arable land to lowland wet
+grassland under the bigger principle of nature restoration for group 1
+(Figure~\ref{fig-EsArBigG1}) and 2 (Figure~\ref{fig-EsArBigG2}).
 
 \begin{figure}[H]
 
@@ -1410,11 +1498,11 @@ bigger principle of nature restoration}
 
 \newpage{}
 
-\paragraph{Essex: Arable Conversion for
+\subsubsection{Essex: Arable Conversion for
 More}\label{essex-arable-conversion-for-more}
 
-The stakeholder preferences for the conversion of arable land to lowland
-wet grassland under the more principle of nature restoration for group 1
+Stakeholder preferences for reversion of arable land to lowland wet
+grassland under the more principle of nature restoration for group 1
 (Figure~\ref{fig-EsArMoreG1}) and 2 (Figure~\ref{fig-EsArMoreG2}).
 
 \begin{figure}[H]
@@ -1447,30 +1535,66 @@ principle of nature restoration}
 
 \newpage{}
 
-\subsubsection{Somerset Levels Results}\label{somerset-levels-results}
+\subsection{Somerset Levels Results}\label{somerset-levels-results}
 
 For the Somerset Levels we had three different stakeholder groups. Group
 1 (G1) was a group of conservationists, group 2 was a group of various
 body representatives tasked with wider objectives than the preservation
 of biodiversity (e.g.~Natural England, Internal drainage board,
 Environment Agency and South West FWAG) group 3 was a group of
-landowners and farmers.
-
-\paragraph{Somerset Levels: Better}\label{somerset-levels-better}
-
-The stakeholder preferences for the better principle of nature
-restoration for group 1, group 2 and group 3 can be visualized in
-(Figure~\ref{fig-SomBetterG1}), (Figure~\ref{fig-SomBetterG2}) and
-(Figure~\ref{fig-SomBetterG3}) receptively. The stakeholder guidelines
-that were used to produce these maps can be found in
-Table~\ref{tbl-SomG1} for group 1, Table~\ref{tbl-SomG2} for group 2 and
-Table~\ref{tbl-SomG3} for group 3.
+landowners and farmers. The stakeholder guidelines that were generated
+during the workshops and how these were converted into a graded map can
+be found in Table~\ref{tbl-SomG1} for group 1, Table~\ref{tbl-SomG2} for
+group 2 and Table~\ref{tbl-SomG3} for group 3. The fields identified as
+grassland or arable land that have the right characteristics to be
+lowland wet grassland, regardless of their current condition, can be
+seen in Figure~\ref{fig-SomSuitHab} and existing wader sites can be seen
+in Figure~\ref{fig-SomLawton}.
 
 \begin{figure}[H]
 
 \centering{
 
-\includegraphics[width=\textwidth,height=9.375in]{Plots/Somerset_G1_Better.png}
+\includegraphics[width=6.77083in,height=\textheight]{Plots/Somerset_OpportunityHabitatMap.png}
+
+}
+
+\caption{\label{fig-SomSuitHab}Parcels in the Somerset Levels that were
+identified as having the right soil type and elevation to become lowland
+wet grassland, regardless of current condition. An OS map is used as the
+background.}
+
+\end{figure}%
+
+\begin{figure}[H]
+
+\centering{
+
+\includegraphics[width=6.77083in,height=\textheight]{Plots/Somerset_LawtonPrincipleMap.png}
+
+}
+
+\caption{\label{fig-SomLawton}Parcels in the Somerset Levels that were
+identified as being part of lowland breeding wader clusters. These
+clusters were identified using the breeding waders of wet meadows survey
+data from 2021-23.}
+
+\end{figure}%
+
+\newpage{}
+
+\subsubsection{Somerset Levels: Better}\label{somerset-levels-better}
+
+The stakeholder preferences for the better principle of nature
+restoration for group 1, group 2 and group 3 can be visualized in
+(Figure~\ref{fig-SomBetterG1}), (Figure~\ref{fig-SomBetterG2}) and
+(Figure~\ref{fig-SomBetterG3}) receptively.
+
+\begin{figure}[H]
+
+\centering{
+
+\includegraphics[width=6.77083in,height=\textheight]{Plots/Somerset_G1_Better.png}
 
 }
 
@@ -1483,7 +1607,7 @@ Somerset Levels for the better principle of nature restoration}
 
 \centering{
 
-\includegraphics[width=\textwidth,height=9.375in]{Plots/Somerset_G2_Better.png}
+\includegraphics[width=6.77083in,height=\textheight]{Plots/Somerset_G2_Better.png}
 
 }
 
@@ -1496,7 +1620,7 @@ Somerset Levels for the better principle of nature restoration}
 
 \centering{
 
-\includegraphics[width=\textwidth,height=9.375in]{Plots/Somerset_G3_Better.png}
+\includegraphics[width=6.77083in,height=\textheight]{Plots/Somerset_G3_Better.png}
 
 }
 
@@ -1507,7 +1631,7 @@ Somerset Levels for the better principle of nature restoration}
 
 \newpage{}
 
-\paragraph{Somerset Levels: Bigger}\label{somerset-levels-bigger}
+\subsubsection{Somerset Levels: Bigger}\label{somerset-levels-bigger}
 
 The stakeholder preferences for the bigger principle of nature
 restoration for group 1 (Figure~\ref{fig-SomBigG1}), group 2
@@ -1517,7 +1641,7 @@ restoration for group 1 (Figure~\ref{fig-SomBigG1}), group 2
 
 \centering{
 
-\includegraphics[width=\textwidth,height=9.375in]{Plots/Somerset_G1_Bigger.png}
+\includegraphics[width=6.77083in,height=\textheight]{Plots/Somerset_G1_Bigger.png}
 
 }
 
@@ -1530,7 +1654,7 @@ Somerset Levels for the bigger principle of nature restoration}
 
 \centering{
 
-\includegraphics[width=\textwidth,height=9.375in]{Plots/Somerset_G2_Bigger.png}
+\includegraphics[width=6.77083in,height=\textheight]{Plots/Somerset_G2_Bigger.png}
 
 }
 
@@ -1543,7 +1667,7 @@ Somerset Levels for the bigger principle of nature restoration}
 
 \centering{
 
-\includegraphics[width=\textwidth,height=9.375in]{Plots/Somerset_G3_Bigger.png}
+\includegraphics[width=6.77083in,height=\textheight]{Plots/Somerset_G3_Bigger.png}
 
 }
 
@@ -1554,7 +1678,7 @@ Somerset Levels for the bigger principle of nature restoration}
 
 \newpage{}
 
-\paragraph{Somerset Levels: More}\label{somerset-levels-more}
+\subsubsection{Somerset Levels: More}\label{somerset-levels-more}
 
 The stakeholder preferences for the more principle of nature restoration
 for group 1 (Figure~\ref{fig-SomMoreG1}), group 2
@@ -1564,7 +1688,7 @@ for group 1 (Figure~\ref{fig-SomMoreG1}), group 2
 
 \centering{
 
-\includegraphics[width=\textwidth,height=9.375in]{Plots/Somerset_G1_More.png}
+\includegraphics[width=6.77083in,height=\textheight]{Plots/Somerset_G1_More.png}
 
 }
 
@@ -1577,7 +1701,7 @@ Somerset Levels for the more principle of nature restoration}
 
 \centering{
 
-\includegraphics[width=\textwidth,height=9.375in]{Plots/Somerset_G2_More.png}
+\includegraphics[width=6.77083in,height=\textheight]{Plots/Somerset_G2_More.png}
 
 }
 
@@ -1590,7 +1714,7 @@ Somerset Levels for the more principle of nature restoration}
 
 \centering{
 
-\includegraphics[width=\textwidth,height=9.375in]{Plots/Somerset_G3_More.png}
+\includegraphics[width=6.77083in,height=\textheight]{Plots/Somerset_G3_More.png}
 
 }
 
@@ -1601,25 +1725,25 @@ Somerset Levels for the more principle of nature restoration}
 
 \newpage{}
 
-\paragraph{Somerset Levels: Arable Reversion for
+\subsubsection{Somerset Levels: Arable Reversion for
 Bigger}\label{somerset-levels-arable-reversion-for-bigger}
 
-The stakeholder preferences for the reversion of arable land to lowland
-wet grassland under the bigger principle of nature restoration for group
-1 (Figure~\ref{fig-SomArBigG1}), group 2 (Figure~\ref{fig-SomArBigG2})
-and group 3 (Figure~\ref{fig-SomArBigG3}).
+Stakeholder preferences for reversion of arable land to lowland wet
+grassland under the bigger principle of nature restoration for group 1
+(Figure~\ref{fig-SomArBigG1}), group 2 (Figure~\ref{fig-SomArBigG2}) and
+group 3 (Figure~\ref{fig-SomArBigG3}).
 
 \begin{figure}[H]
 
 \centering{
 
-\includegraphics[width=\textwidth,height=9.375in]{Plots/Somerset_G1_ArableBig.png}
+\includegraphics[width=6.77083in,height=\textheight]{Plots/Somerset_G1_ArableBig.png}
 
 }
 
-\caption{\label{fig-SomArBigG1}Stakeholder gradings for group 1 in the
-Somerset Levels for the reversion of arable land to lowland wet
-grassland under the bigger principle of nature restoration}
+\caption{\label{fig-SomArBigG1}Stakeholder gradings for group 1 in
+Somerset for the reversion of arable land to lowland wet grassland under
+the bigger principle of nature restoration}
 
 \end{figure}%
 
@@ -1627,13 +1751,13 @@ grassland under the bigger principle of nature restoration}
 
 \centering{
 
-\includegraphics[width=\textwidth,height=9.375in]{Plots/Somerset_G2_ArableBig.png}
+\includegraphics[width=6.77083in,height=\textheight]{Plots/Somerset_G2_ArableBig.png}
 
 }
 
-\caption{\label{fig-SomArBigG2}Stakeholder gradings for group 2 in the
-Somerset Levels for the reversion of arable land to lowland wet
-grassland under the bigger principle of nature restoration}
+\caption{\label{fig-SomArBigG2}Stakeholder gradings for group 2 in
+Somerset for the reversion of arable land to lowland wet grassland under
+the bigger principle of nature restoration}
 
 \end{figure}%
 
@@ -1641,23 +1765,23 @@ grassland under the bigger principle of nature restoration}
 
 \centering{
 
-\includegraphics[width=\textwidth,height=9.375in]{Plots/Somerset_G3_ArableBig.png}
+\includegraphics[width=6.77083in,height=\textheight]{Plots/Somerset_G3_ArableBig.png}
 
 }
 
-\caption{\label{fig-SomArBigG3}Stakeholder gradings for group 3 in the
-Somerset Levels for the the reversion of arable land to lowland wet
-grassland under bigger principle of nature restoration}
+\caption{\label{fig-SomArBigG3}Stakeholder gradings for group 3 in
+Somerset for the the reversion of arable land to lowland wet grassland
+under bigger principle of nature restoration}
 
 \end{figure}%
 
 \newpage{}
 
-\paragraph{Somerset Levels: Arable Reversion for
+\subsubsection{Somerset Levels: Arable Reversion for
 More}\label{somerset-levels-arable-reversion-for-more}
 
-The stakeholder preferences for the reversion of arable land to lowland
-wet grassland under the more principle of nature restoration for group 1
+Stakeholder preferences for reversion of arable land to lowland wet
+grassland under the more principle of nature restoration for group 1
 (Figure~\ref{fig-SomArMoreG1}), group 2 (Figure~\ref{fig-SomArMoreG2})
 and group 3 (Figure~\ref{fig-SomArMoreG3}).
 
@@ -1665,13 +1789,13 @@ and group 3 (Figure~\ref{fig-SomArMoreG3}).
 
 \centering{
 
-\includegraphics[width=\textwidth,height=9.375in]{Plots/Somerset_G1_ArableMore.png}
+\includegraphics[width=6.77083in,height=\textheight]{Plots/Somerset_G1_ArableMore.png}
 
 }
 
-\caption{\label{fig-SomArMoreG1}Stakeholder gradings for group 1 in the
-Somerset Levels for the reversion of arable land to lowland wet
-grassland under the bigger principle of nature restoration}
+\caption{\label{fig-SomArMoreG1}Stakeholder gradings for group 1 in
+Somerset for the reversion of arable land to lowland wet grassland under
+the bigger principle of nature restoration}
 
 \end{figure}%
 
@@ -1679,13 +1803,13 @@ grassland under the bigger principle of nature restoration}
 
 \centering{
 
-\includegraphics[width=\textwidth,height=9.375in]{Plots/Somerset_G2_ArableMore.png}
+\includegraphics[width=6.77083in,height=\textheight]{Plots/Somerset_G2_ArableMore.png}
 
 }
 
-\caption{\label{fig-SomArMoreG2}Stakeholder gradings for group 2 in the
-Somerset Levels for the reversion of arable land to lowland wet
-grassland under the bigger principle of nature restoration}
+\caption{\label{fig-SomArMoreG2}Stakeholder gradings for group 2 in
+Somerset for the reversion of arable land to lowland wet grassland under
+the bigger principle of nature restoration}
 
 \end{figure}%
 
@@ -1693,13 +1817,13 @@ grassland under the bigger principle of nature restoration}
 
 \centering{
 
-\includegraphics[width=\textwidth,height=9.375in]{Plots/Somerset_G3_ArableMore.png}
+\includegraphics[width=6.77083in,height=\textheight]{Plots/Somerset_G3_ArableMore.png}
 
 }
 
-\caption{\label{fig-SomArMoreG3}Stakeholder gradings for group 3 in the
-Somerset Levels for the the reversion of arable land to lowland wet
-grassland under bigger principle of nature restoration}
+\caption{\label{fig-SomArMoreG3}Stakeholder gradings for group 3 in
+Somerset for the reversion of arable land to lowland wet grassland under
+the bigger principle of nature restoration}
 
 \end{figure}%
 
@@ -1721,11 +1845,10 @@ for input into the project. We also need to thank NE for funding.
 \phantomsection\label{refs}
 \begin{CSLReferences}{1}{0}
 \bibitem[\citeproctext]{ref-chazdon2016}
-Chazdon, Robin L., Pedro H. S. Brancalion, David Lamb, Lars Laestadius,
-Miguel Calmon, and Chetan Kumar. 2016. {``A Policy{-}Driven Knowledge
-Agenda for Global Forest and Landscape Restoration.''}
-\emph{Conservation Letters} 10 (1): 125--32.
-\url{https://doi.org/10.1111/conl.12220}.
+Chazdon, R. L., P. H. S. Brancalion, D. Lamb, L. Laestadius, M. Calmon,
+and C. Kumar. 2016. {``A Policy{-}Driven Knowledge Agenda for Global
+Forest and Landscape Restoration.''} \emph{Conservation Letters} 10 (1):
+125--32. \url{https://doi.org/10.1111/conl.12220}.
 
 \bibitem[\citeproctext]{ref-donald2001}
 Donald, P. F., R. E. Green, and M. F. Heath. 2001. {``Agricultural
@@ -1735,12 +1858,11 @@ B: Biological Sciences} 268 (1462): 25--29.
 \url{https://doi.org/10.1098/rspb.2000.1325}.
 
 \bibitem[\citeproctext]{ref-eglington2010}
-Eglington, Sarah M., Mark Bolton, Mark A. Smart, William J. Sutherland,
-Andrew R. Watkinson, and Jennifer A. Gill. 2010. {``Managing Water
-Levels on Wet Grasslands to Improve Foraging Conditions for Breeding
-Northern Lapwing{\emph{Vanellus Vanellus}}.''} \emph{Journal of Applied
-Ecology} 47 (2): 451--58.
-\url{https://doi.org/10.1111/j.1365-2664.2010.01783.x}.
+Eglington, S. M., M. Bolton, M. A. Smart, W. J. Sutherland, A. R.
+Watkinson, and J. A. Gill. 2010. {``Managing Water Levels on Wet
+Grasslands to Improve Foraging Conditions for Breeding Northern
+Lapwing{\emph{Vanellus Vanellus}}.''} \emph{Journal of Applied Ecology}
+47 (2): 451--58. \url{https://doi.org/10.1111/j.1365-2664.2010.01783.x}.
 
 \bibitem[\citeproctext]{ref-envagency2023a}
 Environment Agency. 2023a. \emph{LIDAR Composite Digital Terrain Model
@@ -1753,22 +1875,26 @@ Model (FZ\_DSM) - 1m}.
 \url{https://environment.data.gov.uk/dataset/df4e3ec3-315e-48aa-aaaf-b5ae74d7b2bb}.
 
 \bibitem[\citeproctext]{ref-franks2018}
-Franks, Samantha E., Maja Roodbergen, Wolf Teunissen, Anne Carrington
-Cotton, and James W. Pearce-Higgins. 2018. {``Evaluating the
-Effectiveness of Conservation Measures for European Grassland{-}Breeding
-Waders.''} \emph{Ecology and Evolution} 8 (21): 10555--68.
-\url{https://doi.org/10.1002/ece3.4532}.
+Franks, S. E., M. Roodbergen, W. Teunissen, Carrington. C. A., and J. W.
+Pearce-Higgins. 2018. {``Evaluating the Effectiveness of Conservation
+Measures for European Grassland{-}Breeding Waders.''} \emph{Ecology and
+Evolution} 8 (21): 10555--68. \url{https://doi.org/10.1002/ece3.4532}.
 
 \bibitem[\citeproctext]{ref-gamborg2019}
-Gamborg, Christian, Jonas Morsing, and Karsten Raulund-Rasmussen. 2019.
-{``Adjustive Ecological Restoration Through Stakeholder Involvement: A
-Case of Riparian Landscape Restoration on Privately Owned Land with
-Public Access.''} \emph{Restoration Ecology} 27 (5): 1073--83.
+Gamborg, C., J. Morsing, and K. Raulund-Rasmussen. 2019. {``Adjustive
+Ecological Restoration Through Stakeholder Involvement: A Case of
+Riparian Landscape Restoration on Privately Owned Land with Public
+Access.''} \emph{Restoration Ecology} 27 (5): 1073--83.
 \url{https://doi.org/10.1111/rec.12955}.
 
 \bibitem[\citeproctext]{ref-hijmans2024}
 Hijmans, R. J. 2024. \emph{Terra: Spatial Data Analysis}.
 \url{https://CRAN.R-project.org/package=terra}.
+
+\bibitem[\citeproctext]{ref-jackson1994}
+Jackson, D. B. 1994. {``Breeding Dispersal and Site{-}Fidelity in Three
+Monogamous Wader Species in the Western Isles, U.K.''} \emph{Ibis} 136
+(4): 463--73. \url{https://doi.org/10.1111/j.1474-919x.1994.tb01123.x}.
 
 \bibitem[\citeproctext]{ref-lawton2010}
 Lawton, J. H., P. N. M. Brotherton, V. K. Brown, C. Elphick, A. H.
@@ -1777,11 +1903,11 @@ Nature: A Review of England's Wildlife Sites and Ecological Network.
 Report to Defra.''}
 
 \bibitem[\citeproctext]{ref-malpas2013}
-Malpas, Lucy R., Rosalind J. Kennerley, Graham J. M. Hirons, Rob D.
-Sheldon, Malcolm Ausden, Joanne C. Gilbert, and Jennifer Smart. 2013.
-{``The Use of Predator-Exclusion Fencing as a Management Tool Improves
-the Breeding Success of Waders on Lowland Wet Grassland.''}
-\emph{Journal for Nature Conservation} 21 (1): 37--47.
+Malpas, L. R., R. J. Kennerley, Graham J. M. Hirons, R. D. Sheldon, M.
+Ausden, J. C. Gilbert, and J. Smart. 2013. {``The Use of
+Predator-Exclusion Fencing as a Management Tool Improves the Breeding
+Success of Waders on Lowland Wet Grassland.''} \emph{Journal for Nature
+Conservation} 21 (1): 37--47.
 \url{https://doi.org/10.1016/j.jnc.2012.09.002}.
 
 \bibitem[\citeproctext]{ref-marston2024}
@@ -1808,7 +1934,8 @@ Natural England. 2022. \emph{Priority Habitats Inventory (England)}.
 
 \bibitem[\citeproctext]{ref-nateng2024}
 ---------. 2024. \emph{Environmentally Sensitive Areas (England)}.
-\href{https://www.data.gov.uk/dataset/a5b0ccc4-a144-4027-91fa-49084ff07da2/environmentally-sensitive-areas-england\%20}{https://www.data.gov.uk/dataset/a5b0ccc4-a144-4027-91fa-49084ff07da2/environmentally-sensitive-areas-england
+\href{https://www.data.gov.uk/\%20dataset/a5b0ccc4-a144-4027-91fa-49084ff07da2/environmentally-sensitive-areas-england\%20}{https://www.data.gov.uk/
+dataset/a5b0ccc4-a144-4027-91fa-49084ff07da2/environmentally-sensitive-areas-england
 }.
 
 \bibitem[\citeproctext]{ref-nsri2022}
@@ -1828,22 +1955,21 @@ Computing}. R Foundation for Statistical Computing.
 \url{https://www.R-project.org/}.
 
 \bibitem[\citeproctext]{ref-raven2021}
-Raven, Peter H., and David L. Wagner. 2021. {``Agricultural
-Intensification and Climate Change Are Rapidly Decreasing Insect
-Biodiversity.''} \emph{Proceedings of the National Academy of Sciences}
-118 (2). \url{https://doi.org/10.1073/pnas.2002548117}.
+Raven, P. H., and D. L. Wagner. 2021. {``Agricultural Intensification
+and Climate Change Are Rapidly Decreasing Insect Biodiversity.''}
+\emph{Proceedings of the National Academy of Sciences} 118 (2).
+\url{https://doi.org/10.1073/pnas.2002548117}.
 
 \bibitem[\citeproctext]{ref-roodbergen2011}
-Roodbergen, Maja, Bert van der Werf, and Hermann Hötker. 2011.
-{``Revealing the Contributions of Reproduction and Survival to the
-Europe-Wide Decline in Meadow Birds: Review and Meta-Analysis.''}
-\emph{Journal of Ornithology} 153 (1): 53--74.
-\url{https://doi.org/10.1007/s10336-011-0733-y}.
+Roodbergen, M., B. van der Werf, and H. Hötker. 2011. {``Revealing the
+Contributions of Reproduction and Survival to the Europe-Wide Decline in
+Meadow Birds: Review and Meta-Analysis.''} \emph{Journal of Ornithology}
+153 (1): 53--74. \url{https://doi.org/10.1007/s10336-011-0733-y}.
 
 \bibitem[\citeproctext]{ref-roos2018}
-Roos, Staffan, Jennifer Smart, David W. Gibbons, and Jeremy D. Wilson.
-2018. {``A Review of Predation as a Limiting Factor for Bird Populations
-in Mesopredator{-}Rich Landscapes: A Case Study of the UK.''}
+Roos, St.n, J. Smart, D. W. Gibbons, and J. D. Wilson. 2018. {``A Review
+of Predation as a Limiting Factor for Bird Populations in
+Mesopredator{-}Rich Landscapes: A Case Study of the UK.''}
 \emph{Biological Reviews} 93 (4): 1915--37.
 \url{https://doi.org/10.1111/brv.12426}.
 
@@ -1867,24 +1993,24 @@ on Lowland Wet Grasslands.''} \emph{Ibis} 156 (3): 576--90.
 \url{https://doi.org/10.1111/ibi.12153}.
 
 \bibitem[\citeproctext]{ref-song2018}
-Song, Xiao-Peng, Matthew C. Hansen, Stephen V. Stehman, Peter V.
-Potapov, Alexandra Tyukavina, Eric F. Vermote, and John R. Townshend.
-2018. {``Global Land Change from 1982 to 2016.''} \emph{Nature} 560
-(7720): 639--43. \url{https://doi.org/10.1038/s41586-018-0411-9}.
+Song, X., M. C. Hansen, S. V. Stehman, P. V. Potapov, A. Tyukavina, E.
+F. Vermote, and J. R. Townshend. 2018. {``Global Land Change from 1982
+to 2016.''} \emph{Nature} 560 (7720): 639--43.
+\url{https://doi.org/10.1038/s41586-018-0411-9}.
 
 \bibitem[\citeproctext]{ref-verhulst2011}
-Verhulst, Jort, David Kleijn, Willem Loonen, Frank Berendse, and
-Christian Smit. 2011. {``Seasonal Distribution of Meadow Birds in
-Relation to in-Field Heterogeneity and Management.''} \emph{Agriculture,
-Ecosystems \& Environment} 142 (3-4): 161--66.
+Verhulst, J., D. Kleijn, W. Loonen, F. Berendse, and C. Smit. 2011.
+{``Seasonal Distribution of Meadow Birds in Relation to in-Field
+Heterogeneity and Management.''} \emph{Agriculture, Ecosystems \&
+Environment} 142 (3-4): 161--66.
 \url{https://doi.org/10.1016/j.agee.2011.04.016}.
 
 \bibitem[\citeproctext]{ref-wilson2005}
-Wilson, Andrew M., Juliet A. Vickery, Andrew Brown, Rowena H. W.
-Langston, David Smallshire, Simon Wotton, and Des Vanhinsbergh. 2005.
-{``Changes in the Numbers of Breeding Waders on Lowland Wet Grasslands
-in England and Wales Between 1982 and 2002.''} \emph{Bird Study} 52 (1):
-55--69. \url{https://doi.org/10.1080/00063650509461374}.
+Wilson, A. M., J. A. Vickery, A. Brown, R. H. W. Langston, D.
+Smallshire, S. Wotton, and D. Vanhinsbergh. 2005. {``Changes in the
+Numbers of Breeding Waders on Lowland Wet Grasslands in England and
+Wales Between 1982 and 2002.''} \emph{Bird Study} 52 (1): 55--69.
+\url{https://doi.org/10.1080/00063650509461374}.
 
 \end{CSLReferences}
 

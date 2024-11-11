@@ -1087,7 +1087,7 @@ ggplot() +
   ## Set plot extent so all plots have the same extent
   PlotExt +
   ## set labels
-  labs(fill = "Better Grading") +
+  labs(fill = "Better\nGrading") +
   ggtitle("North Kent: Better (Conservationists)") +
   ## set them
   theme_light() + 
@@ -1120,7 +1120,7 @@ ggplot() +
   ## Set plot extent so all plots have the same extent
   PlotExt +
   ## set labels
-  labs(fill = "Bigger Grading") +
+  labs(fill = "Bigger\nGrading") +
   ggtitle("North Kent: Bigger (Conservationists)") +
   ## set them
   theme_light() + 
@@ -1153,7 +1153,7 @@ ggplot() +
   ## Set plot extent so all plots have the same extent
   PlotExt +
   ## set labels
-  labs(fill = "More Grading") +
+  labs(fill = "More\nGrading") +
   ggtitle("North Kent: More (Conservationists)") +
   ## set them
   theme_light() + 
@@ -1187,7 +1187,7 @@ ggplot() +
   ## Set plot extent so all plots have the same extent
   PlotExt +
   ## set labels
-  labs(fill = "Arable Grading") +
+  labs(fill = "Arable\nGrading") +
   ggtitle("North Kent: Arable Reversion for Bigger (Conservationists)") +
   ## set them
   theme_light() +
@@ -1221,7 +1221,7 @@ ggplot() +
   ## Set plot extent so all plots have the same extent
   PlotExt +
   ## set labels
-  labs(fill = "Arable Grading") +
+  labs(fill = "Arable\nGrading") +
   ggtitle("North Kent: Arable Reversion for More (Conservationists)") +
   ## set them
   theme_light() +
@@ -1288,7 +1288,7 @@ ggplot() +
         axis.title = element_blank()) 
 
 ## save plot as png
-ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_OpportunityHabitatMap.png", width = 20, height = 20, units = "cm")
+ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_OpportunityHabitatMap.png", width = 20, height = 12, units = "cm")
 
 
 
@@ -1330,7 +1330,7 @@ ggplot() +
         axis.title = element_blank()) 
 
 ## save plot as png
-ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_LawtonPrincipleMap.png", width = 20, height = 20, units = "cm")
+ggsave(filename = "CleanData/Guideline Creation/Plots/NorthKent_LawtonPrincipleMap.png", width = 20, height = 12, units = "cm")
 
 
 
@@ -1359,7 +1359,7 @@ ggplot() +
   ## Set plot extent so all plots have the same extent
   PlotExt +
   ## set labels
-  labs(fill = "Better Grading") +
+  labs(fill = "Better\nGrading") +
   ggtitle("North Kent: Better (Land Managers)") +
   ## set them
   theme_light() + 
@@ -1392,7 +1392,7 @@ ggplot() +
   ## Set plot extent so all plots have the same extent
   PlotExt +
   ## set labels
-  labs(fill = "Bigger Grading") +
+  labs(fill = "Bigger\nGrading") +
   ggtitle("North Kent: Bigger (Land Managers)") +
   ## set them
   theme_light() + 
@@ -1426,7 +1426,7 @@ ggplot() +
   ## Set plot extent so all plots have the same extent
   PlotExt +
   ## set labels
-  labs(fill = "More Grading") +
+  labs(fill = "More\nGrading") +
   ggtitle("North Kent: More (Land Managers)") +
   ## set them
   theme_light() + 
@@ -1461,7 +1461,7 @@ ggplot() +
   ## Set plot extent so all plots have the same extent
   PlotExt +
   ## set labels
-  labs(fill = "Arable Grading") +
+  labs(fill = "Arable\nGrading") +
   ggtitle("North Kent: Arable Reversion for Bigger (Land Managers)") +
   ## set them
   theme_light() +
@@ -1496,7 +1496,7 @@ ggplot() +
   ## Set plot extent so all plots have the same extent
   PlotExt +
   ## set labels
-  labs(fill = "Arable Grading") +
+  labs(fill = "Arable\nGrading") +
   ggtitle("North Kent: Arable Reversion for More (Land Managers)") +
   ## set them
   theme_light() +

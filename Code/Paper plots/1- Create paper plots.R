@@ -322,7 +322,7 @@ ggsave(plot = P3, filename = "CleanData/Paper Plots/ManageCosts/Costs_of_managem
 
 ## Filter out the landscapes of interest
 Scapes <- filter(MyBoxes, Att3Value %in% c("Broads", "Essex", "North Kent", "Somerset Levels and Moors"))
-Scapes$Att3Value <- ifelse(Scapes$Att3Value =="Somerset Levels and Moors", "Somerset Levels", Scapes$Att3Value)
+Scapes$Att3Value <- ifelse(Scapes$Att3Value =="Somerset Levels and Moors", "Somerset", Scapes$Att3Value)
 ScapeExt <- ext(Scapes)
 
 ## create the plot
@@ -354,6 +354,37 @@ LP1 <- ggplot() +
 
 ## Save the plot
 ggsave("CleanData/Paper Plots/AllLandscapePlots.png", 
+       plot = LP1,  width = 20, height = 20, units = "cm")
+
+
+## create the plot
+LP1 <- ggplot() + 
+  ## add coastline
+ geom_sf(data = UKCoast, aes(geometry = geometry), color = "#C3C3C3", fill = "#CBCACA") +
+ # add map of landscapes
+ geom_sf(data = Scapes, aes(geometry = geometry, fill = Att3Value), color = NA) + 
+ scale_fill_manual(name = "Landscape:",
+                   values = c("#06d6a0", "#ffd166", "#26547c", "#ef476f")) +
+guides(fill=guide_legend(nrow=2, byrow=TRUE)) +
+ # set plot limits
+ coord_sf(xlim = c(ScapeExt[1]-198000, ScapeExt[2]+10000), ylim = c(ScapeExt[3]-115000, ScapeExt[4]+110000), crs = 27700,
+          expand = FALSE) +
+ # add labels
+ labs(x = "Longitude", y = "Latitude", fill = "Landscape:") +
+ # add styling
+ theme_light() +
+ theme(legend.position = "bottom",
+       legend.title = element_text(size = 28, face="bold"),
+       legend.text = element_text(size = 24),
+       axis.title = element_blank(),
+       axis.text = element_blank(),
+       text = element_text(family = "Karla", color = "#2D2D2E"), 
+       panel.grid = element_line(color = "#ebebe5", size = 0.2),
+       panel.background = element_rect(fill = "#f5f5f2", color = NA)) 
+
+
+## Save the plot
+ggsave("CleanData/Paper Plots/AllLandscapePlotsLARGETEXT.png", 
        plot = LP1,  width = 20, height = 20, units = "cm")
 
 

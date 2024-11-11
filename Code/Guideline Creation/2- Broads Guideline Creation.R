@@ -1263,8 +1263,8 @@ ggplot() +
   geom_sf(data=Canv |> st_transform(crs=3857), mapping=aes(geometry=geometry, fill = Habb), colour = NA, alpha =0.8) +
   coord_sf(expand = FALSE) + 
   scale_fill_manual(name = "Opportunity\nHabitat",   # Change legend title
-                    values = c("#ffd166", "#06d6a0"),
-                    labels = c("Arable", "Grassland")) +
+                    values = c( "#06d6a0", "#ffd166"),
+                    labels = c("Grassland","Arable")) +
 
   ## Add North arrow and scale bar
   annotation_scale(location = "br", line_width = unit(0.25, "cm"), height = unit(0.1, "cm"), pad_y = unit(0.1, "in")) +
