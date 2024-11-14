@@ -1791,7 +1791,7 @@ PlotScenario <- function(inpath,
         axis.title = element_text(size = 14),
         legend.title = element_text(size = 14, face = "bold"),
         legend.text = element_text(size = 12),
-        legend.position = "top")
+        legend.position = "bottom")
   
   ## save the plot
   ggsave(plot=Mult2, filename= paste0(outpath, "Mult_PairCost_vs_CumArea.png"), units = "in", height = 10, width = 13)
@@ -1854,7 +1854,8 @@ PlotScenario <- function(inpath,
                         axis.text.x = element_text(size = 16, angle = 45, vjust = 0.5),
                         legend.title = element_text(size = 17, face = "bold"),
                         legend.text = element_text(size = 16),
-                        legend.position = "top")
+                        legend.position = "bottom", 
+                        title = element_text(size = 17, face = "bold"))
   
   
   
@@ -1867,7 +1868,7 @@ PlotScenario <- function(inpath,
   ScenSum <- AllScn2 |>
     mutate(PlotCatFull = paste0(Strategy, " for ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
            PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
-    group_by(PlotCatFull, ScenType, PlusFull, Plus, NewCat, Strategy) |>
+    group_by(PlotCatFull, ScenType, PlusFull, Plus, NewCat, Strategy, Landscape) |>
     summarise(StEr = sd(Waders_100Ha)/sqrt(n()),
               t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
               MeanWaders_100Ha = mean(Waders_100Ha)) |>  
@@ -1884,9 +1885,10 @@ PlotScenario <- function(inpath,
     scale_fill_manual(name = "Scenario Type",   # Change legend title
                         labels = c("clusterlarge"= "Cluster-large", "clustersmall"= "Cluster-small", "random" ="Random"),  # Change legend labels
                         values = c("clusterlarge"="#A5F076", "clustersmall"="#76A5F0", "random"="#F076A5")) +
-    ylab("Change in Breeding Wader Pairs/ 100 ha") +
+    ylab("Change in Breeding Pairs per 100 ha") +
     xlab("Scenario Category") +
     labs(fill = "Targeting Strategy") +
+    ggtitle(paste0(ScenSum$Landscape[1])) +
     BarPlotTheme + 
     theme(axis.text.x = element_text(size = 11, angle = 45, vjust = 1, hjust = 1))
   
@@ -1904,7 +1906,7 @@ PlotScenario <- function(inpath,
   ScenSumCost <- AllScn2 |>
     mutate(PlotCatFull = paste0(Strategy, " for ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
            PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
-    group_by(PlotCatFull, ScenType, PlusFull, Plus, NewCat, Strategy) |>
+    group_by(PlotCatFull, ScenType, PlusFull, Plus, NewCat, Strategy, Landscape) |>
     summarise(StEr = sd(PairCost)/sqrt(n()),
               t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
               Ave_PairCost = mean(PairCost)) |>     
@@ -1921,9 +1923,10 @@ PlotScenario <- function(inpath,
     scale_fill_manual(name = "Scenario Type",   # Change legend title
                         labels = c("clusterlarge"= "Cluster-large", "clustersmall"= "Cluster-small", "random" ="Random"),  # Change legend labels
                         values = c("clusterlarge"="#A5F076", "clustersmall"="#76A5F0", "random"="#F076A5")) +
-    ylab("Breeding Wader Pairs/ £100,000") +
+    ylab("Change in Breeding Pairs per £100,000") +
     xlab("Scenario Category") +
     labs(fill = "Targeting Strategy") +
+    ggtitle(paste0(ScenSumCost$Landscape[1])) +
     BarPlotTheme + 
     theme(axis.text.x = element_text(size = 11, angle = 45, vjust = 1, hjust = 1))
   
@@ -1941,8 +1944,7 @@ PlotScenario <- function(inpath,
   ## Summarise the data so there are less rows
   ## Essentially the data is summarized to by taking the average across the different targeting strategies
   ScenSum2 <- AllScn2 |>
-            filter(!OppCat %in% c("Arable Opp")) |> 
-            group_by(Strategy, Plus, NewCat) |>
+            group_by(Strategy, Plus, NewCat, Landscape, OppCat) |>
             summarise(StEr = sd(Waders_100Ha)/sqrt(n()),
                       t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
                       MeanWaders_100Ha = mean(Waders_100Ha)) |>
@@ -1950,20 +1952,22 @@ PlotScenario <- function(inpath,
             mutate(PlotCatOther = paste0(NewCat, " ", ifelse(Plus==T, "+", "-")),
                    PlotCatFull= paste0(Strategy, " for ", PlotCatOther),
                    PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality"),
+                   NewCatFull = ifelse(OppCat== "Arable Opp", paste0(NewCat, " from Arable"), NewCat),
                    LowerCI = MeanWaders_100Ha - (t_score * StEr),
                    UpperCI = MeanWaders_100Ha + (t_score * StEr)) 
   
   ## Create bar plot
   ## Much simpler than above and mainly focusses on showing the differences between AES and reserve for the different Lawton Principles
-  ggplot(ScenSum2, aes(x= Strategy, y= MeanWaders_100Ha, fill = NewCat)) +
-    geom_col(width=0.55, position=position_dodge(0.55)) +
-    geom_errorbar(aes(ymin= LowerCI, ymax= UpperCI), width=0.2, position=position_dodge(width=0.55), colour = "#6a6b6b") +
+  ggplot(ScenSum2, aes(x= Strategy, y= MeanWaders_100Ha, fill = NewCatFull)) +
+    geom_col(width=0.75, position=position_dodge(0.75, preserve = "single")) +
+    geom_errorbar(aes(ymin= LowerCI, ymax= UpperCI), width=0.2, position=position_dodge(width=0.75, preserve = "single"), colour = "#6a6b6b") +
     facet_wrap(~PlusFull) +
     scale_fill_manual(name = "Scenario Type",   # Change legend title
-                      labels = c("AES Only"= "AES Only", "Reserve"= "Nature Reserve"),  # Change legend labels
-                      values = c("AES Only"="#F076A5", "Reserve"= "#76A5F0")) +
-    ylab("Change in Breeding Wader Pairs/ 100 ha") +
+                      labels = c("AES Only"= "AES Only", "Reserve"= "Reserve from grassland", "Reserve from Arable" = "Reserve from Arable"),  # Change legend labels
+                      values = c("AES Only"="#F076A5", "Reserve"= "#76A5F0", "Reserve from Arable"= "#DDB24C")) +
+    ylab("Change in Breeding Pairs per 100 ha") +
     xlab("Lawton Principle") +
+    ggtitle(paste0(ScenSum2$Landscape[1])) +
     labs(fill = "Management Used") +
     BarPlotTheme
   
@@ -1980,28 +1984,29 @@ PlotScenario <- function(inpath,
   ## Summarise the data so there are less rows
   ## Essentially the data is summarized to by taking the average across the different targeting strategies
   ScenSumCost2 <- AllScn2 |>
-            filter(!OppCat %in% c("Arable Opp")) |> 
-            group_by(Strategy, Plus, NewCat) |>
+            group_by(Strategy, Plus, NewCat, Landscape, OppCat) |>
             summarise(StEr = sd(PairCost)/sqrt(n()),
                       t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
                       Ave_PairCost = mean(PairCost)) |>
             mutate(PlotCatOther = paste0(NewCat, " ", ifelse(Plus==T, "+", "-")),
                    PlotCatFull= paste0(Strategy, " for ", PlotCatOther),
                    PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality"),
+                   NewCatFull = ifelse(OppCat== "Arable Opp", paste0(NewCat, " from Arable"), NewCat),
                    LowerCI = Ave_PairCost - (t_score * StEr),
                    UpperCI = Ave_PairCost + (t_score * StEr))
   
   ## Create bar plot
   ## Much simpler than above and mainly focuses on showing the differences between AES and reserve for the different Lawton Principles
-  ggplot(ScenSumCost2, aes(x= Strategy, y= Ave_PairCost*100000, fill = NewCat)) +
-    geom_col(width=0.55, position=position_dodge(0.55)) +
-    geom_errorbar(aes(ymin= LowerCI*100000, ymax= UpperCI*100000), width=0.2, position=position_dodge(width=0.55), colour = "#6a6b6b") +
+  ggplot(ScenSumCost2, aes(x= Strategy, y= Ave_PairCost*100000, fill = NewCatFull)) +
+    geom_col(width=0.75, position=position_dodge(0.75, preserve = "single")) +
+    geom_errorbar(aes(ymin= LowerCI*100000, ymax= UpperCI*100000), width=0.2, position=position_dodge(width=0.75, preserve = "single"), colour = "#6a6b6b") +
     facet_wrap(~PlusFull) +
     scale_fill_manual(name = "Scenario Type",   # Change legend title
-                      labels = c("AES Only"= "AES Only", "Reserve"= "Nature Reserve"),  # Change legend labels
-                      values = c("AES Only"="#F076A5", "Reserve"= "#76A5F0")) +
-    ylab("Breeding Wader Pairs/ £100,000") +
+                      labels = c("AES Only"= "AES Only", "Reserve"= "Reserve from grassland", "Reserve from Arable" = "Reserve from Arable"),  # Change legend labels
+                      values = c("AES Only"="#F076A5", "Reserve"= "#76A5F0", "Reserve from Arable"= "#DDB24C")) +
+    ylab("Change in Breeding Pairs per £100,000") +
     xlab("Lawton Principle") +
+    ggtitle(paste0(ScenSumCost2$Landscape[1])) +
     labs(fill = "Management Used") +
     BarPlotTheme
   
@@ -2024,7 +2029,7 @@ PlotScenario <- function(inpath,
     mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
            PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
            PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
-    group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
+    group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy, Landscape) |>
     summarise(StEr = sd(PairCostNoF)/sqrt(n()),
               t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
               Ave_PairCost = mean(PairCostNoF)) |> 
@@ -2040,7 +2045,7 @@ PlotScenario <- function(inpath,
     mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
            PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
            PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
-    group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
+    group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy, Landscape) |>
     summarise(StEr = sd(PairCost)/sqrt(n()),
               t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
               Ave_PairCost = mean(PairCost)) |> 
@@ -2055,7 +2060,7 @@ PlotScenario <- function(inpath,
     mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
            PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
            PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
-    group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
+    group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy, Landscape) |>
     summarise(StEr = sd(PairCost)/sqrt(n()),
               t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
               Ave_PairCost = mean(PairCost)) |> 
@@ -2073,7 +2078,7 @@ PlotScenario <- function(inpath,
     mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
            PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
            PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
-    group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
+    group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy, Landscape) |>
     summarise(StEr = sd(PairCostNoF)/sqrt(n()),
               t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
               Ave_PairCost = mean(PairCostNoF)) |> 
@@ -2089,7 +2094,7 @@ PlotScenario <- function(inpath,
     mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
            PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
            PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
-    group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
+    group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy, Landscape) |>
     summarise(StEr = sd(PairCost)/sqrt(n()),
               t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
               Ave_PairCost = mean(PairCost)) |> 
@@ -2111,9 +2116,10 @@ PlotScenario <- function(inpath,
     facet_wrap(~PlusFull) +
     scale_fill_manual(name = "Created Habitat\n(orginal habitat)",   # Change legend title
                       values = c("#073b4c", "#ffd166", "#06d6a0",  "#ef476f", "#118ab2")) +
-    ylab("Breeding Wader Pairs/ £100,000") +
+    ylab("Change in Breeding Pairs per £100,000") +
     xlab("Lawton Principle") +
     labs(fill = "Targeting Strategy") +
+    ggtitle(paste0(FenceComp$Landscape[1])) +
     guides(fill=guide_legend(nrow=2, byrow=F)) +
     BarPlotTheme
   
@@ -2137,7 +2143,7 @@ PlotScenario <- function(inpath,
     mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
            PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
            PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
-    group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
+    group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy, Landscape) |>
     summarise(StEr = sd(PairCost)/sqrt(n()),
               t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
               Ave_PairCost = mean(PairCost)) |> 
@@ -2153,7 +2159,7 @@ PlotScenario <- function(inpath,
     mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
            PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
            PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
-    group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
+    group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy, Landscape) |>
     summarise(StEr = sd(PairCostPU)/sqrt(n()),
               t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
               Ave_PairCost = mean(PairCostPU)) |> 
@@ -2172,7 +2178,7 @@ PlotScenario <- function(inpath,
     mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
            PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
            PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
-    group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
+    group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy, Landscape) |>
     summarise(StEr = sd(PairCost)/sqrt(n()),
               t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
               Ave_PairCost = mean(PairCost)) |> 
@@ -2188,7 +2194,7 @@ PlotScenario <- function(inpath,
     mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
            PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
            PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
-    group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
+    group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy, Landscape) |>
     summarise(StEr = sd(PairCostPU)/sqrt(n()),
               t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
               Ave_PairCost = mean(PairCostPU)) |> 
@@ -2204,7 +2210,7 @@ PlotScenario <- function(inpath,
     mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
            PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
            PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
-    group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
+    group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy, Landscape) |>
     summarise(StEr = sd(PairCost)/sqrt(n()),
               t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
               Ave_PairCost = mean(PairCost)) |> 
@@ -2227,8 +2233,9 @@ PlotScenario <- function(inpath,
     facet_wrap(~PlusFull) +
     scale_fill_manual(name = "Created Habitat-\n(land costs)",   # Change legend title
                       values = c("#073b4c", "#ffd166", "#06d6a0",  "#ef476f", "#118ab2")) +
-    ylab("Breeding Wader Pairs/ £100,000") +
+    ylab("Change in Breeding Pairs per £100,000") +
     xlab("Lawton Principle") +
+    ggtitle(paste0(CostComp$Landscape[1])) +
     labs(fill = "Targeting Strategy") +
     guides(fill=guide_legend(nrow=2, byrow=F)) +
     BarPlotTheme
@@ -2251,7 +2258,7 @@ PlotScenario <- function(inpath,
   ScenSum <- AllScn2 |>
     mutate(PlotCatFull = paste0(Strategy, " for ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
            PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
-    group_by(PlotCatFull, ScenType, PlusFull, Plus, NewCat, Strategy) |>
+    group_by(PlotCatFull, ScenType, PlusFull, Plus, NewCat, Strategy, Landscape) |>
     summarise(StEr = sd(ClustActual)/sqrt(n()),
               t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
               ClustActual= mean(ClustActual)) |>
@@ -2272,8 +2279,9 @@ PlotScenario <- function(inpath,
                         values = c("clusterlarge"="#A5F076", "clustersmall"="#76A5F0", "random"="#F076A5")) +
     geom_hline(yintercept=Sizes$ReserveAve, linetype="dashed", color = "grey", linewidth = 1.2) +
     geom_hline(yintercept=Sizes$AESAve, linetype="dashed", color = "grey", linewidth = 1.2) +
-    ylab("Average cluster size/ ha") +
+    ylab("Average cluster size/ha") +
     xlab("Scenario Category") +
+    ggtitle(paste0(ScenSum$Landscape[1])) +
     labs(fill = "Targeting Strategy") +
     BarPlotTheme +
     theme(axis.text.x = element_text(size = 11, angle = 45, vjust = 1, hjust = 1))
@@ -2323,7 +2331,7 @@ PlotScenario <- function(inpath,
       mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
              PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
              PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
-      group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
+      group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy, Landscape) |>
       summarise(StEr = sd(PairCostLap)/sqrt(n()),
                 t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
                 Ave_PairCost = mean(PairCostLap)) |> 
@@ -2337,7 +2345,7 @@ PlotScenario <- function(inpath,
       mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
              PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
              PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
-      group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
+      group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy, Landscape) |>
       summarise(StEr = sd(PairCostRed)/sqrt(n()),
                 t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
                 Ave_PairCost = mean(PairCostRed)) |> 
@@ -2358,8 +2366,9 @@ PlotScenario <- function(inpath,
       facet_wrap(~PlusFull) +
       scale_fill_manual(name = "Species",   # Change legend title
                         values = c("#6464f4", "#f46464")) +
-      ylab("Breeding Wader Pairs/ £100,000") +
+      ylab("Change in Breeding Pairs per £100,000") +
       xlab("Scenario Category") +
+      ggtitle(paste0(SpeciesComb$Landscape[1])) +
       BarPlotTheme + 
       theme(axis.text.x = element_text(size = 11, angle = 45, vjust = 1, hjust = 1))
     

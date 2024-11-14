@@ -1283,7 +1283,7 @@ Set <- do.call("rbind", ListSet)
 BarPlotTheme <- theme_light() +
                 theme(panel.grid.minor = element_blank(),
                       strip.text = element_text(size = 17, face = "bold"),
-                      axis.title = element_text(size = 18),
+                      axis.title = element_text(size = 18, face = "bold"),
                       axis.text.y = element_text(size = 16),
                       axis.text.x = element_text(size = 16, angle = 45, vjust = 0.5),
                       legend.title = element_text(size = 17, face = "bold"),
@@ -1317,7 +1317,7 @@ facet_wrap(~PlusFull) +
 scale_fill_manual(name = "Scenario Type",   # Change legend title
                     labels = c("clusterlarge"= "Cluster-large", "clustersmall"= "Cluster-small", "random" ="Random"),  # Change legend labels
                     values = c("clusterlarge"="#A5F076", "clustersmall"="#76A5F0", "random"="#F076A5")) +
-ylab("Change in Breeding Wader Pairs/ 100 ha") +
+ylab("% Change in Breeding Pairs per 100 ha") +
 xlab("Scenario Category") +
 labs(fill = "Targeting Strategy") +
 BarPlotTheme + 
@@ -1354,7 +1354,7 @@ facet_wrap(~PlusFull) +
 scale_fill_manual(name = "Scenario Type",   # Change legend title
                     labels = c("clusterlarge"= "Cluster-large", "clustersmall"= "Cluster-small", "random" ="Random"),  # Change legend labels
                     values = c("clusterlarge"="#A5F076", "clustersmall"="#76A5F0", "random"="#F076A5")) +
-ylab("Breeding Wader Pairs/ £100,000") +
+ylab("% Change in Breeding Pairs per £100,000") +
 xlab("Scenario Category") +
 labs(fill = "Targeting Strategy") +
 BarPlotTheme + 
@@ -1374,8 +1374,8 @@ ggsave(plot=last_plot(), filename= paste0(outpath, "Additive_Pair£_vs_Category.
 ## Summarise the data so there are less rows
 ## Essentially the data is summarized to by taking the average across the different targeting strategies
 ScenSum2 <- Set |>
-        filter(!OppCat %in% c("Arable Opp")) |> 
-        group_by(Strategy, Plus, NewCat) |>
+        #filter(!OppCat %in% c("Arable Opp")) |> 
+        group_by(Strategy, Plus, NewCat, OppCat) |>
         summarise(StEr = sd(Perc_Waders_100Ha)/sqrt(n()),
                   t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
                   Perc_Waders_100Ha = mean(Perc_Waders_100Ha)) |>
@@ -1383,25 +1383,26 @@ ScenSum2 <- Set |>
         mutate(PlotCatOther = paste0(NewCat, " ", ifelse(Plus==T, "+", "-")),
                PlotCatFull= paste0(Strategy, " for ", PlotCatOther),
                PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality"),
+               NewCatFull = ifelse(OppCat== "Arable Opp", paste0(NewCat, " from Arable"), NewCat),
                LowerCI = Perc_Waders_100Ha - (t_score * StEr),
                UpperCI = Perc_Waders_100Ha + (t_score * StEr)) 
 
 ## Create bar plot
 ## Much simpler than above and mainly focusses on showing the differences between AES and reserve for the different Lawton Principles
-ggplot(ScenSum2, aes(x= Strategy, y= Perc_Waders_100Ha, fill = NewCat)) +
-geom_col(width=0.55, position=position_dodge(0.55)) +
-geom_errorbar(aes(ymin= LowerCI, ymax= UpperCI), width=0.2, position=position_dodge(width=0.55), colour = "#6a6b6b") +
+ggplot(ScenSum2, aes(x= Strategy, y= Perc_Waders_100Ha, fill = NewCatFull)) +
+geom_col(width=0.75, position=position_dodge(0.75, preserve = "single")) +
+geom_errorbar(aes(ymin= LowerCI, ymax= UpperCI), width=0.2, position=position_dodge(width=0.75, preserve = "single"), colour = "#6a6b6b") +
 facet_wrap(~PlusFull) +
 scale_fill_manual(name = "Scenario Type",   # Change legend title
-                  labels = c("AES Only"= "AES Only", "Reserve"= "Nature Reserve"),  # Change legend labels
-                  values = c("AES Only"="#F076A5", "Reserve"= "#76A5F0")) +
-ylab("Change in Breeding Wader Pairs/ 100 ha") +
+                  labels = c("AES Only"= "AES Only", "Reserve"= "Reserve from grassland", "Reserve from Arable" = "Reserve from Arable"),  # Change legend labels
+                  values = c("AES Only"="#F076A5", "Reserve"= "#76A5F0", "Reserve from Arable"= "#DDB24C")) +
+ylab("% Change in Breeding Pairs per 100ha") +
 xlab("Lawton Principle") +
 labs(fill = "Management Used") +
 BarPlotTheme
 
 ## save the plot
-ggsave(plot=last_plot(), filename= paste0(outpath, "Additive_Pairha_vs_SumCategory.png"), units = "in", height = 9, width = 11)
+ggsave(plot=last_plot(), filename= paste0(outpath, "Additive_Pairha_vs_SumCategory.png"), units = "in", height = 9, width = 10)
 
 
 
@@ -1413,33 +1414,33 @@ ggsave(plot=last_plot(), filename= paste0(outpath, "Additive_Pairha_vs_SumCatego
 ## Summarise the data so there are less rows
 ## Essentially the data is summarized to by taking the average across the different targeting strategies
 ScenSumCost2 <- Set |>
-          filter(!OppCat %in% c("Arable Opp")) |> 
-        group_by(Strategy, Plus, NewCat) |>
+        group_by(Strategy, Plus, NewCat, OppCat) |>
         summarise(StEr = sd(Perc_PairCost)/sqrt(n()),
                   t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
                   Perc_PairCost = mean(Perc_PairCost)) |>
         mutate(PlotCatOther = paste0(NewCat, " ", ifelse(Plus==T, "+", "-")),
                PlotCatFull= paste0(Strategy, " for ", PlotCatOther),
                PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality"),
+               NewCatFull = ifelse(OppCat== "Arable Opp", paste0(NewCat, " from Arable"), NewCat),
                LowerCI = Perc_PairCost - (t_score * StEr),
                UpperCI = Perc_PairCost + (t_score * StEr))
 
 ## Create bar plot
 ## Much simpler than above and mainly focuses on showing the differences between AES and reserve for the different Lawton Principles
-ggplot(ScenSumCost2, aes(x= Strategy, y= Perc_PairCost*100000, fill = NewCat)) +
-geom_col(width=0.55, position=position_dodge(0.55)) +
-geom_errorbar(aes(ymin= LowerCI*100000, ymax= UpperCI*100000), width=0.2, position=position_dodge(width=0.55), colour = "#6a6b6b") +
+ggplot(ScenSumCost2, aes(x= Strategy, y= Perc_PairCost*100000, fill = NewCatFull)) +
+geom_col(width=0.75, position=position_dodge(0.75, preserve = "single")) +
+geom_errorbar(aes(ymin= LowerCI*100000, ymax= UpperCI*100000), width=0.2, position=position_dodge(width=0.75, preserve = "single"), colour = "#6a6b6b") +
 facet_wrap(~PlusFull) +
 scale_fill_manual(name = "Scenario Type",   # Change legend title
-                  labels = c("AES Only"= "AES Only", "Reserve"= "Nature Reserve"),  # Change legend labels
-                  values = c("AES Only"="#F076A5", "Reserve"= "#76A5F0")) +
-ylab("Breeding Wader Pairs/ £100,000") +
+                  labels = c("AES Only"= "AES Only", "Reserve"= "Reserve from grassland", "Reserve from Arable" = "Reserve from Arable"),  # Change legend labels
+                  values = c("AES Only"="#F076A5", "Reserve"= "#76A5F0", "Reserve from Arable"= "#DDB24C")) +
+ylab("% Change in Breeding Pairs per £100,000") +
 xlab("Lawton Principle") +
 labs(fill = "Management Used") +
 BarPlotTheme
 
 ## save the plot
-ggsave(plot=last_plot(), filename= paste0(outpath, "Additive_Pair£_vs_SumCategory.png"), units = "in", height = 9, width = 11)
+ggsave(plot=last_plot(), filename= paste0(outpath, "Additive_Pair£_vs_SumCategory.png"), units = "in", height = 9, width = 10)
 
 
 
@@ -1544,7 +1545,7 @@ geom_errorbar(aes(ymin= LowerCI*100000, ymax= UpperCI*100000), width=0.2, positi
 facet_wrap(~PlusFull) +
 scale_fill_manual(name = "Created Habitat\n(orginal habitat)",   # Change legend title
                   values = c("#073b4c", "#ffd166", "#06d6a0",  "#ef476f", "#118ab2")) +
-ylab("Breeding Wader Pairs/ £100,000") +
+ylab("% Change in Breeding Pairs per £100,000") +
 xlab("Lawton Principle") +
 labs(fill = "Targeting Strategy") +
 guides(fill=guide_legend(nrow=2, byrow=F)) +
@@ -1657,7 +1658,7 @@ geom_errorbar(aes(ymin= LowerCI*100000, ymax= UpperCI*100000), width=0.2, positi
 facet_wrap(~PlusFull) +
 scale_fill_manual(name = "Created Habitat-\n(land costs)",   # Change legend title
                   values = c("#073b4c", "#ffd166", "#06d6a0",  "#ef476f", "#118ab2")) +
-ylab("Breeding Wader Pairs/ £100,000") +
+ylab("% Change in Breeding Pairs per £100,000") +
 xlab("Lawton Principle") +
 labs(fill = "Targeting Strategy") +
 guides(fill=guide_legend(nrow=2, byrow=F)) +
@@ -1761,7 +1762,7 @@ ggplot(SpeciesComb, aes(x= PlotCatFull, y= Ave_PairCost*100000, fill = Species))
   facet_wrap(~PlusFull) +
   scale_fill_manual(name = "Species",   # Change legend title
                     values = c("#6464f4", "#f46464")) +
-  ylab("Breeding Wader Pairs/ £100,000") +
+  ylab("% Change in Breeding Pairs per £100,000") +
   xlab("Scenario Category") +
   BarPlotTheme + 
   theme(axis.text.x = element_text(size = 11, angle = 45, vjust = 1, hjust = 1))
@@ -1772,3 +1773,132 @@ ggsave(plot=last_plot(), filename= paste0(outpath, "Additive_Pair£_vs_LapwingRe
   
 
 
+
+
+
+
+##--------------------------##
+##--------------------------##
+##  Plot Regional Breakdown ##
+##--------------------------##
+##--------------------------##
+
+## Create a function that can plot the increase in breeding waders per £100,000 for one landscape
+RegionPlot <- function(inpath,
+                         outpath,
+                         species){
+  
+  ## First create a data set that can be used to create a bar plot that covers all scenarios
+  files <- c(dir(paste0(inpath, "rand/"), pattern  = "Track_Add", full.names  = T),
+               dir(paste0(inpath, "clustlarge/"), pattern  = "Track_Add", full.names  = T),
+               dir(paste0(inpath, "clustsmall/"), pattern  = "Track_Add", full.names  = T))
+    
+    
+  ## Read in all these files and bind them together
+  AllScn2 <- files %>%
+              map(fread) %>% # read in all files into a list
+              bind_rows() %>% # bind all the rows
+              mutate(ScenType = ifelse(ScenType == "cluster" & ClustMean == max(ClustMean, na.rm = T), "clusterlarge", ScenType),
+                     ScenType = ifelse(ScenType == "cluster" & ClustMean == min(ClustMean, na.rm = T), "clustersmall", ScenType),
+                     ChangeSnipe = Snipe-BaseSnipe,
+                     ChangeSnipenoF = Snipe_unfenced-BaseSnipe,
+                     ChangeLapwing = Lapwing-BaseLapwing,
+                     ChangeRedshank = Redshank-BaseRedshank,
+                     ChangeWaders = (Lapwing+Redshank) - (BaseLapwing+BaseRedshank),
+                     ChangeWadersnoF = (Lapwing_unfenced+Redshank_unfenced) - (BaseLapwing+BaseRedshank),
+                     ChangeCostsFG = ifelse(NewCat=="AES Only", NewAESCost - BaseAESCost,
+                                          ifelse(NewCat=="Reserve", (NewResMaintCost+(NewResCreatCost/Yrs)+(FencingCost/Yrs)+ForegoneCost)-BaseResMaintCost, 0)),
+                     ChangeCostsPU = ifelse(NewCat=="AES Only", NewAESCost - BaseAESCost,
+                                          ifelse(NewCat=="Reserve", (NewResMaintCost+(NewResCreatCost/Yrs)+(FencingCost/Yrs)+(PurchaseCost/Yrs))-BaseResMaintCost, 0)),
+                     ChangeCostsNoF = ifelse(NewCat=="AES Only", NewAESCost - BaseAESCost,
+                                          ifelse(NewCat=="Reserve", (NewResMaintCost+(NewResCreatCost/Yrs)+ForegoneCost)-BaseResMaintCost, 0)),
+                     PlotCat = paste0(NewCat, ifelse(Plus==T, "+", "-"), " ", ifelse(OppCat== "Arable Opp", "Arable", ""))) |>
+              filter(!SegmentArea == 0) 
+  
+  
+  ## Calculate the cost per pairs depending on whether it is Snipe or Lapwing/Redshank
+  if(species == "LapRed"){ AllScn2 <- AllScn2 |> mutate(PairCost = ChangeWaders/ChangeCostsFG,
+                                                       PairCostPU = ChangeWaders/ChangeCostsPU,
+                                                       PairCostNoF = ChangeWadersnoF/ChangeCostsNoF,
+                                                       Waders_100Ha = (ChangeWaders/SegmentArea)*100) }
+  
+  if(species == "Snipe"){ AllScn2 <- AllScn2 |> mutate(PairCost = ChangeSnipe/ChangeCostsFG,
+                                                      PairCostPU = ChangeSnipe/ChangeCostsPU,
+                                                      PairCostNoF = ChangeSnipenoF/ChangeCostsNoF,
+                                                      Waders_100Ha = (ChangeSnipe/SegmentArea)*100) }
+  
+  
+  ## Set a general theme for the bar plots
+  BarPlotTheme <- theme_light() +
+                  theme(panel.grid.minor = element_blank(),
+                        strip.text = element_text(size = 17),
+                        axis.title = element_text(size = 18),
+                        axis.text.y = element_text(size = 16),
+                        axis.text.x = element_text(size = 16, angle = 45, vjust = 0.5),
+                        legend.title = element_text(size = 17),
+                        legend.text = element_text(size = 16),
+                        legend.position = "bottom", 
+                        plot.title = element_text(size = 17, face = "bold"))
+  
+  
+  
+  ## Summarise the data so there are less rows
+  ## Essentially the data is summarized to by taking the average across the different targeting strategies
+  ScenSumCost2 <- AllScn2 |>
+            #filter(!OppCat %in% c("Arable Opp")) |> 
+            group_by(Strategy, Plus, NewCat, Landscape, OppCat) |>
+            summarise(StEr = sd(PairCost)/sqrt(n()),
+                      t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
+                      Ave_PairCost = mean(PairCost)) |>
+            mutate(PlotCatOther = paste0(NewCat, " ", ifelse(Plus==T, "+", "-")),
+                   PlotCatFull= paste0(Strategy, " for ", PlotCatOther),
+                   PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality"),
+                   NewCatFull = ifelse(OppCat== "Arable Opp", paste0(NewCat, " from Arable"), NewCat),
+                   LowerCI = Ave_PairCost - (t_score * StEr),
+                   UpperCI = Ave_PairCost + (t_score * StEr))
+  
+  ## Create bar plot
+  ## Much simpler than above and mainly focuses on showing the differences between AES and reserve for the different Lawton Principles
+  Plotout <- ggplot(ScenSumCost2, aes(x= Strategy, y= Ave_PairCost*100000, fill = NewCatFull)) +
+    geom_col(width=0.75, position=position_dodge(0.75, preserve = "single")) +
+    geom_errorbar(aes(ymin= LowerCI*100000, ymax= UpperCI*100000), width=0.2, position=position_dodge(width=0.75, preserve = "single"), colour = "#6a6b6b") +
+    facet_wrap(~PlusFull) +
+    scale_fill_manual(name = "Scenario Type",   # Change legend title
+                      labels = c("AES Only"= "AES Only", "Reserve"= "Reserve from grassland", "Reserve from Arable" = "Reserve from Arable"),  # Change legend labels
+                      values = c("AES Only"="#F076A5", "Reserve"= "#76A5F0", "Reserve from Arable"= "#DDB24C")) +
+    ylab("Change in Breeding Pairs per £100,000") +
+    xlab("Lawton Principle") +
+    ggtitle(paste0(ScenSumCost2$Landscape[1])) +
+    labs(fill = "Management Used") +
+    BarPlotTheme
+  
+  return(Plotout)
+
+}
+
+
+## Create plots for the regional landscapes
+SP <- RegionPlot(inpath= "CleanData/Scenarios/5-ScenarioCreation/Som/",
+                 outpath="CleanData/Scenarios/5-ScenarioCreation/Som/Plots/",
+                 species="Snipe")
+
+Br <- RegionPlot(inpath= "CleanData/Scenarios/5-ScenarioCreation/Broads/",
+                 outpath="CleanData/Scenarios/5-ScenarioCreation/Broads/Plots/",
+                 species="LapRed")
+
+NK <- RegionPlot(inpath= "CleanData/Scenarios/5-ScenarioCreation/Kent/",
+                 outpath="CleanData/Scenarios/5-ScenarioCreation/Kent/Plots/",
+                 species="LapRed")
+
+Es <- RegionPlot(inpath= "CleanData/Scenarios/5-ScenarioCreation/Essex/",
+                 outpath="CleanData/Scenarios/5-ScenarioCreation/Essex/Plots/",
+                 species="LapRed")
+
+## arrange all the plots into one
+library(ggpubr)
+ggarrange(SP, Br, NK, Es, common.legend = T, legend = "bottom")
+
+## save the plot
+ggsave(plot=last_plot(), filename= paste0(outpath, "RegionalBreakdown_Pair£_vs_Category.png"), units = "in", height = 12, width = 12)
+  
+  

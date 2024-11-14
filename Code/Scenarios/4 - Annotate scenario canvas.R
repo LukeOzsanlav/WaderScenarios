@@ -536,9 +536,9 @@ AnnotateCanv <- function(Canv, ## Blank un-labelled canvas for each priority lan
   if(RunGrades==TRUE){
     
     ## Read in all the gradings and change the layer names to something meaningful
-    Arable_G1 <- rast(paste0("CleanData/Guideline Creation/", guidepath,"_ArableRev_G1.tif")) 
+    Arable_G1 <- rast(paste0("CleanData/Guideline Creation/", guidepath,"_ArableBig_G1.tif")) 
     names(Arable_G1) <- "Arable_G1"
-    Arable_G2 <- rast(paste0("CleanData/Guideline Creation/", guidepath,"_ArableRev_G2.tif"))
+    Arable_G2 <- rast(paste0("CleanData/Guideline Creation/", guidepath,"_ArableBig_G2.tif"))
     names(Arable_G2) <- "Arable_G2"
     Better_G1 <- rast(paste0("CleanData/Guideline Creation/", guidepath,"_Better_G1.tif"))
     names(Better_G1) <- "Better_G1"
@@ -564,7 +564,7 @@ AnnotateCanv <- function(Canv, ## Blank un-labelled canvas for each priority lan
     ## For Somerset need to add on a third group that was not done for the other three regions
     if(Label == "Somerset Levels and Moors"){
       
-    Arable_G3 <- rast(paste0("CleanData/Guideline Creation/", guidepath,"_ArableRev_G3.tif")) 
+    Arable_G3 <- rast(paste0("CleanData/Guideline Creation/", guidepath,"_ArableBig_G3.tif")) 
     names(Arable_G3) <- "Arable_G3"
     Better_G3 <- rast(paste0("CleanData/Guideline Creation/", guidepath,"_Better_G3.tif"))
     names(Better_G3) <- "Better_G3"
@@ -1219,15 +1219,15 @@ AnnotateCanv <- function(Canv, ## Blank un-labelled canvas for each priority lan
   ## Now for different land categories and grading assign a land cost
   Canv <- Canv |> 
           mutate(Hectares = as.numeric(m2_to_ha(ParcArea)),
-                 PurchaseGDP = case_when(Category == "AES Only" & AgriGrade <=2 ~ P1$Q25[P1$Land_Type=="Pasture"],
+                 PurchaseGDP = case_when(Category == "AES Only" & AgriGrade <=2 ~ P1$Q75[P1$Land_Type=="Pasture"],
                                          Category == "AES Only" & AgriGrade ==3 ~ P1$Q50[P1$Land_Type=="Pasture"],
-                                         Category == "AES Only" & AgriGrade >=4 ~ P1$Q75[P1$Land_Type=="Pasture"],
-                                         Category == "Grass Opp" & AgriGrade <=2 ~ P1$Q25[P1$Land_Type=="Pasture"],
+                                         Category == "AES Only" & AgriGrade >=4 ~ P1$Q25[P1$Land_Type=="Pasture"],
+                                         Category == "Grass Opp" & AgriGrade <=2 ~ P1$Q75[P1$Land_Type=="Pasture"],
                                          Category == "Grass Opp" & AgriGrade ==3 ~ P1$Q50[P1$Land_Type=="Pasture"],
-                                         Category == "Grass Opp" & AgriGrade >=4 ~ P1$Q75[P1$Land_Type=="Pasture"],
-                                         Category == "Arable Opp" & AgriGrade <=2 ~ P1$Q25[P1$Land_Type=="Arable"],
+                                         Category == "Grass Opp" & AgriGrade >=4 ~ P1$Q25[P1$Land_Type=="Pasture"],
+                                         Category == "Arable Opp" & AgriGrade <=2 ~ P1$Q75[P1$Land_Type=="Arable"],
                                          Category == "Arable Opp" & AgriGrade ==3 ~ P1$Q50[P1$Land_Type=="Arable"],
-                                         Category == "Arable Opp" & AgriGrade >=4 ~ P1$Q75[P1$Land_Type=="Arable"],
+                                         Category == "Arable Opp" & AgriGrade >=4 ~ P1$Q25[P1$Land_Type=="Arable"],
                                          Category == "Reserve" ~ 0,
                                          .default = NA),
                  PurchaseGDP = PurchaseGDP*Hectares) |> select(-Hectares)
