@@ -1,7 +1,8 @@
 # Wader Scenarios Repository
 
-<img src="Plots/MarkdownPics/lolandwaderscenarios logo.png" id="id" class="class" width=25% height=25% > 
-
+## To Do
+- Re-run the budget contrained scenario code as I have tweaked the land purchase estimation code
+- Check RF model (Lapwing-is it using Som data)?
 
 ## Folder Structure
 
@@ -27,3 +28,4 @@ Some of the plots are output here. These are mainly plots for the wader modellin
 ### `RawData` folder
 
 All input data is placed in this folder. Each data set is generally placed in it's own folder. 
+
