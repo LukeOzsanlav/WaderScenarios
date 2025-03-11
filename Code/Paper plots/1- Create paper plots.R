@@ -141,7 +141,7 @@ Lawton <- ggplot() +
   
   ## Add the canvas categories
   geom_sf(data = CanvCat, mapping = aes(geometry = geometry, fill = WaderSite), colour = NA) +
-  scale_fill_manual(values = c("#e9cd50", "#506ce9"), name="Lawton \nPrinciple") +
+  scale_fill_manual(values = c("#e9cd50", "#506ce9"), name="Spatial\nTargeting\nLocation") +
   
   ## Set plot extent so all plots have the same extent
   PlotExt +

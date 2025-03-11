@@ -1393,7 +1393,11 @@ ggplot(ScenSum2, aes(x= Strategy, y= Perc_Waders_100Ha, fill = NewCatFull)) +
 geom_col(width=0.75, position=position_dodge(0.75, preserve = "single")) +
 geom_errorbar(aes(ymin= LowerCI, ymax= UpperCI), width=0.2, position=position_dodge(width=0.75, preserve = "single"), colour = "#6a6b6b") +
 facet_wrap(~PlusFull) +
+<<<<<<< HEAD
 scale_fill_manual(name = "Mechanism",   # Change legend title
+=======
+scale_fill_manual(name = "Scenario Type",   # Change legend title
+>>>>>>> 3df2806f235f4042a1cc095ec47e8f1ff9e342d9
                   labels = c("AES Only"= "AES Only", "Reserve"= "Reserve from grassland", "Reserve from Arable" = "Reserve from Arable"),  # Change legend labels
                   values = c("AES Only"="#F076A5", "Reserve"= "#76A5F0", "Reserve from Arable"= "#DDB24C")) +
 ylab("% Change in Breeding Pairs per 100ha") +
@@ -1431,7 +1435,11 @@ ggplot(ScenSumCost2, aes(x= Strategy, y= Perc_PairCost*100000, fill = NewCatFull
 geom_col(width=0.75, position=position_dodge(0.75, preserve = "single")) +
 geom_errorbar(aes(ymin= LowerCI*100000, ymax= UpperCI*100000), width=0.2, position=position_dodge(width=0.75, preserve = "single"), colour = "#6a6b6b") +
 facet_wrap(~PlusFull) +
+<<<<<<< HEAD
 scale_fill_manual(name = "Mechanism",   # Change legend title
+=======
+scale_fill_manual(name = "Scenario Type",   # Change legend title
+>>>>>>> 3df2806f235f4042a1cc095ec47e8f1ff9e342d9
                   labels = c("AES Only"= "AES Only", "Reserve"= "Reserve from grassland", "Reserve from Arable" = "Reserve from Arable"),  # Change legend labels
                   values = c("AES Only"="#F076A5", "Reserve"= "#76A5F0", "Reserve from Arable"= "#DDB24C")) +
 ylab("% Change in Breeding Pairs per £100,000") +
@@ -1863,7 +1871,11 @@ RegionPlot <- function(inpath,
     geom_col(width=0.75, position=position_dodge(0.75, preserve = "single")) +
     geom_errorbar(aes(ymin= LowerCI*100000, ymax= UpperCI*100000), width=0.2, position=position_dodge(width=0.75, preserve = "single"), colour = "#6a6b6b") +
     facet_wrap(~PlusFull) +
+<<<<<<< HEAD
     scale_fill_manual(name = "Mechanism",   # Change legend title
+=======
+    scale_fill_manual(name = "Scenario Type",   # Change legend title
+>>>>>>> 3df2806f235f4042a1cc095ec47e8f1ff9e342d9
                       labels = c("AES Only"= "AES Only", "Reserve"= "Reserve from grassland", "Reserve from Arable" = "Reserve from Arable"),  # Change legend labels
                       values = c("AES Only"="#F076A5", "Reserve"= "#76A5F0", "Reserve from Arable"= "#DDB24C")) +
     ylab("Change in Breeding Pairs per £100,000") +
@@ -1896,7 +1908,11 @@ Es <- RegionPlot(inpath= "CleanData/Scenarios/5-ScenarioCreation/Essex/",
 
 ## arrange all the plots into one
 library(ggpubr)
+<<<<<<< HEAD
 ggarrange(Br, SP, NK, Es, common.legend = T, legend = "bottom")
+=======
+ggarrange(SP, Br, NK, Es, common.legend = T, legend = "bottom")
+>>>>>>> 3df2806f235f4042a1cc095ec47e8f1ff9e342d9
 
 ## save the plot
 ggsave(plot=last_plot(), filename= paste0(outpath, "RegionalBreakdown_Pair£_vs_Category.png"), units = "in", height = 12, width = 12)
