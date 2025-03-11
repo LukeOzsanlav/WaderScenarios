@@ -51,6 +51,10 @@ SL <- nrow(Waders) # keep track of data set length throughout
 LC <- rast(here("RawData", "LandCover", "gblcm25m2021.tif"))
 LC <- LC[[1]]
 
+## Read in RSPB priority landscapes, with greater Thames landscape split in two
+SplitLanscape <- st_read("RawData/Priority Landscapes/Split Priority Landscapes/EnglandWales_PriorityLandscapes.shp") |> 
+  filter(Att3Value %in% c("Somerset Levels and Moors", "Broads", "Greater Thames", "North Kent", "Essex"))
+
 
 
 
@@ -150,9 +154,62 @@ Prop_Shapes_Cov <- function(Survey = Survey, Shapes = Shapes, Dist = Dist, Col =
 
 
 
+##-----------------------------------##
+#### 1. Add split landscape labels ####
+##-----------------------------------## 
+
+## Remove duplicated from the fields data set, this happens as we have different survey fields for Lapwing/Snipe in Somerset
+Waderssub <- Waders[duplicated(Waders$F_LOC_ID)==F,]
+
+
+## Work out if fields fall within any of the priority landscapes
+Overlap <- st_intersection(SplitLanscape, st_as_sf(Waderssub))
+
+## Join the priority landscape labels onto that data set with all the fields in
+## first streamline the data set from the overlap
+Overlap <- Overlap |> 
+  select(F_LOC_ID, Att3Value) |> 
+  rename(Landscape4 = Att3Value) |> 
+  st_drop_geometry()
+
+
+## Work out if fields fall within any of the buffered priority landscapes
+## This is done int two steps here as the boundaries of North kent and Essex overlap when they are buffered
+OverlapBuf <- st_intersection(st_buffer(SplitLanscape, dist = 5000), st_as_sf(Waderssub))
+
+## Join the priority landscape labels onto that data set with all the fields in
+## first streamline the data set from the overlap
+OverlapBuf <- OverlapBuf |> 
+  select(F_LOC_ID, Att3Value) |> 
+  rename(Landscape4buf = Att3Value) |> 
+  st_drop_geometry()
+
+
+## Join the data sets together, and for row change in join
+PreL <- nrow(Waders)
+Waders <- left_join(Waders, Overlap, by = "F_LOC_ID")
+nrow(Waders) == PreL # check no rows lost
+
+
+## Join the data sets together, and for row change in join
+PreL <- nrow(Waders)
+OverlapBuf <- OverlapBuf[duplicated(OverlapBuf$F_LOC_ID)==F,] # remove duplicated from where Essex/North Kent boundaries overlap
+Waders <- left_join(Waders, OverlapBuf, by = "F_LOC_ID")
+nrow(Waders) == PreL # check no rows lost
+
+## Mutate the 
+Waders <- Waders |> 
+  mutate(Landscape4 = ifelse(is.na(Landscape4)==T, Landscape4buf, Landscape4))
+summary(is.na(Waders$Landscape4)) ## just check that all fields have been given a landscape label
+
+
+
+
+
+
 
 ##-----------------------------------------------##
-#### 1. Calculate average standing water value ####
+#### 2. Calculate average standing water value ####
 ##-----------------------------------------------##
 
 
@@ -207,7 +264,7 @@ rm(WadersThames, WadersSom, WadersBroads, WaterVals, ThamesWat, NorfolkW, SomW);
 
 
 ##-----------------------------------------##
-#### 2. Calculate percentage of woodland ####
+#### 3. Calculate percentage of woodland ####
 ##-----------------------------------------##
 
 ## Using UKCEH land cover data (Codes 1/2) calculate the percentage woodland around each field
@@ -228,7 +285,7 @@ rm(WoodLC); gc()
 
 
 ##--------------------------------------------##
-#### 3. Calculate percentage of urban areas ####
+#### 4. Calculate percentage of urban areas ####
 ##--------------------------------------------##
 
 ## Using UKCEH land cover data (Codes 20/21) calculate the percentage Urban cover around each field
@@ -249,7 +306,7 @@ rm(UrbanLC); gc()
 
 
 ##---------------------------------------------------##
-#### 4. Calculate percentage of intensive land use ####
+#### 5. Calculate percentage of intensive land use ####
 ##---------------------------------------------------##
 
 # ## Using UKCEH land cover data (codes 3/4) and NE priority habitats (semi-natural grassland categories)
@@ -319,7 +376,7 @@ rm(UrbanLC); gc()
 
 
 ##-------------------------------------------------------##
-#### 5. Calculate percentage of semi-nat wet grassland ####
+#### 6. Calculate percentage of semi-nat wet grassland ####
 ##-------------------------------------------------------##
 
 # ## Reclassify the UKCEH raster so semi natural grassland pixels pixels are 1 and all others habitats are 0
@@ -404,7 +461,7 @@ rm(LowWetGrass); gc()
 
 
 ##-------------------------------------------##
-#### 6. Calculate percentage SSSI coverage ####
+#### 7. Calculate percentage SSSI coverage ####
 ##-------------------------------------------##
 
 # ## SSSI's 
@@ -418,7 +475,7 @@ rm(LowWetGrass); gc()
 
 
 ##----------------------------------------------##
-#### 7. Calculate percentage reserve coverage ####
+#### 8. Calculate percentage reserve coverage ####
 ##----------------------------------------------##
 
 ## Read in the reserve outlines
@@ -433,7 +490,7 @@ rm(RSPB, LNR, NNR, IntComb, Comb); gc()
 
 
 ##------------------------------------------------##
-#### 8. Calculate percentage wader AES coverage ####
+#### 9. Calculate percentage wader AES coverage ####
 ##------------------------------------------------##
 
 # ## Read in CS Schemes
@@ -501,7 +558,7 @@ rm(RSPB, LNR, NNR, IntComb, Comb); gc()
 
 
 ##------------------------------------------------##
-#### 9. Save data set with landscape attributes ####
+#### 10. Save data set with landscape attributes ####
 ##------------------------------------------------##
 
 ## Check i didn't lose any data here

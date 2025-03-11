@@ -64,7 +64,8 @@ WData <- WData |>
                 Fence_Coverage = ifelse(Fence_Coverage == 0, "N", "Y"), # fence indicator variable
                 Lap_Density = est_pairsL/FieldArea, # breeding Lapwing density
                 Red_Density = est_pairsR/FieldArea, # breeding Redshank density
-                Sni_Density = est_pairsS/FieldArea,)# breeding Snipe density
+                Sni_Density = est_pairsS/FieldArea, # breeding Snipe density
+                Landscape = Landscape4) # change the landscape column from 3 to 4 regions
 
 ## Plot histogram of breeding bird densities
 hist(WData$Lap_Density, main = "Breeding Lapwing density")
@@ -244,7 +245,7 @@ plot.variable(RF_fit, c("Fence_Coverage", "FieldArea", "Landscape"), partial = T
 dev.off()
 
 png(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Lapwing_VarRel2.png", width = 20, height = 10, units = "cm", res = 1200)
-plot.variable(RF_fit, c("WaterCoverage", "PropUrban_2000", "PropWetGrass_2000"), partial = TRUE)
+plot.variable(RF_fit, c("WaterCoverage", "PropUrban_2000", "Ave_WiderWater500"), partial = TRUE)
 dev.off()
 
 
@@ -289,7 +290,7 @@ sum(Lap_test2$Predicted)
 sum(Lap_test2$est_pairsL)
 sqrt(mean((Lap_test2$est_pairsL - Lap_test2$Predicted)^2)) # RMSE
 
-Lap_test3 <- filter(Lap_test, Landscape == "Greater Thames")
+Lap_test3 <- filter(Lap_test, Landscape == "North Kent")
 sum(Lap_test3$Predicted)
 sum(Lap_test3$est_pairsL)
 sqrt(mean((Lap_test3$est_pairsL - Lap_test3$Predicted)^2)) # RMSE
@@ -298,6 +299,11 @@ Lap_test4 <- filter(Lap_test, Landscape == "Somerset Levels and Moors")
 sum(Lap_test4$Predicted)
 sum(Lap_test4$est_pairsL)
 sqrt(mean((Lap_test4$est_pairsL - Lap_test4$Predicted)^2)) # RMSE
+
+Lap_test5 <- filter(Lap_test, Landscape == "Essex")
+sum(Lap_test5$Predicted)
+sum(Lap_test5$est_pairsL)
+sqrt(mean((Lap_test5$est_pairsL - Lap_test5$Predicted)^2)) # RMSE
 
 
 
@@ -313,14 +319,17 @@ L_TestFields <- left_join(Lap_test, BWWM, by = "F_LOC_ID") |> st_as_sf()
 
 ## filter out the landscape individually
 LS_TestFields <- filter(L_TestFields, Landscape == "Somerset Levels and Moors")
-LGT_TestFields <- filter(L_TestFields, Landscape == "Greater Thames")
+LNK_TestFields <- filter(L_TestFields, Landscape == "North Kent")
 LB_TestFields <- filter(L_TestFields, Landscape == "Broads")
+LEs_TestFields <- filter(L_TestFields, Landscape == "Essex")
 
 ## Calculate the RMSE at the site level
 sqrt(mean((L_TestFields$SitePopReal - L_TestFields$SitePopPred)^2)) # RMSE
 sqrt(mean((LS_TestFields$SitePopReal - LS_TestFields$SitePopPred)^2)) # RMSE
-sqrt(mean((LGT_TestFields$SitePopReal - LGT_TestFields$SitePopPred)^2)) # RMSE
+sqrt(mean((LNK_TestFields$SitePopReal - LNK_TestFields$SitePopPred)^2)) # RMSE
 sqrt(mean((LB_TestFields$SitePopReal - LB_TestFields$SitePopPred)^2)) # RMSE
+sqrt(mean((LEs_TestFields$SitePopReal - LEs_TestFields$SitePopPred)^2)) # RMSE
+
 
 ## Plot predicted vs real Lapwing abundance for Somerset
 LapSFi1 <- ggplot() + 
@@ -360,28 +369,54 @@ ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/L
 
 
 
-## Plot predicted vs real Lapwing abundance for Greater Thames
-## Set the plot extent so that all plots have the same area no matter if they have different landarcels
-PlotExt <- coord_sf(xlim = c(st_bbox(LGT_TestFields)[1]+22000, st_bbox(LGT_TestFields)[3]-4000), 
-                    ylim = c(st_bbox(LGT_TestFields)[2]-500, st_bbox(LGT_TestFields)[4]-9000), 
-                    crs = 27700, expand = FALSE) 
-LapGTFi1 <- ggplot() + 
-  geom_sf(data = LGT_TestFields, mapping=aes(geometry=geometry, fill = (Predicted)), colour = NA) +
+## Plot predicted vs real Lapwing abundance for North Kent
+## Set the plot extent so that all plots have the same area no matter if they have different land parcels
+PlotExtNK <- coord_sf(xlim = c(st_bbox(LNK_TestFields)[1]-1000, st_bbox(LNK_TestFields)[3]+1000), 
+                      ylim = c(st_bbox(LNK_TestFields)[2]-1000, st_bbox(LNK_TestFields)[4]+1000), 
+                      crs = 27700, expand = FALSE) 
+LapNKFi1 <- ggplot() + 
+  geom_sf(data = LNK_TestFields, mapping=aes(geometry=geometry, fill = (Predicted)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
-  ggtitle("Lapwing Greater Thames: Predicted") +
-  PlotExt +
+  ggtitle("Lapwing North Kent: Predicted") +
+  PlotExtNK +
   theme_light()
 
-LapGTFi2 <- ggplot() + 
-  geom_sf(data = LGT_TestFields, mapping=aes(geometry=geometry, fill = (est_pairsL)), colour = NA) +
+LapNKFi2 <- ggplot() + 
+  geom_sf(data = LNK_TestFields, mapping=aes(geometry=geometry, fill = (est_pairsL)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
-  ggtitle("Lapwing Greater Thames: Real") +
-  PlotExt +
+  ggtitle("Lapwing North Kent: Real") +
+  PlotExtNK +
   theme_light()
 
 ## Arrange plots side-by side and save
-LapGTFi <- grid.arrange(LapGTFi1, LapGTFi2, ncol=2)
-ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Lapwing_GT_FieldComp.png", plot = LapGTFi, width = 40, height = 20, units = "cm")
+LapNKFi <- grid.arrange(LapNKFi1, LapNKFi2, ncol=2)
+ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Lapwing_NK_FieldComp.png", plot = LapNKFi, width = 40, height = 20, units = "cm")
+
+
+
+## Plot predicted vs real Lapwing abundance for North Kent
+## Set the plot extent so that all plots have the same area no matter if they have different land parcels
+PlotExtEs <- coord_sf(xlim = c(st_bbox(LEs_TestFields)[1]-1000, st_bbox(LEs_TestFields)[3]+1000), 
+                    ylim = c(st_bbox(LEs_TestFields)[2]-1000, st_bbox(LEs_TestFields)[4]+1000), 
+                    crs = 27700, expand = FALSE) 
+LapEsFi1 <- ggplot() + 
+  geom_sf(data = LEs_TestFields, mapping=aes(geometry=geometry, fill = (Predicted)), colour = NA) +
+  scale_fill_viridis_c(na.value = "lightgrey") + 
+  ggtitle("Lapwing Essex: Predicted") +
+  PlotExtEs +
+  theme_light()
+
+LapEsFi2 <- ggplot() + 
+  geom_sf(data = LEs_TestFields, mapping=aes(geometry=geometry, fill = (est_pairsL)), colour = NA) +
+  scale_fill_viridis_c(na.value = "lightgrey") + 
+  ggtitle("Lapwing Essex: Real") +
+  PlotExtEs +
+  theme_light()
+
+## Arrange plots side-by side and save
+LapEsFi <- grid.arrange(LapEsFi1, LapEsFi2, ncol=2)
+ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Lapwing_Es_FieldComp.png", plot = LapEsFi, width = 40, height = 20, units = "cm")
+
 
 
 
@@ -424,24 +459,45 @@ ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/L
 
 
 
-## Plot predicted vs real Lapwing abundance for Greater Thames
-LapGTSi1 <- ggplot() + 
-  geom_sf(data = LGT_TestFields, mapping=aes(geometry=geometry, fill = (SitePopPred)), colour = NA) +
+## Plot predicted vs real Lapwing abundance for North Kent
+LapNKSi1 <- ggplot() + 
+  geom_sf(data = LNK_TestFields, mapping=aes(geometry=geometry, fill = (SitePopPred)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
-  ggtitle("Lapwing Greater Thames: Predicted") +
-  PlotExt +
+  ggtitle("Lapwing North Kent: Predicted") +
+  PlotExtNK +
   theme_light()
 
-LapGTSi2 <- ggplot() + 
-  geom_sf(data = LGT_TestFields, mapping=aes(geometry=geometry, fill = (SitePopReal)), colour = NA) +
+LapNKSi2 <- ggplot() + 
+  geom_sf(data = LNK_TestFields, mapping=aes(geometry=geometry, fill = (SitePopReal)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
-  ggtitle("Lapwing Greater Thames: Real") +
-  PlotExt +
+  ggtitle("Lapwing North Kent: Real") +
+  PlotExtNK +
   theme_light()
 
 ## Arrange plots side-by side and save
-LapGTSi <- grid.arrange(LapGTSi1, LapGTSi2, ncol=2)
-ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Lapwing_GT_SiteComp.png", plot = LapGTSi, width = 40, height = 20, units = "cm")
+LapNKSi <- grid.arrange(LapNKSi1, LapNKSi2, ncol=2)
+ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Lapwing_NK_SiteComp.png", plot = LapNKSi, width = 40, height = 20, units = "cm")
+
+
+
+## Plot predicted vs real Lapwing abundance for North Kent
+LapEsSi1 <- ggplot() + 
+  geom_sf(data = LEs_TestFields, mapping=aes(geometry=geometry, fill = (SitePopPred)), colour = NA) +
+  scale_fill_viridis_c(na.value = "lightgrey") + 
+  ggtitle("Lapwing Essex: Predicted") +
+  PlotExtEs +
+  theme_light()
+
+LapEsSi2 <- ggplot() + 
+  geom_sf(data = LEs_TestFields, mapping=aes(geometry=geometry, fill = (SitePopReal)), colour = NA) +
+  scale_fill_viridis_c(na.value = "lightgrey") + 
+  ggtitle("Lapwing Essex: Real") +
+  PlotExtEs +
+  theme_light()
+
+## Arrange plots side-by side and save
+LapEsSi <- grid.arrange(LapEsSi1, LapEsSi2, ncol=2)
+ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Lapwing_Es_SiteComp.png", plot = LapEsSi, width = 40, height = 20, units = "cm")
 
 
 
@@ -460,8 +516,8 @@ ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/L
 #### Redshank: Prep Data ####
 ##-------------------------##
 
-## Filter out the Redshank survey data fro the Thames and Broads
-Red <- filter(WData, is.na(est_pairsR)==F) |> filter(Landscape %in% c("Greater Thames", "Broads"))
+## Filter out the Redshank survey data for the Thames and Broads
+Red <- filter(WData, is.na(est_pairsR)==F) |> filter(Landscape %in% c("North Kent", "Broads", "Essex"))
 nrow(Red); nrow(filter(Red, est_pairsR > 0)) # total no. of survey fields and total with waders 
 
 ## Check if survey columns have NA's
@@ -666,10 +722,15 @@ sum(Red_test2$Predicted)
 sum(Red_test2$est_pairsR)
 sqrt(mean((Red_test2$est_pairsR - Red_test2$Predicted)^2)) # RMSE
 
-Red_test3 <- filter(Red_test, Landscape == "Greater Thames")
+Red_test3 <- filter(Red_test, Landscape == "North Kent")
 sum(Red_test3$Predicted)
 sum(Red_test3$est_pairsR)
 sqrt(mean((Red_test3$est_pairsR - Red_test3$Predicted)^2)) # RMSE
+
+Red_test4 <- filter(Red_test, Landscape == "Essex")
+sum(Red_test4$Predicted)
+sum(Red_test4$est_pairsR)
+sqrt(mean((Red_test4$est_pairsR - Red_test4$Predicted)^2)) # RMSE
 
 
 
@@ -683,13 +744,16 @@ Red_test <- Red_test |>  group_by(S_LOC_ID) |>
 R_TestFields <- left_join(Red_test, BWWM, by = "F_LOC_ID") |> st_as_sf()
 
 ## filter out the landscape individually
-RGT_TestFields <- filter(R_TestFields, Landscape == "Greater Thames")
+RNK_TestFields <- filter(R_TestFields, Landscape == "North Kent")
+REs_TestFields <- filter(R_TestFields, Landscape == "Essex")
 RB_TestFields <- filter(R_TestFields, Landscape == "Broads")
 
 ## Calculate the RMSE at the site level
 sqrt(mean((R_TestFields$SitePopReal - R_TestFields$SitePopPred)^2)) # RMSE
-sqrt(mean((RGT_TestFields$SitePopReal - RGT_TestFields$SitePopPred)^2)) # RMSE
+sqrt(mean((RNK_TestFields$SitePopReal - RNK_TestFields$SitePopPred)^2)) # RMSE
+sqrt(mean((REs_TestFields$SitePopReal - REs_TestFields$SitePopPred)^2)) # RMSE
 sqrt(mean((RB_TestFields$SitePopReal - RB_TestFields$SitePopPred)^2)) # RMSE
+
 
 
 ## Plot predicted vs real Redshank abundance for Broads
@@ -711,28 +775,54 @@ ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/R
 
 
 
-## Plot predicted vs real Redshank abundance for Greater Thames
-## Set the plot extent so that all plots have the same area no matter if they have different landarcels
-PlotExt <- coord_sf(xlim = c(st_bbox(RGT_TestFields)[1]+22000, st_bbox(RGT_TestFields)[3]-4000), 
-                    ylim = c(st_bbox(RGT_TestFields)[2]-500, st_bbox(RGT_TestFields)[4]-9000), 
+## Plot predicted vs real Redshank abundance for North Kent
+## Set the plot extent so that all plots have the same area no matter if they have different land parcels
+PlotExtNK <- coord_sf(xlim = c(st_bbox(RNK_TestFields)[1]-1000, st_bbox(RNK_TestFields)[3]+1000), 
+                    ylim = c(st_bbox(RNK_TestFields)[2]-1000, st_bbox(RNK_TestFields)[4]+1000), 
                     crs = 27700, expand = FALSE) 
-RedGTFi1 <- ggplot() + 
-  geom_sf(data = RGT_TestFields, mapping=aes(geometry=geometry, fill = (Predicted)), colour = NA) +
+RedNKFi1 <- ggplot() + 
+  geom_sf(data = RNK_TestFields, mapping=aes(geometry=geometry, fill = (Predicted)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
-  ggtitle("Redshank Greater Thames: Predicted") +
-  PlotExt +
+  ggtitle("Redshank North Kent: Predicted") +
+  PlotExtNK +
   theme_light()
 
-RedGTFi2 <- ggplot() + 
-  geom_sf(data = RGT_TestFields, mapping=aes(geometry=geometry, fill = (est_pairsR)), colour = NA) +
+RedNKFi2 <- ggplot() + 
+  geom_sf(data = RNK_TestFields, mapping=aes(geometry=geometry, fill = (est_pairsR)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
-  ggtitle("Redshank Greater Thames: Real") +
-  PlotExt +
+  ggtitle("Redshank North Kent: Real") +
+  PlotExtNK +
   theme_light()
 
 ## Arrange plots side-by side and save
-RedGTFi <- grid.arrange(RedGTFi1, RedGTFi2, ncol=2)
-ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Redshank_GT_FieldComp.png", plot = RedGTFi, width = 40, height = 20, units = "cm")
+RedNKFi <- grid.arrange(RedNKFi1, RedNKFi2, ncol=2)
+ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Redshank_NK_FieldComp.png", plot = RedNKFi, width = 40, height = 20, units = "cm")
+
+
+
+## Plot predicted vs real Redshank abundance for Greater Thames
+## Set the plot extent so that all plots have the same area no matter if they have different land parcels
+PlotExtEs <- coord_sf(xlim = c(st_bbox(REs_TestFields)[1]-1000, st_bbox(REs_TestFields)[3]+1000), 
+                      ylim = c(st_bbox(REs_TestFields)[2]-1000, st_bbox(REs_TestFields)[4]+1000), 
+                      crs = 27700, expand = FALSE) 
+RedEsFi1 <- ggplot() + 
+  geom_sf(data = REs_TestFields, mapping=aes(geometry=geometry, fill = (Predicted)), colour = NA) +
+  scale_fill_viridis_c(na.value = "lightgrey") + 
+  ggtitle("Redshank North Kent: Predicted") +
+  PlotExtEs +
+  theme_light()
+
+RedEsFi2 <- ggplot() + 
+  geom_sf(data = REs_TestFields, mapping=aes(geometry=geometry, fill = (est_pairsR)), colour = NA) +
+  scale_fill_viridis_c(na.value = "lightgrey") + 
+  ggtitle("Redshank North Kent: Real") +
+  PlotExtEs +
+  theme_light()
+
+## Arrange plots side-by side and save
+RedEsFi <- grid.arrange(RedEsFi1, RedEsFi2, ncol=2)
+ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Redshank_Es_FieldComp.png", plot = RedEsFi, width = 40, height = 20, units = "cm")
+
 
 
 
@@ -755,24 +845,44 @@ ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/R
 
 
 
-## Plot predicted vs real Redshank abundance for Greater Thames
-RedGTSi1 <- ggplot() + 
-  geom_sf(data = RGT_TestFields, mapping=aes(geometry=geometry, fill = (SitePopPred)), colour = NA) +
+## Plot predicted vs real Redshank abundance for North Kent
+RedNKSi1 <- ggplot() + 
+  geom_sf(data = RNK_TestFields, mapping=aes(geometry=geometry, fill = (SitePopPred)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
   ggtitle("Redshank Greater Thames: Predicted") +
-  PlotExt +
+  PlotExtNK +
   theme_light()
 
-RedGTSi2 <- ggplot() + 
-  geom_sf(data = RGT_TestFields, mapping=aes(geometry=geometry, fill = (SitePopReal)), colour = NA) +
+RedNKSi2 <- ggplot() + 
+  geom_sf(data = RNK_TestFields, mapping=aes(geometry=geometry, fill = (SitePopReal)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
   ggtitle("Redshank Greater Thames: Real") +
-  PlotExt +
+  PlotExtNK +
   theme_light()
 
 ## Arrange plots side-by side and save
-RedGTSi <- grid.arrange(RedGTSi1, RedGTSi2, ncol=2)
-ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Redshank_GT_SiteComp.png", plot = RedGTSi, width = 40, height = 20, units = "cm")
+RedNKSi <- grid.arrange(RedNKSi1, RedNKSi2, ncol=2)
+ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Redshank_NK_SiteComp.png", plot = RedNKSi, width = 40, height = 20, units = "cm")
+
+
+## Plot predicted vs real Redshank abundance for Essex
+RedEsSi1 <- ggplot() + 
+  geom_sf(data = REs_TestFields, mapping=aes(geometry=geometry, fill = (SitePopPred)), colour = NA) +
+  scale_fill_viridis_c(na.value = "lightgrey") + 
+  ggtitle("Redshank Greater Thames: Predicted") +
+  PlotExtEs +
+  theme_light()
+
+RedEsSi2 <- ggplot() + 
+  geom_sf(data = REs_TestFields, mapping=aes(geometry=geometry, fill = (SitePopReal)), colour = NA) +
+  scale_fill_viridis_c(na.value = "lightgrey") + 
+  ggtitle("Redshank Greater Thames: Real") +
+  PlotExtEs +
+  theme_light()
+
+## Arrange plots side-by side and save
+RedEsSi <- grid.arrange(RedEsSi1, RedEsSi2, ncol=2)
+ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Redshank_Es_SiteComp.png", plot = RedEsSi, width = 40, height = 20, units = "cm")
 
 
 

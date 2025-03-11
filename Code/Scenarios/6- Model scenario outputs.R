@@ -10,12 +10,14 @@
 ## Load in packages & helper functions
 pacman::p_load(tidyverse, # used
                data.table,
-               sf) # used
+               sf, 
+               ggpubr) # used
 
 options(scipen=999) # turn off scientific notation
 source("Code/Helper functions.R") # additional simple functions 
 
-
+## Emmeans vignette:
+##- https://rvlenth.github.io/emmeans/articles/AQuickStart.html
 
 
 
@@ -169,8 +171,8 @@ confint(Mod1)
 ## Forest plot from model
 ## get the estimates and confidence intervals from the models
 Ests <- cbind(confint(Mod1))
-rownames(Ests) <- c("Intercept", "Region: Broads", "Region: Essex", "Region: North Kent", "Targetting: Large Sites", "Targetting: Small Sites ", "Location: Bigger", 
-                    "Location: More", "Mechanism: Reserve", "Mechanism: Reserve from Arable", "Quality: High-quality")
+rownames(Ests) <- c("Intercept", "Region: Broads", "Region: Essex", "Region: North Kent", "Scale: Large Sites", "Scale: Small Sites ", "Location: Bigger", 
+                    "Location: More", "Mechanism: Reserve", "Mechanism: Reserve\nfrom Arable", "Quality: High-quality")
 Ests <- Ests[!rownames(Ests)=="Intercept",] # remove the intercept
 Ests <- Ests |> as.data.frame()
 
@@ -189,27 +191,86 @@ level_order <- c(Ests$Param)
 
 
 ## Create forest plot
-ggplot(Ests) +
+FP <- ggplot(Ests) +
         #geom_vline(xintercept = 0, linetype = "dashed", alpha =0.5) +
         geom_errorbarh(aes(y= factor(Param, level = rev(level_order)), xmin= `2.5 %`, xmax=`97.5 %`), height = 0.2, linewidth =0.5) +
         geom_point(aes(y= factor(Param, level = rev(level_order)), x= Estimate, colour = Sig), size = 2.5) +
         theme_bw() +
         ylab("") +
+        xlab("Model Estimate") +
+        xlim(0, 20) +
         scale_color_manual(values=c("#E74C3C")) +
         theme(panel.grid.minor.y = element_blank(),
               #panel.grid.major.x = element_blank(),
               panel.grid.major.y = element_blank(),
-              axis.title=element_text(size=16), 
+              axis.title=element_text(size=18), 
               legend.title=element_text(size=14),
-              axis.text=element_text(size=14), 
+              axis.text=element_text(size=16), 
               legend.text=element_text(size=12),
               panel.grid.minor.x = element_blank(),
               legend.position = "none") 
 
 ## save the plot
-ggsave(plot=last_plot(), filename= "CleanData/Scenarios/6-ModelOutputs/Parameter_ForestPlot.png", units = "in", height = 8, width = 11)
+ggsave(plot=FP, filename= "CleanData/Scenarios/6-ModelOutputs/Parameter_ForestPlot.png", units = "in", height = 8, width = 11)
   
 
+
+##-- Plot EMMs --##
+
+## Retreiev all the Emmeans
+Emm1 <- as.data.frame(emmeans(Mod1, "ScenType"))
+colnames(Emm1)[1] <- "Var"
+Emm2 <- as.data.frame(emmeans(Mod1, "Strategy"))
+colnames(Emm2)[1] <- "Var"
+Emm3 <- as.data.frame(emmeans(Mod1, "NewCat"))
+colnames(Emm3)[1] <- "Var"
+Emm4 <- as.data.frame(emmeans(Mod1, "Plus"))
+colnames(Emm4)[1] <- "Var"
+
+## bind them all together
+Emms <- rbind(Emm1, Emm2, Emm3, Emm4)
+Emms$Var <- c("Scale: Random", "Scale: Large Sites", "Scale: Small Sites" , "Location: Better", "Location: Bigger",
+              "Location: More", "Mechanism: AES",  "Mechanism: Reserve", "Mechanism: Reserve\nfrom Arable", "Quality: Average-quality", "Quality: High-quality")
+
+## Define the order I want
+Emms$Pos <- c(6, 4, 5, 3, 1, 2, 9, 7, 8, 11, 10)
+Emms <- Emms[order(Emms$Pos), ]
+
+## make a forest plot fo the model estimates
+Emms <- Emms %>%
+        mutate(Param2 = Var)
+
+
+## this vector might be useful for other plots/analyses
+level_order2 <- c(Emms$Param)
+
+
+## Create plot
+EP <- ggplot(Emms) +
+        #geom_vline(xintercept = 0, linetype = "dashed", alpha =0.5) +
+        geom_errorbarh(aes(y= factor(Param2, level = rev(level_order2)), xmin= asymp.LCL, xmax=asymp.UCL), height = 0.2, linewidth =0.5) +
+        geom_point(aes(y= factor(Param2, level = rev(level_order2)), x= emmean), colour = "#E74C3C", size = 2.5) +
+        theme_bw() +
+        ylab("") +
+        xlab("Estimated Marginal Mean") +
+        xlim(0, 22.3) +
+        theme(panel.grid.minor.y = element_blank(),
+              #panel.grid.major.x = element_blank(),
+              panel.grid.major.y = element_blank(),
+              axis.title=element_text(size=18), 
+              legend.title=element_text(size=14),
+              axis.text=element_text(size=16), 
+              legend.text=element_text(size=12),
+              panel.grid.minor.x = element_blank(),
+              legend.position = "none") 
+
+## save the plot
+ggsave(plot=EP, filename= "CleanData/Scenarios/6-ModelOutputs/Parameter_EstMargMeans.png", units = "in", height = 8, width = 11)
+  
+
+## combine the two plots
+Combo <- ggarrange(EP, FP, nrow = 2)
+ggsave(plot=Combo, filename= "CleanData/Scenarios/6-ModelOutputs/Combined_estimates.png", units = "in", height = 14, width = 11)
 
 
 ##-- Comparisons --##
@@ -218,22 +279,21 @@ glimpse(SetD)
 emmeans(Mod1, specs = pairwise ~ ScenType + Strategy)
 emm <- emmeans(Mod1, ~ ScenType + Strategy)
 simp <- pairs(emm, simple = "each")
-pairs
 
-(Emm_ScenType <- emmeans(Mod1, "ScenType"))
-confint(pairs(Emm_ScenType))
+Emm_ScenType <-emmeans(Mod1, "ScenType")
+confint(pairs(Emm_ScenType, adjust = "mvt"))
 emmeans(Mod1, ~ ScenType) |> plot()
 
-(Emm_Strategy <- emmeans(Mod1, "Strategy"))
-confint(pairs(Emm_Strategy))
+Emm_Strategy <- emmeans(Mod1, "Strategy")
+confint(pairs(Emm_Strategy, adjust = "mvt"))
 emmeans(Mod1, ~ Strategy) |> plot()
  
-(Emm_NewCat <- emmeans(Mod1, "NewCat"))
-pairs(Emm_NewCat)
+Emm_NewCat <- emmeans(Mod1, "NewCat")
+confint(pairs(Emm_NewCat, adjust = "mvt"))
 emmeans(Mod1, ~ NewCat) |> plot()
 
-(Emm_Plus <- emmeans(Mod1, "Plus"))
-pairs(Emm_Plus)
+Emm_Plus <- emmeans(Mod1, "Plus")
+confint(pairs(Emm_Plus))
 emmeans(Mod1, ~ Plus) |> plot()
 
 
@@ -278,19 +338,19 @@ ModS <- glmmTMB((AbChange/(ChangeCostsFG/100000)) ~ ScenType + Strategy + NewCat
 summary(ModS)
 
 (Emm_ScenType <- emmeans(ModS, "ScenType"))
-confint(pairs(Emm_ScenType))
+confint(pairs(Emm_ScenType, adjust = "mvt"))
 emmeans(ModS, ~ ScenType) |> plot()
 
 (Emm_Strategy <- emmeans(ModS, "Strategy"))
-confint(pairs(Emm_Strategy))
+confint(pairs(Emm_Strategy, adjust = "mvt"))
 emmeans(ModS, ~ Strategy) |> plot()
  
 (Emm_NewCat <- emmeans(ModS, "NewCat"))
-confint(pairs(Emm_NewCat))
+confint(pairs(Emm_NewCat, adjust = "mvt"))
 emmeans(ModS, ~ NewCat) |> plot()
 
 (Emm_Plus <- emmeans(ModS, "Plus"))
-confint(pairs(Emm_Plus))
+confint(pairs(Emm_Plus, adjust = "mvt"))
 emmeans(ModS, ~ Plus) |> plot()
 
 
@@ -334,19 +394,19 @@ ModB <- glmmTMB((AbChange/(ChangeCostsFG/100000)) ~ ScenType + Strategy + NewCat
 summary(ModB)
 
 (Emm_ScenType <- emmeans(ModB, "ScenType"))
-confint(pairs(Emm_ScenType))
+confint(pairs(Emm_ScenType, adjust = "mvt"))
 emmeans(ModB, ~ ScenType) |> plot()
 
 (Emm_Strategy <- emmeans(ModB, "Strategy"))
-confint(pairs(Emm_Strategy))
+confint(pairs(Emm_Strategy, adjust = "mvt"))
 emmeans(ModB, ~ Strategy) |> plot()
  
 (Emm_NewCat <- emmeans(ModB, "NewCat"))
-confint(pairs(Emm_NewCat))
+confint(pairs(Emm_NewCat, adjust = "mvt"))
 emmeans(ModB, ~ NewCat) |> plot()
 
 (Emm_Plus <- emmeans(ModB, "Plus"))
-confint(pairs(Emm_Plus))
+confint(pairs(Emm_Plus, adjust = "mvt"))
 emmeans(ModB, ~ Plus) |> plot()
 
 
@@ -389,19 +449,19 @@ ModNK <- glmmTMB((AbChange/(ChangeCostsFG/100000)) ~ ScenType + Strategy + NewCa
 summary(ModNK)
 
 (Emm_ScenType <- emmeans(ModNK, "ScenType"))
-confint(pairs(Emm_ScenType))
+confint(pairs(Emm_ScenType, adjust = "mvt"))
 emmeans(ModNK, ~ ScenType) |> plot()
 
 (Emm_Strategy <- emmeans(ModNK, "Strategy"))
-confint(pairs(Emm_Strategy))
+confint(pairs(Emm_Strategy, adjust = "mvt"))
 emmeans(ModNK, ~ Strategy) |> plot()
  
 (Emm_NewCat <- emmeans(ModNK, "NewCat"))
-confint(pairs(Emm_NewCat))
+confint(pairs(Emm_NewCat, adjust = "mvt"))
 emmeans(ModNK, ~ NewCat) |> plot()
 
 (Emm_Plus <- emmeans(ModNK, "Plus"))
-pairs(Emm_Plus)
+pairs(Emm_Plus, adjust = "mvt")
 emmeans(ModNK, ~ Plus) |> plot()
 
 
@@ -444,19 +504,19 @@ ModEs <- glmmTMB((AbChange/(ChangeCostsFG/100000)) ~ ScenType + Strategy + NewCa
 summary(ModEs)
 
 (Emm_ScenType <- emmeans(ModEs, "ScenType"))
-confint(pairs(Emm_ScenType))
+confint(pairs(Emm_ScenType, adjust = "mvt"))
 emmeans(ModEs, ~ ScenType) |> plot()
 
 (Emm_Strategy <- emmeans(ModEs, "Strategy"))
-confint(pairs(Emm_Strategy))
+confint(pairs(Emm_Strategy, adjust = "mvt"))
 emmeans(ModEs, ~ Strategy) |> plot()
  
 (Emm_NewCat <- emmeans(ModEs, "NewCat"))
-pairs(Emm_NewCat)
+pairs(Emm_NewCat, adjust = "mvt")
 emmeans(ModEs, ~ NewCat) |> plot()
 
 (Emm_Plus <- emmeans(ModEs, "Plus"))
-pairs(Emm_Plus)
+pairs(Emm_Plus, adjust = "mvt")
 emmeans(ModEs, ~ Plus) |> plot()
 
 
