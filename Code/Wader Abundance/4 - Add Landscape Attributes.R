@@ -27,7 +27,7 @@ library(here)
 here()
 
 ## Global Setting: Buffer Distances to trial
-BuffDists <- seq(from = 2000, to = 2000, by = 250)
+BuffDists <- seq(from = 500, to = 2000, by = 500)
 
 
 
@@ -228,8 +228,8 @@ rm(KentW, Essex1W, Essex2W); gc()
 
 ## Calculate the mean weighted pixel value for each field
 ## First mask the ditches around each field using field parcels buffered in by 10m
-KentCanv <- st_read("CleanData/Starting Canvas/NKent_Canvas.shp") |> st_buffer(dist = -10)
-EssexCanv <- st_read("CleanData/Starting Canvas/Essex_Canvas.shp") |> st_buffer(dist = -10)
+KentCanv <- st_read("CleanData/Scenarios/1-Starting Canvas/NKent_Canvas.shp") |> st_buffer(dist = -10)
+EssexCanv <- st_read("CleanData/Scenarios/1-Starting Canvas/Essex_Canvas.shp") |> st_buffer(dist = -10)
 ThamesCanv <- rbind(KentCanv, EssexCanv)
 ThamesWat <- mask(ThamesWat, vect(ThamesCanv)); rm(ThamesCanv, KentCanv, EssexCanv)
 WadersThames <- filter(Waders, Landscape == "Greater Thames")
@@ -238,7 +238,7 @@ WadersThames <- Prop_Raster_Cov(Survey = WadersThames, Rast = ThamesWat, Dist = 
 
 ## Calculate the mean weighted pixel value for each field
 ## First mask the ditches around each field using field parcels buffered in by 10m
-SomCanv <- st_read("CleanData/Starting Canvas/Som_Canvas.shp") |> st_buffer(dist = -10)
+SomCanv <- st_read("CleanData/Scenarios/1-Starting Canvas/Som_Canvas.shp") |> st_buffer(dist = -10)
 SomW <- mask(SomW, vect(SomCanv)); rm(SomCanv)
 WadersSom <- filter(Waders, Landscape == "Somerset Levels and Moors")
 WadersSom <- Prop_Raster_Cov(Survey = WadersSom, Rast = SomW, Dist = BuffDists, Col = "Ave_WiderWater")
@@ -246,7 +246,7 @@ WadersSom <- Prop_Raster_Cov(Survey = WadersSom, Rast = SomW, Dist = BuffDists, 
 
 ## Calculate the mean weighted pixel value for each field
 ## First mask the ditches around each field using field parcels buffered in by 10m
-BroadCanv <- st_read("CleanData/Starting Canvas/Broads_Canvas.shp") |> st_buffer(dist = -10)
+BroadCanv <- st_read("CleanData/Scenarios/1-Starting Canvas/Broads_Canvas.shp") |> st_buffer(dist = -10)
 NorfolkW <- mask(NorfolkW, vect(BroadCanv)); rm(BroadCanv)
 WadersBroads <- filter(Waders, Landscape == "Broads")
 WadersBroads <- Prop_Raster_Cov(Survey = WadersBroads, Rast = NorfolkW, Dist = BuffDists, Col = "Ave_WiderWater")

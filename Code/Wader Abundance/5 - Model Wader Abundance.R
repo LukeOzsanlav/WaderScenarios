@@ -24,6 +24,10 @@ here::i_am("Code/Wader Abundance/5 - Model Wader Abundance.R")
 library(here)
 here()
 
+## seetings for plot font sizes
+FontSize <- theme(plot.title=element_text(size = 12), 
+                  legend.title=element_text(size = 11))
+
 
 
 ##----------------------##
@@ -72,6 +76,17 @@ hist(WData$Lap_Density, main = "Breeding Lapwing density")
 hist(WData$Red_Density, main = "Breeding Redshank density")
 hist(WData$Sni_Density, main = "Breeding Snipe density")
 
+## ## summarise the data by landscape
+WDatafilt <- WData |> 
+  filter(is.na(est_pairsL)==F | is.na(est_pairsR)==F | is.na(est_pairsS)==F)
+
+WDatafilt |> 
+  group_by(Landscape) |> 
+  summarise(TotArea = sum(FieldArea),
+            TotFields = length(unique(F_LOC_ID)))
+length(unique(WDatafilt$F_LOC_ID))
+sum(WDatafilt$FieldArea)
+
 
 
 ##--------------------------------------------------------------------------------------------------------------------##
@@ -105,13 +120,11 @@ LapF <- Lap |> drop_na(TALL_BOUNDARY_PERCENT, STANDING_WATER_TOTAL_PERCENT, STOC
 ## Select columns wanted for modelling
 colnames(LapF)
 LapF <- LapF |> 
-           select(est_pairsL, S_LOC_ID, Landscape, FieldArea, CorvDens,  Reserve, SSSI, ESS_Wader, CSS_Wader,
+           select(est_pairsL, S_LOC_ID, Landscape, FieldArea, CorvDens,  Reserve, SSSI, 
                   TALL_BOUNDARY_PERCENT, WaterCoverage, Lap_Density, InterTidal_Distm, GRASSLAND_TYPE, F_LOC_ID, Fence_Coverage,
                   STANDING_WATER_TOTAL_PERCENT, STOCK, VEG_STRUCTURE, GROUND_DAMP, RUSH_PERCENT, 
                   PropWood_500, PropUrban_500, PropWetGrass_500, Ave_WiderWater500,
-                  PropWood_750, PropUrban_750, PropWetGrass_750, Ave_WiderWater750,
                   PropWood_1000, PropUrban_1000, PropWetGrass_1000, Ave_WiderWater1000,
-                  PropWood_1250, PropUrban_1250, PropWetGrass_1250, Ave_WiderWater1250,
                   PropWood_1500, PropUrban_1500, PropWetGrass_1500, Ave_WiderWater1500,
                   PropWood_2000, PropUrban_2000, PropWetGrass_2000, Ave_WiderWater2000) 
 
@@ -120,17 +133,15 @@ LapF <- LapF |>
             mutate(across(c(est_pairsL, FieldArea, CorvDens, STANDING_WATER_TOTAL_PERCENT,  RUSH_PERCENT, 
                             WaterCoverage, Lap_Density, InterTidal_Distm, TALL_BOUNDARY_PERCENT, 
                             PropWood_500, PropUrban_500, PropWetGrass_500, Ave_WiderWater500,
-                            PropWood_750, PropUrban_750, PropWetGrass_750, Ave_WiderWater750,
                             PropWood_1000, PropUrban_1000, PropWetGrass_1000, Ave_WiderWater1000,
-                            PropWood_1250, PropUrban_1250, PropWetGrass_1250, Ave_WiderWater1250,
                             PropWood_1500, PropUrban_1500, PropWetGrass_1500, Ave_WiderWater1500,
                             PropWood_2000, PropUrban_2000, PropWetGrass_2000, Ave_WiderWater2000), as.numeric),
-                   across(c(Reserve, SSSI, ESS_Wader, CSS_Wader, STOCK, VEG_STRUCTURE, GROUND_DAMP, Landscape, GRASSLAND_TYPE, Fence_Coverage), as.factor)) %>% 
+                   across(c(Reserve, SSSI, STOCK, VEG_STRUCTURE, GROUND_DAMP, Landscape, GRASSLAND_TYPE, Fence_Coverage), as.factor)) %>% 
            as.data.frame()
 
 
 ## Summary of the number of data points used in the model
-nrow(LapF) # total number of feilds in the model
+nrow(LapF) # total number of fields in the model
 length(unique(LapF$S_LOC_ID))
 table(LapF$Landscape) # number of fields per region
 LapF |> group_by(Landscape) |> summarise(Sites = length(unique(S_LOC_ID))) # number of sites 
@@ -202,11 +213,11 @@ RF_fit <- rfsrc(est_pairsL ~ FieldArea + Landscape + CorvDens + GRASSLAND_TYPE +
                 data = Lap_train, ntree = 2000, mtry = 5, nodesize = 1)
 saveRDS(RF_fit, "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Objects/LapRF.rds") # Save model for later use if wanted
 
-## run full model with all the data
+# ## run full model with all the data
 # set.seed(112)
-# RF_fit <- rfsrc(est_pairsL ~ FieldArea + Landscape + CorvDens + GRASSLAND_TYPE + Fence_Coverage + 
-#                                WaterCoverage + TALL_BOUNDARY_PERCENT + STOCK + VEG_STRUCTURE + RUSH_PERCENT + 
-#                                WaterCoverage*Landscape + 
+# RF_fit <- rfsrc(est_pairsL ~ FieldArea + Landscape + CorvDens + GRASSLAND_TYPE + Fence_Coverage +
+#                                WaterCoverage + TALL_BOUNDARY_PERCENT + STOCK + VEG_STRUCTURE + RUSH_PERCENT +
+#                                WaterCoverage*Landscape +
 #                                PropWood_500 + PropUrban_500 + PropWetGrass_500 + Ave_WiderWater500 +
 #                                PropWood_1000 + PropUrban_1000 + PropWetGrass_1000 + Ave_WiderWater1000 +
 #                                PropWood_1500 + PropUrban_1500 + PropWetGrass_1500 + Ave_WiderWater1500 +
@@ -224,6 +235,7 @@ saveRDS(RF_fit, "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Objects/L
 ## (OOB) R squared = R squared of RF model
 ## Since MSE has scale invariance and lacks interpretation, standardized MSE, defined as the MSE divided by the variance of the outcome
 ## is used and converted to R squared or the percent of variance explained by a random forest model
+# RF_fit <- readRDS("CleanData/Wader Abundance/5-ModelWaderAbundance/Model Objects/LapRF.rds")
 RF_fit 
 sqrt(mean((Lap_train$est_pairsL - RF_fit$predicted.oob)^2)) # root mean square oob error
 
@@ -245,7 +257,7 @@ plot.variable(RF_fit, c("Fence_Coverage", "FieldArea", "Landscape"), partial = T
 dev.off()
 
 png(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Lapwing_VarRel2.png", width = 20, height = 10, units = "cm", res = 1200)
-plot.variable(RF_fit, c("WaterCoverage", "PropUrban_2000", "Ave_WiderWater500"), partial = TRUE)
+plot.variable(RF_fit, c("WaterCoverage","Ave_WiderWater500", "PropUrban_2000"), partial = TRUE)
 dev.off()
 
 
@@ -336,14 +348,16 @@ LapSFi1 <- ggplot() +
   geom_sf(data = LS_TestFields, mapping=aes(geometry=geometry, fill = (Predicted)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
   ggtitle("Lapwing Somerset: Predicted") +
-  theme_light()
+  labs(fill="Predicted\nbreeding pairs") +
+  theme_light() + FontSize
 
 LapSFi2 <- ggplot() + 
   geom_sf(data = LS_TestFields, mapping=aes(geometry=geometry, fill = (est_pairsL)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
-  ggtitle("Lapwing Somerset: Real") +
-  theme_light()
-
+  ggtitle("Lapwing Somerset: Observed") +
+  labs(fill="Observed\nbreeding pairs") +
+  theme_light() + FontSize
+ 
 ## Arrange plots side-by side and save
 LapSFi <- grid.arrange(LapSFi1, LapSFi2, ncol=2)
 ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Lapwing_Som_FieldComp.png", plot = LapSFi, width = 40, height = 20, units = "cm")
@@ -355,17 +369,21 @@ LapBFi1 <- ggplot() +
   geom_sf(data = LB_TestFields, mapping=aes(geometry=geometry, fill = (Predicted)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
   ggtitle("Lapwing Broads: Predicted") +
-  theme_light()
+  labs(fill="Predicted\nbreeding pairs") +
+  theme_light() + FontSize +
+  theme(legend.position = "bottom")
 
 LapBFi2 <-ggplot() + 
   geom_sf(data = LB_TestFields, mapping=aes(geometry=geometry, fill = (est_pairsL)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
-  ggtitle("Lapwing Broads: Real") +
-  theme_light()
+  ggtitle("Lapwing Broads: Observed") +
+  labs(fill="Observed\nbreeding pairs") +
+  theme_light() + FontSize +
+  theme(legend.position = "bottom")
 
 ## Arrange plots side-by side and save
 LapBFi <- grid.arrange(LapBFi1, LapBFi2, ncol=2)
-ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Lapwing_Broads_FieldComp.png", plot = LapBFi, width = 40, height = 20, units = "cm")
+ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Lapwing_Broads_FieldComp.png", plot = LapBFi, width = 22, height = 18, units = "cm")
 
 
 
@@ -378,19 +396,21 @@ LapNKFi1 <- ggplot() +
   geom_sf(data = LNK_TestFields, mapping=aes(geometry=geometry, fill = (Predicted)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
   ggtitle("Lapwing North Kent: Predicted") +
+  labs(fill="Predicted\nbreeding pairs") +
   PlotExtNK +
-  theme_light()
+  theme_light() + FontSize
 
 LapNKFi2 <- ggplot() + 
   geom_sf(data = LNK_TestFields, mapping=aes(geometry=geometry, fill = (est_pairsL)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
-  ggtitle("Lapwing North Kent: Real") +
+  ggtitle("Lapwing North Kent: Observed") +
+  labs(fill="Observed\nbreeding pairs") +
   PlotExtNK +
-  theme_light()
+  theme_light() + FontSize
 
 ## Arrange plots side-by side and save
-LapNKFi <- grid.arrange(LapNKFi1, LapNKFi2, ncol=2)
-ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Lapwing_NK_FieldComp.png", plot = LapNKFi, width = 40, height = 20, units = "cm")
+LapNKFi <- grid.arrange(LapNKFi1, LapNKFi2, nrow=2)
+ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Lapwing_NK_FieldComp.png", plot = LapNKFi, width = 20, height = 18, units = "cm")
 
 
 
@@ -403,19 +423,21 @@ LapEsFi1 <- ggplot() +
   geom_sf(data = LEs_TestFields, mapping=aes(geometry=geometry, fill = (Predicted)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
   ggtitle("Lapwing Essex: Predicted") +
+  labs(fill="Predicted\nbreeding pairs") +
   PlotExtEs +
-  theme_light()
+  theme_light() + FontSize
 
 LapEsFi2 <- ggplot() + 
   geom_sf(data = LEs_TestFields, mapping=aes(geometry=geometry, fill = (est_pairsL)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
-  ggtitle("Lapwing Essex: Real") +
+  ggtitle("Lapwing Essex: Observed") +
+  labs(fill="Observed\nbreeding pairs") +
   PlotExtEs +
-  theme_light()
+  theme_light() + FontSize
 
 ## Arrange plots side-by side and save
-LapEsFi <- grid.arrange(LapEsFi1, LapEsFi2, ncol=2)
-ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Lapwing_Es_FieldComp.png", plot = LapEsFi, width = 40, height = 20, units = "cm")
+LapEsFi <- grid.arrange(LapEsFi1, LapEsFi2, nrow=2)
+ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Lapwing_Es_FieldComp.png", plot = LapEsFi, width = 20, height = 21, units = "cm")
 
 
 
@@ -426,13 +448,13 @@ LapSSi1 <- ggplot() +
   geom_sf(data = LS_TestFields, mapping=aes(geometry=geometry, fill = (SitePopPred)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
   ggtitle("Lapwing Somerset: Predicted") +
-  theme_light()
+  theme_light() + FontSize
 
 LapSSi2 <- ggplot() + 
   geom_sf(data = LS_TestFields, mapping=aes(geometry=geometry, fill = (SitePopReal)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
-  ggtitle("Lapwing Somerset: Real") +
-  theme_light()
+  ggtitle("Lapwing Somerset: Observed") +
+  theme_light() + FontSize
 
 ## Arrange plots side-by side and save
 LapSSi <- grid.arrange(LapSSi1, LapSSi2, ncol=2)
@@ -445,17 +467,17 @@ LapBSi1 <- ggplot() +
   geom_sf(data = LB_TestFields, mapping=aes(geometry=geometry, fill = (SitePopPred)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
   ggtitle("Lapwing Broads: Predicted") +
-  theme_light()
+  theme_light() + FontSize
 
 LapBSi2 <- ggplot() + 
   geom_sf(data = LB_TestFields, mapping=aes(geometry=geometry, fill = (SitePopReal)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
-  ggtitle("Lapwing Broads: Real") +
-  theme_light()
+  ggtitle("Lapwing Broads: Observed") +
+  theme_light() + FontSize
 
 ## Arrange plots side-by side and save
 LapBSi <- grid.arrange(LapBSi1, LapBSi2, ncol=2)
-ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Lapwing_Broads_SiteComp.png", plot = LapBSi, width = 40, height = 20, units = "cm")
+ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Lapwing_Broads_SiteComp.png", plot = LapBSi, width = 22, height = 18, units = "cm")
 
 
 
@@ -465,18 +487,18 @@ LapNKSi1 <- ggplot() +
   scale_fill_viridis_c(na.value = "lightgrey") + 
   ggtitle("Lapwing North Kent: Predicted") +
   PlotExtNK +
-  theme_light()
+  theme_light() + FontSize
 
 LapNKSi2 <- ggplot() + 
   geom_sf(data = LNK_TestFields, mapping=aes(geometry=geometry, fill = (SitePopReal)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
-  ggtitle("Lapwing North Kent: Real") +
+  ggtitle("Lapwing North Kent: Observed") +
   PlotExtNK +
-  theme_light()
+  theme_light() + FontSize
 
 ## Arrange plots side-by side and save
-LapNKSi <- grid.arrange(LapNKSi1, LapNKSi2, ncol=2)
-ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Lapwing_NK_SiteComp.png", plot = LapNKSi, width = 40, height = 20, units = "cm")
+LapNKSi <- grid.arrange(LapNKSi1, LapNKSi2, nrow=2)
+ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Lapwing_NK_SiteComp.png", plot = LapNKSi, width = 15, height = 12, units = "cm")
 
 
 
@@ -486,18 +508,18 @@ LapEsSi1 <- ggplot() +
   scale_fill_viridis_c(na.value = "lightgrey") + 
   ggtitle("Lapwing Essex: Predicted") +
   PlotExtEs +
-  theme_light()
+  theme_light() + FontSize
 
 LapEsSi2 <- ggplot() + 
   geom_sf(data = LEs_TestFields, mapping=aes(geometry=geometry, fill = (SitePopReal)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
-  ggtitle("Lapwing Essex: Real") +
+  ggtitle("Lapwing Essex: Observed") +
   PlotExtEs +
-  theme_light()
+  theme_light() + FontSize
 
 ## Arrange plots side-by side and save
-LapEsSi <- grid.arrange(LapEsSi1, LapEsSi2, ncol=2)
-ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Lapwing_Es_SiteComp.png", plot = LapEsSi, width = 40, height = 20, units = "cm")
+LapEsSi <- grid.arrange(LapEsSi1, LapEsSi2, nrow=2)
+ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Lapwing_Es_SiteComp.png", plot = LapEsSi, width = 15, height = 16, units = "cm")
 
 
 
@@ -534,13 +556,11 @@ RedF <- Red |> drop_na(TALL_BOUNDARY_PERCENT, STANDING_WATER_TOTAL_PERCENT, STOC
 ## Select columns wanted for modelling
 colnames(RedF)
 RedF <- RedF |> 
-           select(est_pairsR, S_LOC_ID, Landscape, FieldArea, CorvDens,  Reserve, SSSI, ESS_Wader, CSS_Wader,
+           select(est_pairsR, S_LOC_ID, Landscape, FieldArea, CorvDens,  Reserve, SSSI, 
                   TALL_BOUNDARY_PERCENT, WaterCoverage, Red_Density, InterTidal_Distm, GRASSLAND_TYPE, F_LOC_ID, Fence_Coverage,
                   STANDING_WATER_TOTAL_PERCENT, STOCK, VEG_STRUCTURE, GROUND_DAMP, RUSH_PERCENT, 
                   PropWood_500, PropUrban_500, PropWetGrass_500, Ave_WiderWater500,
-                  PropWood_750, PropUrban_750, PropWetGrass_750, Ave_WiderWater750,
                   PropWood_1000, PropUrban_1000, PropWetGrass_1000, Ave_WiderWater1000,
-                  PropWood_1250, PropUrban_1250, PropWetGrass_1250, Ave_WiderWater1250,
                   PropWood_1500, PropUrban_1500, PropWetGrass_1500, Ave_WiderWater1500,
                   PropWood_2000, PropUrban_2000, PropWetGrass_2000, Ave_WiderWater2000) 
 
@@ -549,12 +569,10 @@ RedF <- RedF |>
             mutate(across(c(est_pairsR, FieldArea, CorvDens, STANDING_WATER_TOTAL_PERCENT,  RUSH_PERCENT, 
                             WaterCoverage, Red_Density, InterTidal_Distm, TALL_BOUNDARY_PERCENT, 
                             PropWood_500, PropUrban_500, PropWetGrass_500, Ave_WiderWater500,
-                            PropWood_750, PropUrban_750, PropWetGrass_750, Ave_WiderWater750,
                             PropWood_1000, PropUrban_1000, PropWetGrass_1000, Ave_WiderWater1000,
-                            PropWood_1250, PropUrban_1250, PropWetGrass_1250, Ave_WiderWater1250,
                             PropWood_1500, PropUrban_1500, PropWetGrass_1500, Ave_WiderWater1500,
                             PropWood_2000, PropUrban_2000, PropWetGrass_2000, Ave_WiderWater2000), as.numeric),
-                   across(c(Reserve, SSSI, ESS_Wader, CSS_Wader, STOCK, VEG_STRUCTURE, GROUND_DAMP, Landscape, GRASSLAND_TYPE, Fence_Coverage), as.factor)) %>% 
+                   across(c(Reserve, SSSI,  STOCK, VEG_STRUCTURE, GROUND_DAMP, Landscape, GRASSLAND_TYPE, Fence_Coverage), as.factor)) %>% 
            as.data.frame()
 
 
@@ -631,7 +649,7 @@ RF_fit <- rfsrc(est_pairsR ~ FieldArea + Landscape + CorvDens + GRASSLAND_TYPE +
                 data = Red_train, ntree = 2000, mtry = 5, nodesize = 1)
 saveRDS(RF_fit, "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Objects/RedRF.rds") # Save model for later use if wanted
 
-## run model on full data
+# # run model on full data
 # set.seed(1212)
 # RF_fit <- rfsrc(est_pairsR ~ FieldArea + Landscape + CorvDens + GRASSLAND_TYPE + Fence_Coverage +
 #                                WaterCoverage + TALL_BOUNDARY_PERCENT + STOCK + VEG_STRUCTURE + RUSH_PERCENT +
@@ -653,6 +671,7 @@ saveRDS(RF_fit, "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Objects/R
 ## (OOB) R squared = R squared of RF model
 ## Since MSE has scale invariance and lacks interpretation, standardized MSE, defined as the MSE divided by the variance of the outcome
 ## is used and converted to R squared or the percent of variance explained by a random forest model
+# RF_fit <- readRDS("CleanData/Wader Abundance/5-ModelWaderAbundance/Model Objects/RedRF.rds")
 RF_fit
 sqrt(mean((Red_train$est_pairsR - RF_fit$predicted.oob)^2)) # root mean square oob error
 
@@ -674,7 +693,7 @@ plot.variable(RF_fit, c("FieldArea","Fence_Coverage", "PropUrban_2000"), partial
 dev.off()
 
 png(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Redshank_VarRel2.png", width = 20, height = 10, units = "cm", res = 1200)
-plot.variable(RF_fit, c("Ave_WiderWater500", "PropWetGrass_1000","PropWetGrass_1500"), partial = TRUE)
+plot.variable(RF_fit, c("Ave_WiderWater500", "WaterCoverage","PropWetGrass_1000"), partial = TRUE)
 dev.off()
 
 
@@ -761,17 +780,21 @@ RedBFi1 <- ggplot() +
   geom_sf(data = RB_TestFields, mapping=aes(geometry=geometry, fill = (Predicted)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
   ggtitle("Redshank Broads: Predicted") +
-  theme_light()
+  labs(fill="Predicted\nbreeding pairs") +
+  theme_light() + FontSize +
+  theme(legend.position = "bottom")
 
 RedBFi2 <-ggplot() + 
   geom_sf(data = RB_TestFields, mapping=aes(geometry=geometry, fill = (est_pairsR)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
-  ggtitle("Redshank Broads: Real") +
-  theme_light()
+  ggtitle("Redshank Broads: Observed") +
+  labs(fill="Observed\nbreeding pairs") +
+  theme_light() + FontSize +
+  theme(legend.position = "bottom")
 
 ## Arrange plots side-by side and save
 RedBFi <- grid.arrange(RedBFi1, RedBFi2, ncol=2)
-ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Redshank_Broads_FieldComp.png", plot = RedBFi, width = 40, height = 20, units = "cm")
+ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Redshank_Broads_FieldComp.png", plot = RedBFi, width = 20, height = 16, units = "cm")
 
 
 
@@ -784,19 +807,21 @@ RedNKFi1 <- ggplot() +
   geom_sf(data = RNK_TestFields, mapping=aes(geometry=geometry, fill = (Predicted)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
   ggtitle("Redshank North Kent: Predicted") +
+  labs(fill="Predicted\nbreeding pairs") +
   PlotExtNK +
-  theme_light()
+  theme_light() + FontSize
 
 RedNKFi2 <- ggplot() + 
   geom_sf(data = RNK_TestFields, mapping=aes(geometry=geometry, fill = (est_pairsR)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
-  ggtitle("Redshank North Kent: Real") +
+  ggtitle("Redshank North Kent: Observed") +
+  labs(fill="Observed\nbreeding pairs") +
   PlotExtNK +
-  theme_light()
+  theme_light() + FontSize
 
 ## Arrange plots side-by side and save
-RedNKFi <- grid.arrange(RedNKFi1, RedNKFi2, ncol=2)
-ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Redshank_NK_FieldComp.png", plot = RedNKFi, width = 40, height = 20, units = "cm")
+RedNKFi <- grid.arrange(RedNKFi1, RedNKFi2, nrow=2)
+ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Redshank_NK_FieldComp.png", plot = RedNKFi, width = 20, height = 18, units = "cm")
 
 
 
@@ -808,20 +833,22 @@ PlotExtEs <- coord_sf(xlim = c(st_bbox(REs_TestFields)[1]-1000, st_bbox(REs_Test
 RedEsFi1 <- ggplot() + 
   geom_sf(data = REs_TestFields, mapping=aes(geometry=geometry, fill = (Predicted)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
-  ggtitle("Redshank North Kent: Predicted") +
+  ggtitle("Redshank Essex: Predicted") +
+  labs(fill="Predicted\nbreeding pairs") +
   PlotExtEs +
-  theme_light()
+  theme_light() + FontSize
 
 RedEsFi2 <- ggplot() + 
   geom_sf(data = REs_TestFields, mapping=aes(geometry=geometry, fill = (est_pairsR)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
-  ggtitle("Redshank North Kent: Real") +
+  ggtitle("Redshank Essex: Observed") +
+  labs(fill="Observed\nbreeding pairs") +
   PlotExtEs +
-  theme_light()
+  theme_light() + FontSize
 
 ## Arrange plots side-by side and save
-RedEsFi <- grid.arrange(RedEsFi1, RedEsFi2, ncol=2)
-ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Redshank_Es_FieldComp.png", plot = RedEsFi, width = 40, height = 20, units = "cm")
+RedEsFi <- grid.arrange(RedEsFi1, RedEsFi2, nrow=2)
+ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Redshank_Es_FieldComp.png", plot = RedEsFi, width = 20, height = 21, units = "cm")
 
 
 
@@ -831,17 +858,21 @@ RedBSi1 <- ggplot() +
   geom_sf(data = RB_TestFields, mapping=aes(geometry=geometry, fill = (SitePopPred)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
   ggtitle("Redshank Broads: Predicted") +
-  theme_light()
+  labs(fill="Predicted\nbreeding pairs") +
+  theme_light() + FontSize +
+  theme(legend.position = "bottom")
 
 RedBSi2 <- ggplot() + 
   geom_sf(data = RB_TestFields, mapping=aes(geometry=geometry, fill = (SitePopReal)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
-  ggtitle("Redshank Broads: Real") +
-  theme_light()
+  ggtitle("Redshank Broads: Observed") +
+  labs(fill="Observed\nbreeding pairs") +
+  theme_light() + FontSize +
+  theme(legend.position = "bottom")
 
 ## Arrange plots side-by side and save
 RedBSi <- grid.arrange(RedBSi1, RedBSi2, ncol=2)
-ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Redshank_Broads_SiteComp.png", plot = RedBSi, width = 40, height = 20, units = "cm")
+ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Redshank_Broads_SiteComp.png", plot = RedBSi, width = 22, height = 15, units = "cm")
 
 
 
@@ -850,19 +881,21 @@ RedNKSi1 <- ggplot() +
   geom_sf(data = RNK_TestFields, mapping=aes(geometry=geometry, fill = (SitePopPred)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
   ggtitle("Redshank Greater Thames: Predicted") +
+  labs(fill="Predicted\nbreeding pairs") +
   PlotExtNK +
-  theme_light()
+  theme_light() + FontSize
 
 RedNKSi2 <- ggplot() + 
   geom_sf(data = RNK_TestFields, mapping=aes(geometry=geometry, fill = (SitePopReal)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
-  ggtitle("Redshank Greater Thames: Real") +
+  ggtitle("Redshank Greater Thames: Observed") +
+  labs(fill="Observed\nbreeding pairs") +
   PlotExtNK +
-  theme_light()
+  theme_light() + FontSize
 
 ## Arrange plots side-by side and save
-RedNKSi <- grid.arrange(RedNKSi1, RedNKSi2, ncol=2)
-ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Redshank_NK_SiteComp.png", plot = RedNKSi, width = 40, height = 20, units = "cm")
+RedNKSi <- grid.arrange(RedNKSi1, RedNKSi2, nrow=2)
+ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Redshank_NK_SiteComp.png", plot = RedNKSi, width = 15, height = 12, units = "cm")
 
 
 ## Plot predicted vs real Redshank abundance for Essex
@@ -870,19 +903,21 @@ RedEsSi1 <- ggplot() +
   geom_sf(data = REs_TestFields, mapping=aes(geometry=geometry, fill = (SitePopPred)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
   ggtitle("Redshank Greater Thames: Predicted") +
+  labs(fill="Predicted\nbreeding pairs") +
   PlotExtEs +
-  theme_light()
+  theme_light() + FontSize
 
 RedEsSi2 <- ggplot() + 
   geom_sf(data = REs_TestFields, mapping=aes(geometry=geometry, fill = (SitePopReal)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
-  ggtitle("Redshank Greater Thames: Real") +
+  ggtitle("Redshank Greater Thames: Observed") +
+  labs(fill="Observed\nbreeding pairs") +
   PlotExtEs +
-  theme_light()
+  theme_light() + FontSize
 
 ## Arrange plots side-by side and save
-RedEsSi <- grid.arrange(RedEsSi1, RedEsSi2, ncol=2)
-ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Redshank_Es_SiteComp.png", plot = RedEsSi, width = 40, height = 20, units = "cm")
+RedEsSi <- grid.arrange(RedEsSi1, RedEsSi2, nrow=2)
+ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Redshank_Es_SiteComp.png", plot = RedEsSi, width = 15, height = 16, units = "cm")
 
 
 
@@ -920,13 +955,11 @@ SnipeF <- Snipe |> drop_na(TALL_BOUNDARY_PERCENT, STANDING_WATER_TOTAL_PERCENT, 
 ## Select columns wanted for modelling
 colnames(SnipeF)
 SnipeF <- SnipeF |> 
-           select(est_pairsS, S_LOC_ID, Landscape, FieldArea, CorvDens,  Reserve, SSSI, ESS_Wader, CSS_Wader,
+           select(est_pairsS, S_LOC_ID, Landscape, FieldArea, CorvDens,  Reserve, SSSI, 
                   TALL_BOUNDARY_PERCENT, WaterCoverage, Red_Density, InterTidal_Distm, GRASSLAND_TYPE, F_LOC_ID, Fence_Coverage,
                   STANDING_WATER_TOTAL_PERCENT, STOCK, VEG_STRUCTURE, GROUND_DAMP, RUSH_PERCENT, Peat_Soil,
                   PropWood_500, PropUrban_500, PropWetGrass_500, Ave_WiderWater500,
-                  PropWood_750, PropUrban_750, PropWetGrass_750, Ave_WiderWater750,
                   PropWood_1000, PropUrban_1000, PropWetGrass_1000, Ave_WiderWater1000,
-                  PropWood_1250, PropUrban_1250, PropWetGrass_1250, Ave_WiderWater1250,
                   PropWood_1500, PropUrban_1500, PropWetGrass_1500, Ave_WiderWater1500,
                   PropWood_2000, PropUrban_2000, PropWetGrass_2000, Ave_WiderWater2000) 
 
@@ -935,12 +968,10 @@ SnipeF <- SnipeF |>
             mutate(across(c(est_pairsS, FieldArea, CorvDens, STANDING_WATER_TOTAL_PERCENT,  RUSH_PERCENT, 
                             WaterCoverage, Red_Density, InterTidal_Distm, TALL_BOUNDARY_PERCENT, 
                             PropWood_500, PropUrban_500, PropWetGrass_500, Ave_WiderWater500,
-                            PropWood_750, PropUrban_750, PropWetGrass_750, Ave_WiderWater750,
                             PropWood_1000, PropUrban_1000, PropWetGrass_1000, Ave_WiderWater1000,
-                            PropWood_1250, PropUrban_1250, PropWetGrass_1250, Ave_WiderWater1250,
                             PropWood_1500, PropUrban_1500, PropWetGrass_1500, Ave_WiderWater1500,
                             PropWood_2000, PropUrban_2000, PropWetGrass_2000, Ave_WiderWater2000), as.numeric),
-                   across(c(Reserve, SSSI, ESS_Wader, CSS_Wader, STOCK, VEG_STRUCTURE, GROUND_DAMP, Landscape, GRASSLAND_TYPE, Fence_Coverage, Peat_Soil), as.factor)) %>% 
+                   across(c(Reserve, SSSI, STOCK, VEG_STRUCTURE, GROUND_DAMP, Landscape, GRASSLAND_TYPE, Fence_Coverage, Peat_Soil), as.factor)) %>% 
            as.data.frame()
 
 SnipeF <- SnipeF |> mutate(est_pairsSW = as.factor(round2(est_pairsS, digits =0)))
@@ -1039,13 +1070,15 @@ saveRDS(RF_fit, "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Objects/S
 # saveRDS(RF_fit, "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Objects/SnipeRF_FullData.rds") # Save model for later use if wanted
 
 
-RF_fit # model summary
-sqrt(mean((Sni_train$est_pairsS - RF_fit$predicted.oob)^2)) # root mean square oob error
+
 ## Model performance is displayed in terms of out-of-bag (OOB) prediction error. 
 ## (OOB) Requested performance error = mean square oob error, mean(real-oob predicted)^2
 ## (OOB) R squared = R squared of RF model
 ## Since MSE has scale invariance and lacks interpretation, standardized MSE, defined as the MSE divided by the variance of the outcome
 ## is used and converted to R squared or the percent of variance explained by a random forest model
+# RF_fit <- readRDS("CleanData/Wader Abundance/5-ModelWaderAbundance/Model Objects/SnipeRF.rds")
+RF_fit # model summary
+sqrt(mean((Sni_train$est_pairsS - RF_fit$predicted.oob)^2)) # root mean square oob error
 
 ## plot variable importance
 ## VIMP (variable importance) is a technique for estimating the importance of a variable by 
@@ -1121,17 +1154,21 @@ SniSFi1 <- ggplot() +
   geom_sf(data = S_TestFields, mapping=aes(geometry=geometry, fill = (Predicted)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
   ggtitle("Snipe Somerset: Predicted") +
-  theme_light()
+  labs(fill="Predicted\nbreeding pairs") +
+  theme_light() + FontSize+
+  theme(legend.position = "bottom")
 
 SniSFi2 <- ggplot() + 
   geom_sf(data = S_TestFields, mapping=aes(geometry=geometry, fill = (est_pairsS)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
-  ggtitle("Snipe Somerset: Real") +
-  theme_light()
+  ggtitle("Snipe Somerset: Observed") +
+  labs(fill="Observed\nbreeding pairs") +
+  theme_light() + FontSize +
+  theme(legend.position = "bottom")
 
 ## Arrange plots side-by side and save
 SniSFi <- grid.arrange(SniSFi1, SniSFi2, ncol=2)
-ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Snipe_Som_FieldComp.png", plot = SniSFi, width = 40, height = 20, units = "cm")
+ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Snipe_Som_FieldComp.png", plot = SniSFi, width = 30, height = 20, units = "cm")
 
 
 
@@ -1141,17 +1178,21 @@ SniSSi1 <- ggplot() +
   geom_sf(data = S_TestFields, mapping=aes(geometry=geometry, fill = (SitePopPred)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
   ggtitle("Snipe Somerset: Predicted") +
-  theme_light()
+  labs(fill="Predicted\nbreeding pairs") +
+  theme_light() + FontSize+
+  theme(legend.position = "bottom")
 
 SniSSi2 <- ggplot() + 
   geom_sf(data = S_TestFields, mapping=aes(geometry=geometry, fill = (SitePopReal)), colour = NA) +
   scale_fill_viridis_c(na.value = "lightgrey") + 
-  ggtitle("Snipe Somerset: Real") +
-  theme_light()
+  ggtitle("Snipe Somerset: Observed") +
+  labs(fill="Observed\nbreeding pairs") +
+  theme_light() + FontSize+
+  theme(legend.position = "bottom")
 
 ## Arrange plots side-by side and save
 SniSSi <- grid.arrange(SniSSi1, SniSSi2, ncol=2)
-ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Snipe_Som_SiteComp.png", plot = SniSSi, width = 40, height = 20, units = "cm")
+ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Snipe_Som_SiteComp.png", plot = SniSSi, width = 30, height = 20, units = "cm")
 
 
 

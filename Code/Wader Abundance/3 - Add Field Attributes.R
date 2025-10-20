@@ -70,10 +70,10 @@ NNR <- st_read(here("RawData", "Other Reserves", "National_Nature_Reserves_Engla
 ## SSSI's 
 SSSI <- st_read(here("RawData", "PAs", "Sites_of_Special_Scientific_Interest_England.shp"))
 
-## Read in the Different Stewardship Schemes
-CSS <- st_read(here("RawData", "Stewardship", "Countryside_Stewardship_Scheme_2016_Management_Areas_England.shp"))
-CSS_Ops <- st_read(here("RawData", "Stewardship", "Countryside_Stewardship_Scheme_Management_Options_(England)___Natural_England.shp"))
-ESS <- st_read(here("RawData", "Stewardship", "Environmental_Stewardship_Scheme_Agreements_(England)___Natural_England.shp"))
+# ## Read in the Different Stewardship Schemes
+# CSS <- st_read(here("RawData", "Stewardship", "Countryside_Stewardship_Scheme_2016_Management_Areas_England.shp"))
+# CSS_Ops <- st_read(here("RawData", "Stewardship", "Countryside_Stewardship_Scheme_Management_Options_(England)___Natural_England.shp"))
+# ESS <- st_read(here("RawData", "Stewardship", "Environmental_Stewardship_Scheme_Agreements_(England)___Natural_England.shp"))
 
 
 
@@ -424,99 +424,99 @@ ggplot() + geom_sf(data = DataCheck, mapping = aes(geometry = geometry, fill = S
 ##---------------------------------------------------------------##
 #### 6.4 Identify Fields that Overlap with Stewardship Schemes ####
 ##---------------------------------------------------------------##
-
-## Check Types of ESS and CSS
-table(CSS$cs_type)
-table(ESS$scheme)
-table(CSS_Ops$opt_code)
-
-
-## Identify CSS Higher Tier
-CSSH <- filter(CSS, cs_type == "Higher Tier")
-Waders <- Field_Overlap_IDer(Fields = Waders, OverlapShapes = CSSH, 
-                              Thresh = 0.5, ColName = "CSS_Higher")
-rm(CSSH);gc()
-
-
-## Identify CSS Mid Tier
-CSSM <- filter(CSS, cs_type == "Mid Tier")
-Waders <- Field_Overlap_IDer(Fields = Waders, OverlapShapes = CSSM, 
-                              Thresh = 0.5, ColName = "CSS_Mid")
-rm(CSSM);gc()
-
-
-## Identify ESS Higher Tier or Entry Level plus Higher Level Stewardship
-ESSH <- filter(ESS, scheme %in% c("Entry Level plus Higher Level Stewardship", "Higher Level Stewardship"))
-Waders <- Field_Overlap_IDer(Fields = Waders, OverlapShapes = ESSH, 
-                              Thresh = 0.5, ColName = "ESS_Higher")
-rm(ESSH);gc()
-
-
-## plots to check
-DataCheck2 <- filter(Waders, Landscape == "Greater Thames") # Somerset Levels and Moors # Broads
-ggplot() + geom_sf(data = DataCheck2, mapping = aes(geometry = geometry, fill = CSS_Higher), colour = NA) + theme_minimal()
-ggplot() + geom_sf(data = DataCheck2, mapping = aes(geometry = geometry, fill = CSS_Mid), colour = NA) + theme_minimal()
-ggplot() + geom_sf(data = DataCheck2, mapping = aes(geometry = geometry, fill = ESS_Higher), colour = NA) + theme_minimal()
-
-
-
-## Add column to ESS data to indicate if agreements includes options that benefit waders or general options that could benefit waders
-## See Table 3 of Rob's BWWM report for what is classified as "wader focused" and "general" options
-ESS <- ESS |> 
-  mutate(Wader_Focus = paste0(ifelse(is.na(str_match(optsonag, "HK9|HK10|HK11|HK12|HK13|HK14|HK19"))==T, "N", "Y")),
-         General_Focus = paste0(ifelse(is.na(str_match(optsonag, "DR|WDC|HK15|HK16|HK17|EK2|OK2|HK2|OHK2|EK3|OK3|HK3|OHK3|EK4|OK4|HK4|OHK4|HK6|HK7|HK8|HL8|HQ3|HQ4|HQ5|HQ6HQ7|HQ8|HR6|EK21|HK21|OHK21"))==T, "N", "Y")))
-
-## Identify ESS With wader focused options
-ESSWa <- filter(ESS, Wader_Focus == "Y")
-Waders <- Field_Overlap_IDer(Fields = Waders, OverlapShapes = ESSWa, 
-                              Thresh = 0.5, ColName = "ESS_Wader")
-rm(ESSWa);gc()
-
-## Identify ESS With general options benefiting waders
-ESSGen <- filter(ESS, General_Focus == "Y")
-Waders <- Field_Overlap_IDer(Fields = Waders, OverlapShapes = ESSGen, 
-                              Thresh = 0.5, ColName = "ESS_Gen")
-rm(ESSGen);gc()
-
-
-## plots to check
-DataCheck3 <- filter(Waders, Landscape == "Greater Thames") # Somerset Levels and Moors # Broads
-ggplot() + geom_sf(data = DataCheck3, mapping = aes(geometry = geometry, fill = ESS_Wader), colour = NA) + theme_minimal()
-ggplot() + geom_sf(data = DataCheck3, mapping = aes(geometry = geometry, fill = ESS_Gen), colour = NA) + theme_minimal()
-
-
-
-## Add column to CSS data to indicate if agreements includes options that benefit waders or general options that could benefit waders
-## See Table 3 of Rob's BWWM report for what is classified as "wader focused" and "general" options
-## Filter out wader focused options
-CSS_OpsWa <- filter(CSS_Ops, opt_code %in% c("GS9", "GS10", "GS11", "GS12"))
-## Filter out general options
-CSS_OpsGe <- filter(CSS_Ops, opt_code %in% c("WN3", "WN4", "GS2", "GS5", "GS6", "GS7", "GS8", "UP2", "WT6", "WT7", "WT8", "WT9", "GS4", "GS13", "GS14", "GS16"))
-
-## Since these CSS options are points, determine if a points falls within one of the survey fields
-## And label each field whether a wader specific CSS point fell within it
-CSS_InterWa <- as.data.frame(st_covers(Waders, CSS_OpsWa))
-Waders$CSS_Wader <- "N"
-Waders$CSS_Wader[CSS_InterWa$row.id] <- "Y"
-
-## Since these CSS options are points, determine if a points falls within one of the survey fields
-## And label each field whether a general CSS point fell within it
-CSS_InterGe <- as.data.frame(st_covers(Waders, CSS_OpsGe))
-Waders$CSS_Gen <- "N"
-Waders$CSS_Gen[CSS_InterGe$row.id] <- "Y"
-
-
-## plots to check
-DataCheck4 <- filter(Waders, Landscape == "Somerset Levels and Moors") # Greater Thames # Broads
-CSS_OpsWa2 <- st_crop(CSS_OpsWa, DataCheck4) # crop to size
-CSS_OpsGe2 <- st_crop(CSS_OpsGe, DataCheck4) # crop to size
-ggplot() + geom_sf(data = DataCheck4, mapping = aes(geometry = geometry, fill = CSS_Wader), colour = NA) + 
-           geom_sf(data = CSS_OpsWa2, mapping = aes(geometry = geometry), fill = "purple") + 
-           theme_minimal()
-ggplot() + geom_sf(data = DataCheck4, mapping = aes(geometry = geometry, fill = CSS_Gen), colour = NA) +
-           geom_sf(data = CSS_OpsGe2, mapping = aes(geometry = geometry, fill = "purple")) + 
-           theme_minimal()
-
+# 
+# ## Check Types of ESS and CSS
+# table(CSS$cs_type)
+# table(ESS$scheme)
+# table(CSS_Ops$opt_code)
+# 
+# 
+# ## Identify CSS Higher Tier
+# CSSH <- filter(CSS, cs_type == "Higher Tier")
+# Waders <- Field_Overlap_IDer(Fields = Waders, OverlapShapes = CSSH, 
+#                               Thresh = 0.5, ColName = "CSS_Higher")
+# rm(CSSH);gc()
+# 
+# 
+# ## Identify CSS Mid Tier
+# CSSM <- filter(CSS, cs_type == "Mid Tier")
+# Waders <- Field_Overlap_IDer(Fields = Waders, OverlapShapes = CSSM, 
+#                               Thresh = 0.5, ColName = "CSS_Mid")
+# rm(CSSM);gc()
+# 
+# 
+# ## Identify ESS Higher Tier or Entry Level plus Higher Level Stewardship
+# ESSH <- filter(ESS, scheme %in% c("Entry Level plus Higher Level Stewardship", "Higher Level Stewardship"))
+# Waders <- Field_Overlap_IDer(Fields = Waders, OverlapShapes = ESSH, 
+#                               Thresh = 0.5, ColName = "ESS_Higher")
+# rm(ESSH);gc()
+# 
+# 
+# ## plots to check
+# DataCheck2 <- filter(Waders, Landscape == "Greater Thames") # Somerset Levels and Moors # Broads
+# ggplot() + geom_sf(data = DataCheck2, mapping = aes(geometry = geometry, fill = CSS_Higher), colour = NA) + theme_minimal()
+# ggplot() + geom_sf(data = DataCheck2, mapping = aes(geometry = geometry, fill = CSS_Mid), colour = NA) + theme_minimal()
+# ggplot() + geom_sf(data = DataCheck2, mapping = aes(geometry = geometry, fill = ESS_Higher), colour = NA) + theme_minimal()
+# 
+# 
+# 
+# ## Add column to ESS data to indicate if agreements includes options that benefit waders or general options that could benefit waders
+# ## See Table 3 of Rob's BWWM report for what is classified as "wader focused" and "general" options
+# ESS <- ESS |> 
+#   mutate(Wader_Focus = paste0(ifelse(is.na(str_match(optsonag, "HK9|HK10|HK11|HK12|HK13|HK14|HK19"))==T, "N", "Y")),
+#          General_Focus = paste0(ifelse(is.na(str_match(optsonag, "DR|WDC|HK15|HK16|HK17|EK2|OK2|HK2|OHK2|EK3|OK3|HK3|OHK3|EK4|OK4|HK4|OHK4|HK6|HK7|HK8|HL8|HQ3|HQ4|HQ5|HQ6HQ7|HQ8|HR6|EK21|HK21|OHK21"))==T, "N", "Y")))
+# 
+# ## Identify ESS With wader focused options
+# ESSWa <- filter(ESS, Wader_Focus == "Y")
+# Waders <- Field_Overlap_IDer(Fields = Waders, OverlapShapes = ESSWa, 
+#                               Thresh = 0.5, ColName = "ESS_Wader")
+# rm(ESSWa);gc()
+# 
+# ## Identify ESS With general options benefiting waders
+# ESSGen <- filter(ESS, General_Focus == "Y")
+# Waders <- Field_Overlap_IDer(Fields = Waders, OverlapShapes = ESSGen, 
+#                               Thresh = 0.5, ColName = "ESS_Gen")
+# rm(ESSGen);gc()
+# 
+# 
+# ## plots to check
+# DataCheck3 <- filter(Waders, Landscape == "Greater Thames") # Somerset Levels and Moors # Broads
+# ggplot() + geom_sf(data = DataCheck3, mapping = aes(geometry = geometry, fill = ESS_Wader), colour = NA) + theme_minimal()
+# ggplot() + geom_sf(data = DataCheck3, mapping = aes(geometry = geometry, fill = ESS_Gen), colour = NA) + theme_minimal()
+# 
+# 
+# 
+# ## Add column to CSS data to indicate if agreements includes options that benefit waders or general options that could benefit waders
+# ## See Table 3 of Rob's BWWM report for what is classified as "wader focused" and "general" options
+# ## Filter out wader focused options
+# CSS_OpsWa <- filter(CSS_Ops, opt_code %in% c("GS9", "GS10", "GS11", "GS12"))
+# ## Filter out general options
+# CSS_OpsGe <- filter(CSS_Ops, opt_code %in% c("WN3", "WN4", "GS2", "GS5", "GS6", "GS7", "GS8", "UP2", "WT6", "WT7", "WT8", "WT9", "GS4", "GS13", "GS14", "GS16"))
+# 
+# ## Since these CSS options are points, determine if a points falls within one of the survey fields
+# ## And label each field whether a wader specific CSS point fell within it
+# CSS_InterWa <- as.data.frame(st_covers(Waders, CSS_OpsWa))
+# Waders$CSS_Wader <- "N"
+# Waders$CSS_Wader[CSS_InterWa$row.id] <- "Y"
+# 
+# ## Since these CSS options are points, determine if a points falls within one of the survey fields
+# ## And label each field whether a general CSS point fell within it
+# CSS_InterGe <- as.data.frame(st_covers(Waders, CSS_OpsGe))
+# Waders$CSS_Gen <- "N"
+# Waders$CSS_Gen[CSS_InterGe$row.id] <- "Y"
+# 
+# 
+# ## plots to check
+# DataCheck4 <- filter(Waders, Landscape == "Somerset Levels and Moors") # Greater Thames # Broads
+# CSS_OpsWa2 <- st_crop(CSS_OpsWa, DataCheck4) # crop to size
+# CSS_OpsGe2 <- st_crop(CSS_OpsGe, DataCheck4) # crop to size
+# ggplot() + geom_sf(data = DataCheck4, mapping = aes(geometry = geometry, fill = CSS_Wader), colour = NA) + 
+#            geom_sf(data = CSS_OpsWa2, mapping = aes(geometry = geometry), fill = "purple") + 
+#            theme_minimal()
+# ggplot() + geom_sf(data = DataCheck4, mapping = aes(geometry = geometry, fill = CSS_Gen), colour = NA) +
+#            geom_sf(data = CSS_OpsGe2, mapping = aes(geometry = geometry, fill = "purple")) + 
+#            theme_minimal()
+# 
 
 
 
@@ -530,8 +530,8 @@ SL == nrow(Waders)
 
 ## Write out the main survey data set
 Waders |>  select(-geometry) |> 
-write_csv("CleanData/Wader Abundance/AddFieldAttributes-3/Breeding_Pairs_Attribs.csv")
-write_sf(st_as_sf(Waders), "CleanData/Wader Abundance/AddFieldAttributes-3/Breeding_Pairs_Attribs.shp")
+write_csv("CleanData/Wader Abundance/3-AddFieldAttributes/Breeding_Pairs_Attribs.csv")
+write_sf(st_as_sf(Waders), "CleanData/Wader Abundance/3-AddFieldAttributes/Breeding_Pairs_Attribs.shp")
 
 
 

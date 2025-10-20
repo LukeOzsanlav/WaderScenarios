@@ -342,16 +342,9 @@ CreateScenario <- function(Canvas,
   
   ## Get the index of rows representing the opportunity area for this scenario
   ## This is decided based upon whether fields are inside or outside of wader clusters and the category of the field
-  if(Strategy %in% c("Big", "More") & Plus ==F){ IndOpp <- which(is.na(Canvas$ClustGroup)==T & Canvas$Category %in% OppCat) }
-  if(Strategy %in% c("Better") & Plus ==F){ IndOpp <- which(is.na(Canvas$ClustGroup)==F & Canvas$Category %in% OppCat) }
-  
-  ## For the plus strategies we also remove any fields that are the same category as the new management type and already have waders 
-  ## (i.e. AES fields with waders will not be targeted and those without will be)
-  if(Strategy %in% c("Big", "More") & Plus ==T){ IndOpp <- which(is.na(Canvas$ClustGroup)==T & Canvas$Category %in% OppCat & !(Canvas$Category %in% NewCat & Canvas$Tot_abund > 0)) }
-  if(Strategy %in% c("Better") & Plus ==T){ IndOpp <- which(is.na(Canvas$ClustGroup)==F & Canvas$Category %in% OppCat & !(Canvas$Category %in% NewCat & Canvas$Tot_abund > 0)) }
-  
-  ## Calculate the total field Area for my opportunity Area
-  # TotArea <- sum(Canvas[IndOpp,]$FieldArea)*PropOppArea
+  if(Strategy %in% c("Big", "More")){ IndOpp <- which(is.na(Canvas$ClustGroup)==T & Canvas$Category %in% OppCat) }
+  if(Strategy %in% c("Better")){ IndOpp <- which(is.na(Canvas$ClustGroup)==F & Canvas$Category %in% OppCat) }
+
   ## Edited here: now the user defines an area in hectares to alter rather than a percentage of the total area
   TotArea <- sum(OppAreaUsed)
   

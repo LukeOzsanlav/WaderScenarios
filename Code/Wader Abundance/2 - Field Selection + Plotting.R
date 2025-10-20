@@ -69,6 +69,7 @@ LC <- LC[[1]]
 
 
 
+
 ##-----------------------------------##
 #### 1. Spatial Data Manipulations ####
 ##-----------------------------------##
@@ -228,10 +229,15 @@ nrow(PL_data) # the number of fields across all landscapes
 sum(PL_data$FieldArea)/10000 # total survey area in hectares
 
 ## summarise the data by landscape
-PL_data |> 
+IND <- duplicated(PL_data$F_LOC_ID)
+PL_data2 <- PL_data[IND==F,]
+PL_data2 |> 
   group_by(Landscape) |> 
   summarise(TotArea = sum(FieldArea)/10000,
-            TotFields = n())
+            TotFields = length(unique(F_LOC_ID)))
+length(unique(PL_data2$F_LOC_ID))
+sum(PL_data2$FieldArea/10000)
+
 
 ## calculate the number of fields with only one visit
 Visits <- table(PL_data$N_visits)
@@ -288,22 +294,30 @@ PFields$PropGrass <- PropGrass$gblcm25m2021_1
 
 ##** CRITERIA 2: Remove Arable ##
 ## remove any fields that were assigned as Arable during every survey visit
-PFields <- filter(PFields, !Arable_Hab == 1)
+SelectFields <- filter(PFields, !Arable_Hab == 1)
 
 ##** CRITERIA 3: Remove unsuitable non-grassland ##
 ## remove any fields that were assigned as none-grassland from the UKCEH land cover maps
 ## AND that were identified as unsuitable or suitable other in every survey visit
-SelectFields <- filter(PFields, !(DomHab %in% c(1, 2, 3, 12, 13, 14, 15, 16, 17, 18, 20, 21) & (Unsuit_Hab == 1 | Other_Hab == 1)))
+SelectFields <- filter(SelectFields, !(DomHab %in% c(1, 2, 3, 12, 13, 14, 15, 16, 17, 18, 20, 21) & (Unsuit_Hab == 1 | Other_Hab == 1)))
 
 
-## Check size of current data set
-nrow(PFields) # number of fields left
-StartLength-nrow(PFields) # number of fields removed
-((StartLength-nrow(PFields))/StartLength)*100 # % of fields removed
-PFields |> 
+## Length of data pre and post filter
+length(unique(PL_data2$F_LOC_ID))
+length(unique(SelectFields$F_LOC_ID))
+
+## number of fields lost
+length(unique(PL_data2$F_LOC_ID))-length(unique(SelectFields$F_LOC_ID))
+
+## summarise the data by landscape that remains
+IND <- duplicated(SelectFields$F_LOC_ID)
+SelectFields2 <- SelectFields[IND==F,]
+SelectFields2 |> 
   group_by(Landscape) |> 
   summarise(TotArea = sum(FieldArea)/10000,
-            TotFields = n())
+            TotFields = length(unique(F_LOC_ID)))
+length(unique(SelectFields2$F_LOC_ID))
+sum(SelectFields2$FieldArea/10000)
 
 
 
@@ -367,7 +381,7 @@ SL_Base <- ggplot() + geom_sf(data = Somerset, mapping = aes(geometry = geometry
            theme_minimal() +
            theme(text = element_text(family = "Karla", color = "#2D2D2E"), # change the font
             legend.position = c(0.9,0.1), # Move the legend to the bottom left corner
-            legend.margin = margin(t = 0, unit = "cm"), # Set top of legend margin to zero
+            #legend.margin = margin(t = 0, unit = "cm"), # Set top of legend margin to zero
             legend.title = element_text(size = 13), # Adjust legend text size
             legend.text = element_text(size = 10, color = "#878585"), # Adjust legend text size
             legend.key.width = unit(1, "cm"), # Change legend colorbar width
@@ -448,7 +462,7 @@ NB_Base <- ggplot() + geom_sf(data = Broads, mapping = aes(geometry = geometry),
            theme_minimal() +
            theme(text = element_text(family = "Karla", color = "#2D2D2E"), # change the font
             legend.position = c(0.14,0.15), # Move the legend to the bottom left corner
-            legend.margin = margin(t = 0, unit = "cm"), # Set top of legend margin to zero
+            #legend.margin = margin(t = 0, unit = "cm"), # Set top of legend margin to zero
             legend.title = element_text(size = 13), # Adjust legend text size
             legend.text = element_text(size = 10, color = "#878585"), # Adjust legend text size
             legend.key.width = unit(1, "cm"), # Change legend colorbar width
@@ -530,7 +544,7 @@ GT_Base <- ggplot() + geom_sf(data = Thames, mapping = aes(geometry = geometry),
            theme_minimal() +
            theme(text = element_text(family = "Karla", color = "#2D2D2E"), # change the font
             legend.position = c(0.9,0.15), # Move the legend to the bottom left corner
-            legend.margin = margin(t = 0, unit = "cm"), # Set top of legend margin to zero
+            #legend.margin = margin(t = 0, unit = "cm"), # Set top of legend margin to zero
             legend.title = element_text(size = 13), # Adjust legend text size
             legend.text = element_text(size = 10, color = "#878585"), # Adjust legend text size
             legend.key.width = unit(1, "cm"), # Change legend colorbar width

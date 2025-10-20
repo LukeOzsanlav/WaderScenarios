@@ -840,7 +840,7 @@ Scen_settingsEs <- Scen_settings |> mutate(Budget= case_when(Budget=="low" ~ Ave
 ## Run the batch function 
 BatchBake(Canvas=Canv, SniModel=NULL, LapModel=LapMod,  RedModel=RedMod, LandCov=LC_crop,
           Outpath = "CleanData/Scenarios/5-ScenarioCreation/Essex/SetCost/", SaveCanv = FALSE,
-          N_sets = 20, runsetting = Scen_settingsEs, zstart = 15, CostSpread = 20, ClustBuf=200)
+          N_sets = 20, runsetting = Scen_settingsEs, zstart = 1, CostSpread = 20, ClustBuf=200)
 
 
 
@@ -1122,15 +1122,22 @@ for(j in 1:length(Paths)){
   
   ## Calculate the cost per pairs depending on whether it is Snipe or Lapwing/Redshank
   if(Species[j] == "LapRed"){ ListSet[[j]] <- AllScn |> mutate(PairCost = ChangeWaders/(ChangeCosts/Budget),
-                                                      PairCost100k = ChangeWaders/(ChangeCosts/100000),
-                                                      Waders_100Ha = (ChangeWaders/SegmentArea)*100) }
+                                                                PairCost100k = ChangeWaders/(ChangeCosts/100000),
+                                                                Waders_100Ha = (ChangeWaders/SegmentArea)*100,
+                                                                Perc_Waders_100Ha = (((ChangeWaders/(BaseLapwing+BaseRedshank))*100)/(SegmentArea))*100,
+                                                                Perc_PairCost = (((ChangeWaders/(BaseLapwing+BaseRedshank))*100)/(ChangeCosts)),
+                                                                Perc_PairCostSt = (((ChangeWaders/(BaseLapwing+BaseRedshank))*100)/(ChangeCosts/Budget))) }
   
   if(Species[j] == "Snipe"){ ListSet[[j]] <- AllScn |> mutate(ChangeWaders = ChangeSnipe,
-                                                     PairCost = ChangeSnipe/(ChangeCosts/Budget),
-                                                     PairCost100k = ChangeWaders/(ChangeCosts/100000),
-                                                     Waders_100Ha = (ChangeWaders/SegmentArea)*100) }
+                                                               PairCost = ChangeSnipe/(ChangeCosts/Budget),
+                                                               PairCost100k = ChangeWaders/(ChangeCosts/100000),
+                                                               Waders_100Ha = (ChangeWaders/SegmentArea)*100,
+                                                               Perc_Waders_100Ha = (((ChangeSnipe/(BaseSnipe))*100)/(SegmentArea))*100,
+                                                               Perc_PairCost = (((ChangeSnipe/(BaseSnipe))*100)/(ChangeCosts)),
+                                                               Perc_PairCostSt = (((ChangeSnipe/(BaseSnipe))*100)/(ChangeCosts/Budget))) }
 
 }
+
 
 
 ## Now finally combine all the scenario outputs across regions
@@ -1281,20 +1288,51 @@ ScenSumCost <- Set |>
          UpperCI = Ave_PairCost + (t_score * StEr),
          BudgetW = fct_reorder(BudgetW, Budget))
 
+# Define x-axis positions for groupings
+group_ranges <- data.frame(
+  category = c("Better", "Bigger", "More"),
+  xmin = c(0.5, 2.5, 5.5),  # approximate starting positions
+  xmax = c(2.5, 5.5, 8.5)   # approximate ending positions
+)
+
 ## Create Bar plot
 ggplot(ScenSumCost, aes(x= PlotCatFull, y= Ave_PairCost, group = BudgetW)) +
+  # Add grey rectangles
+  geom_rect(data = group_ranges, 
+            aes(xmin = xmin, xmax = xmax, ymin = -Inf, ymax = Inf),
+            inherit.aes = FALSE, 
+            fill = "grey", 
+            alpha = c(0, 0.2, 0.5)) +
   geom_col(aes(fill = BudgetW), width=0.55, position=position_dodge(0.55)) +
   geom_errorbar(aes(ymin= LowerCI, ymax= UpperCI), width=.2, position=position_dodge(0.55), colour = "#424949") +
   scale_fill_manual(name = "Budget",
                       values = c("#A5F076", "#76A5F0", "#F076A5")) +
-  ylab("Change in Breeding Wader Pairs/Budget cost") +
-  xlab("Scenario Category") +
+  ylab("Change in Breeding Wader Pairs / Budget used") +
+  xlab("Mechanism") +
   labs(fill = "Budget") +
   BarPlotTheme + 
-  theme(axis.text.x = element_text(size = 11, angle = 45, vjust = 1, hjust = 1))
+  theme(axis.text.x = element_text(size = 11, angle = 45, vjust = 1, hjust = 1)) +
+  # Add labels
+  annotate("text", x = 1.5, y = max(ScenSumCost$UpperCI, na.rm = TRUE) + 15,
+           label = "Better", fontface = "bold", size = 5) +
+  annotate("text", x = 4, y = max(ScenSumCost$UpperCI, na.rm = TRUE) + 15,
+           label = "Bigger", fontface = "bold", size = 5) +
+  annotate("text", x = 7, y = max(ScenSumCost$UpperCI, na.rm = TRUE) + 15,
+           label = "More", fontface = "bold", size = 5) +
+  scale_x_discrete(labels = c(
+    "Better for AES Only"  = "AES only",
+    "Better for Reserve"  = "Reserve\n(grassland conversion)",
+    "Big for AES Only" = "AES only",
+    "Big for Reserve" = "Reserve\n(grassland conversion)",
+    "Big for Reserve\nfrom Arable" = "Reserve\n(arable reversion)",
+    "More for AES Only"  = "AES only",
+    "More for Reserve"  = "Reserve\n(grassland conversion)",
+    "More for Reserve\nfrom Arable" = "Reserve\n(arable reversion)"))
 
 ## save the plot
 ggsave(plot=last_plot(), filename= paste0(outpath, "PairBudget_vs_SplitBudget.png"), units = "in", height = 9, width = 11)
+
+
 
 
 
@@ -1327,7 +1365,7 @@ ggplot(ScenSumCost, aes(x= PlotCatFull, y= Ave_PairCostK, group = BudgetW)) +
   xlab("Scenario Category") +
   labs(fill = "Budget") +
   BarPlotTheme + 
-  theme(axis.text.x = element_text(size = 11, angle = 45, vjust = 1, hjust = 1))
+  theme(axis.text.x = element_text(size = 11, angle = 45, vjust = 1, hjust = 0.5))
 
 ## save the plot
 ggsave(plot=last_plot(), filename= paste0(outpath, "Pair£100k_vs_SplitBudget.png"), units = "in", height = 9, width = 11)
@@ -1354,18 +1392,48 @@ mutate(LowerCI = AveSegmentArea - (t_score * StEr),
        UpperCI = AveSegmentArea + (t_score * StEr),
        BudgetW = fct_reorder(BudgetW, Budget))
 
-  
+
+# Define x-axis positions for groupings
+group_ranges <- data.frame(
+  category = c("Better", "Bigger", "More"),
+  xmin = c(0.5, 2.5, 5.5),  # approximate starting positions
+  xmax = c(2.5, 5.5, 8.5)   # approximate ending positions
+)
+
+
 ## Create Bar plot
 ggplot(ScenSize, aes(x= PlotCatFull, y= AveSegmentArea, group = BudgetW)) +
+  # Add grey rectangles
+  geom_rect(data = group_ranges, 
+            aes(xmin = xmin, xmax = xmax, ymin = -Inf, ymax = Inf),
+            inherit.aes = FALSE, 
+            fill = "grey", 
+            alpha = c(0, 0.2, 0.5)) +
   geom_col(aes(fill = BudgetW), width=0.55, position=position_dodge(0.55)) +
   geom_errorbar(aes(ymin= LowerCI, ymax= UpperCI), width=.2, position=position_dodge(0.55), colour = "#424949") +
   scale_fill_manual(name = "Budget",
                       values = c("#A5F076", "#76A5F0", "#F076A5")) +
-  ylab("Area altered in scenario/ha") +
-  xlab("Scenario Category") +
+  ylab("Area altered in scenario / ha") +
+  xlab("Mechanism") +
   labs(fill = "Budget") +
   BarPlotTheme + 
-  theme(axis.text.x = element_text(size = 11, angle = 45, vjust = 1, hjust = 1))
+  theme(axis.text.x = element_text(size = 11, angle = 45, vjust = 1, hjust = 1)) +
+  # Add labels
+  annotate("text", x = 1.5, y = max(ScenSize$UpperCI, na.rm = TRUE) + 40,
+           label = "Better", fontface = "bold", size = 5) +
+  annotate("text", x = 4, y = max(ScenSize$UpperCI, na.rm = TRUE) + 40,
+           label = "Bigger", fontface = "bold", size = 5) +
+  annotate("text", x = 7, y = max(ScenSize$UpperCI, na.rm = TRUE) + 40,
+           label = "More", fontface = "bold", size = 5) +
+  scale_x_discrete(labels = c(
+    "Better for AES Only"  = "AES only",
+    "Better for Reserve"  = "Reserve\n(grassland conversion)",
+    "Big for AES Only" = "AES only",
+    "Big for Reserve" = "Reserve\n(grassland conversion)",
+    "Big for Reserve\nfrom Arable" = "Reserve\n(arable reversion)",
+    "More for AES Only"  = "AES only",
+    "More for Reserve"  = "Reserve\n(grassland conversion)",
+    "More for Reserve\nfrom Arable" = "Reserve\n(arable reversion)"))
 
 ## save the plot
 ggsave(plot=last_plot(), filename= paste0(outpath, "TotalArea_vs_SplitBudget.png"), units = "in", height = 9, width = 11)
@@ -1391,18 +1459,47 @@ mutate(LowerCI = AveAveClustArea - (t_score * StEr),
        UpperCI = AveAveClustArea + (t_score * StEr),
        BudgetW = fct_reorder(BudgetW, Budget))
 
+# Define x-axis positions for groupings
+group_ranges <- data.frame(
+  category = c("Better", "Bigger", "More"),
+  xmin = c(0.5, 2.5, 5.5),  # approximate starting positions
+  xmax = c(2.5, 5.5, 8.5)   # approximate ending positions
+)
+
   
 ## Create Bar plot
 ggplot(ClustSize, aes(x= PlotCatFull, y= AveAveClustArea, group = BudgetW)) +
+  # Add grey rectangles
+  geom_rect(data = group_ranges, 
+            aes(xmin = xmin, xmax = xmax, ymin = -Inf, ymax = Inf),
+            inherit.aes = FALSE, 
+            fill = "grey", 
+            alpha = c(0, 0.2, 0.5)) +
   geom_col(aes(fill = BudgetW), width=0.55, position=position_dodge(0.55)) +
   geom_errorbar(aes(ymin= LowerCI, ymax= UpperCI), width=.2, position=position_dodge(0.55), colour = "#424949") +
   scale_fill_manual(name = "Budget",
                       values = c("#A5F076", "#76A5F0", "#F076A5")) +
-  ylab("Cluster area/ha") +
-  xlab("Scenario Category") +
+  ylab("Cluster area / ha") +
+  xlab("Mechanism") +
   labs(fill = "Budget") +
   BarPlotTheme + 
-  theme(axis.text.x = element_text(size = 11, angle = 45, vjust = 1, hjust = 1))
+  theme(axis.text.x = element_text(size = 11, angle = 45, vjust = 1, hjust = 1)) +
+  # Add labels
+  annotate("text", x = 1.5, y = max(ClustSize$UpperCI, na.rm = TRUE) + 10,
+           label = "Better", fontface = "bold", size = 5) +
+  annotate("text", x = 4, y = max(ClustSize$UpperCI, na.rm = TRUE) + 10,
+           label = "Bigger", fontface = "bold", size = 5) +
+  annotate("text", x = 7, y = max(ClustSize$UpperCI, na.rm = TRUE) + 10,
+           label = "More", fontface = "bold", size = 5) +
+  scale_x_discrete(labels = c(
+    "Better for AES Only"  = "AES only",
+    "Better for Reserve"  = "Reserve\n(grassland conversion)",
+    "Big for AES Only" = "AES only",
+    "Big for Reserve" = "Reserve\n(grassland conversion)",
+    "Big for Reserve\nfrom Arable" = "Reserve\n(arable reversion)",
+    "More for AES Only"  = "AES only",
+    "More for Reserve"  = "Reserve\n(grassland conversion)",
+    "More for Reserve\nfrom Arable" = "Reserve\n(arable reversion)"))
 
 ## save the plot
 ggsave(plot=last_plot(), filename= paste0(outpath, "ClusterArea_vs_SplitBudget.png"), units = "in", height = 9, width = 11)
@@ -1445,3 +1542,134 @@ ggplot(WClustSize, aes(x= PlotCatFull, y= AveAveClustWider, group = BudgetW)) +
 ## save the plot
 ggsave(plot=last_plot(), filename= paste0(outpath, "ClusterArea_vs_SplitBudget.png"), units = "in", height = 9, width = 11)
 
+
+
+
+##---------------------------------------------------##
+##  Percentage Pairs per £100,000 vs Strategy/Budget ##
+##---------------------------------------------------##
+
+## First create a data set that can be used to create a bar plot that covers all scenarios
+ScenSumCost <- Set |>
+  mutate(PlotCatFull = paste0(Strategy, " for ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
+         BudgetW = ifelse(Budget==max(Budget), paste0("High: £", round(max(Budget)/1000), "k"),
+                          ifelse(Budget==min(Budget), paste0("Low: £", round(min(Budget)/1000), "k"),
+                                 paste0("Medium: £", round(median(Budget)/1000), "k")))) |>
+  group_by(PlotCatFull, NewCat, Strategy, Budget, BudgetW) |>
+  summarise(StEr = sd(Perc_PairCost)/sqrt(n()),
+            t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
+            Ave_PairCost = mean(Perc_PairCost)) |> 
+  ungroup() |> 
+  mutate(LowerCI = Ave_PairCost - (t_score * StEr),
+         UpperCI = Ave_PairCost + (t_score * StEr),
+         BudgetW = fct_reorder(BudgetW, Budget))
+
+# Define x-axis positions for groupings
+group_ranges <- data.frame(
+  category = c("Better", "Bigger", "More"),
+  xmin = c(0.5, 2.5, 5.5),  # approximate starting positions
+  xmax = c(2.5, 5.5, 8.5)   # approximate ending positions
+)
+
+## Create Bar plot
+ggplot(ScenSumCost, aes(x= PlotCatFull, y= Ave_PairCost*100000, group = BudgetW)) +
+  # Add grey rectangles
+  geom_rect(data = group_ranges, 
+            aes(xmin = xmin, xmax = xmax, ymin = -Inf, ymax = Inf),
+            inherit.aes = FALSE, 
+            fill = "grey", 
+            alpha = c(0, 0.2, 0.5)) +
+  geom_col(aes(fill = BudgetW), width=0.55, position=position_dodge(0.55)) +
+  geom_errorbar(aes(ymin= LowerCI*100000, ymax= UpperCI*100000), width=.2, position=position_dodge(0.55), colour = "#424949") +
+  scale_fill_manual(name = "Budget",
+                    values = c("#A5F076", "#76A5F0", "#F076A5")) +
+  ylab("% Change in Breeding Wader Pairs per £100,000") +
+  xlab("Mechanism") +
+  labs(fill = "Budget") +
+  BarPlotTheme + 
+  theme(axis.text.x = element_text(size = 11, angle = 45, vjust = 1, hjust = 1)) +
+  # Add labels
+  annotate("text", x = 1.5, y = max(ScenSumCost$UpperCI*100000, na.rm = TRUE) + 0.75,
+           label = "Better", fontface = "bold", size = 5) +
+  annotate("text", x = 4, y = max(ScenSumCost$UpperCI*100000, na.rm = TRUE) + 0.75,
+           label = "Bigger", fontface = "bold", size = 5) +
+  annotate("text", x = 7, y = max(ScenSumCost$UpperCI*100000, na.rm = TRUE) + 0.75,
+           label = "More", fontface = "bold", size = 5) +
+  scale_x_discrete(labels = c(
+    "Better for AES Only"  = "AES only",
+    "Better for Reserve"  = "Reserve\n(grassland conversion)",
+    "Big for AES Only" = "AES only",
+    "Big for Reserve" = "Reserve\n(grassland conversion)",
+    "Big for Reserve\nfrom Arable" = "Reserve\n(arable reversion)",
+    "More for AES Only"  = "AES only",
+    "More for Reserve"  = "Reserve\n(grassland conversion)",
+    "More for Reserve\nfrom Arable" = "Reserve\n(arable reversion)"))
+
+## save the plot
+ggsave(plot=last_plot(), filename= paste0(outpath, "PercPair£100000_vs_SplitBudget.png"), units = "in", height = 9, width = 11)
+
+
+
+
+##------------------------------------------------------##
+##  Percentage Pairs per Budget Used vs Strategy/Budget ##
+##------------------------------------------------------##
+
+## First create a data set that can be used to create a bar plot that covers all scenarios
+ScenSumCost <- Set |>
+  mutate(PlotCatFull = paste0(Strategy, " for ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
+         BudgetW = ifelse(Budget==max(Budget), paste0("High: £", round(max(Budget)/1000), "k"),
+                          ifelse(Budget==min(Budget), paste0("Low: £", round(min(Budget)/1000), "k"),
+                                 paste0("Medium: £", round(median(Budget)/1000), "k")))) |>
+  group_by(PlotCatFull, NewCat, Strategy, Budget, BudgetW) |>
+  summarise(StEr = sd(Perc_PairCostSt)/sqrt(n()),
+            t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
+            Ave_PairCost = mean(Perc_PairCostSt)) |> 
+  ungroup() |> 
+  mutate(LowerCI = Ave_PairCost - (t_score * StEr),
+         UpperCI = Ave_PairCost + (t_score * StEr),
+         BudgetW = fct_reorder(BudgetW, Budget))
+
+# Define x-axis positions for groupings
+group_ranges <- data.frame(
+  category = c("Better", "Bigger", "More"),
+  xmin = c(0.5, 2.5, 5.5),  # approximate starting positions
+  xmax = c(2.5, 5.5, 8.5)   # approximate ending positions
+)
+
+## Create Bar plot
+ggplot(ScenSumCost, aes(x= PlotCatFull, y= Ave_PairCost, group = BudgetW)) +
+  # Add grey rectangles
+  geom_rect(data = group_ranges, 
+            aes(xmin = xmin, xmax = xmax, ymin = -Inf, ymax = Inf),
+            inherit.aes = FALSE, 
+            fill = "grey", 
+            alpha = c(0, 0.2, 0.5)) +
+  geom_col(aes(fill = BudgetW), width=0.55, position=position_dodge(0.55)) +
+  geom_errorbar(aes(ymin= LowerCI, ymax= UpperCI), width=.2, position=position_dodge(0.55), colour = "#424949") +
+  scale_fill_manual(name = "Budget",
+                    values = c("#A5F076", "#76A5F0", "#F076A5")) +
+  ylab("% Change in Breeding Wader Pairs / Budget used") +
+  xlab("Mechanism") +
+  labs(fill = "Budget") +
+  BarPlotTheme + 
+  theme(axis.text.x = element_text(size = 11, angle = 45, vjust = 1, hjust = 1)) +
+  # Add labels
+  annotate("text", x = 1.5, y = max(ScenSumCost$UpperCI, na.rm = TRUE) + 5,
+           label = "Better", fontface = "bold", size = 5) +
+  annotate("text", x = 4, y = max(ScenSumCost$UpperCI, na.rm = TRUE) + 5,
+           label = "Bigger", fontface = "bold", size = 5) +
+  annotate("text", x = 7, y = max(ScenSumCost$UpperCI, na.rm = TRUE) + 5,
+           label = "More", fontface = "bold", size = 5) +
+  scale_x_discrete(labels = c(
+    "Better for AES Only"  = "AES only",
+    "Better for Reserve"  = "Reserve\n(grassland conversion)",
+    "Big for AES Only" = "AES only",
+    "Big for Reserve" = "Reserve\n(grassland conversion)",
+    "Big for Reserve\nfrom Arable" = "Reserve\n(arable reversion)",
+    "More for AES Only"  = "AES only",
+    "More for Reserve"  = "Reserve\n(grassland conversion)",
+    "More for Reserve\nfrom Arable" = "Reserve\n(arable reversion)"))
+
+## save the plot
+ggsave(plot=last_plot(), filename= paste0(outpath, "PercPairBudget_vs_SplitBudget.png"), units = "in", height = 9, width = 11)

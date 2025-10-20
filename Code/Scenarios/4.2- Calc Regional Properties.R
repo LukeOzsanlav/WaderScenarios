@@ -721,3 +721,73 @@ write_csv(WaderDens |> st_drop_geometry(), "CleanData/Scenarios/4-AnnotateCanvas
 
 
 
+
+##------------------------------##
+#### 6.0 Average Reserve Size ####
+##------------------------------##
+
+## Read in annotated canvas as csv
+SomCanv <- readRDS("CleanData/Scenarios/4-AnnotateCanvas/Som_AnnotatedCanv.rds")
+NKCanv <- readRDS("CleanData/Scenarios/4-AnnotateCanvas/NKent_AnnotatedCanv.rds")
+EsCanv <- readRDS("CleanData/Scenarios/4-AnnotateCanvas/Essex_AnnotatedCanv.rds")
+BroCanv <- readRDS("CleanData/Scenarios/4-AnnotateCanvas/Broads_AnnotatedCanv.rds")
+
+## bind the canvas for each region together
+AllCanv <- rbind(NKCanv, EsCanv, BroCanv) |> plyr::rbind.fill(SomCanv)
+
+## Alter some column for the summary
+AllCanv <- AllCanv |> 
+  mutate(SemiImp_Bin = ifelse(GRASSLAND_TYPE=="I", 1, 0), # binary column if grassland type was semi-improved
+         FineCoarse_Veg = ifelse(VEG_STRUCTURE %in% c("C", "F"), 1, 0), # # binary column if veg structure was fine or coarse
+         Fence_Coverage = ifelse(Fence_Coverage == 0 | is.na(Fence_Coverage) == T, 0, 1), # binary column for predator fence coverage
+         ParcArea = m2_to_ha(ParcArea)) # convert field area to hectares
+
+## First calculate the habitat values for AES and Reserve for average quality
+AveCanv <- filter(AllCanv, Category %in% c("Reserve", "AES Only"))
+
+## Summary of different variables for average quality AES and Reserve
+AveSum <- AveCanv |> 
+  group_by(Category, Landscape) |> 
+  summarise(Prop_SemiImp = sum(SemiImp_Bin, na.rm=T)/n(), # Proportion of fields classified as semi-improved 
+            Ave_tall_bound = mean(TALL_BOUNDARY_PERCENT, na.rm=T), # Average tall boundary cover (%)
+            Prop_FineCoarse_Veg = sum(FineCoarse_Veg, na.rm=T)/n(), # Proportion of fields with patchy (fine or coarse) vegetation
+            Ave_StandWater = mean(WaterCoverage, na.rm=T)*100, # Average standing water cover (%)
+            Ave_StandWater1000 = mean(Ave_WiderWater1000, na.rm=T)*100, # Average standing water cover 1000m around field (%)
+            Ave_RushCover = mean(RUSH_PERCENT, na.rm=T), # Average rush cover (%) 
+            Prop_livestock = sum(STOCK, na.rm=T)/n(), # Proportion of fields where livestock was present
+            Ave_fieldArea = mean(ParcArea, na.rm=T), # Average field area (ha)
+            Prop_PredFence = sum(Fence_Coverage, na.rm=T)/n()) # Proportion of fields with predator fencing present
+
+## Change data format
+AveSum <- pivot_longer(AveSum, cols = 3:11) |> 
+  arrange(Landscape) |> 
+  rename(Ave_value = value)
+
+
+## Second calculate the habitat values for AES and Reserve for high quality
+HighCanv <- filter(AllCanv, Category %in% c("Reserve", "AES Only") & Tot_abund > 0)
+
+## Summary of different variables for high quality AES and Reserve
+HighSum <- HighCanv |> 
+  group_by(Category, Landscape) |> 
+  summarise(Prop_SemiImp = sum(SemiImp_Bin, na.rm=T)/n(), # Proportion of fields classified as semi-improved 
+            Ave_tall_bound = mean(TALL_BOUNDARY_PERCENT, na.rm=T), # Average tall boundary cover (%)
+            Prop_FineCoarse_Veg = sum(FineCoarse_Veg, na.rm=T)/n(), # Proportion of fields with patchy (fine or coarse) vegetation
+            Ave_StandWater = mean(WaterCoverage, na.rm=T)*100, # Average standing water cover (%)
+            Ave_StandWater1000 = mean(Ave_WiderWater1000, na.rm=T)*100, # Average standing water cover 1000m around field (%)
+            Ave_RushCover = mean(RUSH_PERCENT, na.rm=T), # Average rush cover (%) 
+            Prop_livestock = sum(STOCK, na.rm=T)/n(), # Proportion of fields where livestock was present
+            Ave_fieldArea = mean(ParcArea, na.rm=T), # Average field area (ha)
+            Prop_PredFence = sum(Fence_Coverage, na.rm=T)/n()) # Proportion of fields with predator fencing present
+
+## Change data format
+HighSum <- pivot_longer(HighSum, cols = 3:11) |> 
+  arrange(Landscape) |> 
+  rename(High_value = value)
+
+## Bind together
+AllSum <- left_join(AveSum, HighSum, by = join_by(Category, Landscape, name))
+
+
+## Read out the habitat values 
+write_csv(AllSum, "CleanData/Scenarios/4-AnnotateCanvas/Habitat_values_by_MechanismLandscape.csv")

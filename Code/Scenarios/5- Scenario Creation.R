@@ -18,7 +18,8 @@ pacman::p_load(tidyverse, # used
                exactextractr, # used
                tictoc, # used for timing scenario creation function
                ggpubr, # used
-               truncnorm) # used
+               truncnorm, # used
+               ggpubr) # used
 
 options(scipen=999) # turn off scientific notation
 source("Code/Helper functions.R")
@@ -604,12 +605,12 @@ RedMod <- readRDS("CleanData/Wader Abundance/5-ModelWaderAbundance/Model Objects
 ## Get the index of the rows that I want to predict wader abundance into
 PrIndex <- which(Canv$Category %in% c("Reserve", "AES Only", "Grass Opp"))
 
-## Predict abundance for Snipe
+## Predict abundance for Redshank
 set.seed(1212)
 Canv$RedAbund[PrIndex] <- (predict.rfsrc(object = RedMod, 
                              newdata = (Canv[PrIndex, ] |> select(RedMod[["xvar.names"]]) |> st_drop_geometry() |> as.data.frame()), 
                              jitt=FALSE))$predicted
-sum(Canv$RedAbund, na.rm = T) # number of Snipe in the landscape
+sum(Canv$RedAbund, na.rm = T) # number of Redshank in the landscape
   
 
 ## Predict abundance for Lapwing
@@ -730,15 +731,15 @@ Scen_settings$ClustMean <- ifelse(Scen_settings$ClustMean == max(Scen_settings$C
 Scen_settingsNK<- Scen_settings #|> filter(!(ScenType == "cluster" & ClustMean == max(ClustMean, na.rm = T) & Strategy == "Better"))
 Scen_settingsNK$OppCat4 <- NA
 
-## Run the batch function for additive
-BatchBake(Canvas=Canv, SniModel=NULL, LapModel=LapMod,  RedModel=RedMod, LandCov=LC_crop,
-          Outpath = "CleanData/Scenarios/5-ScenarioCreation/Kent/", SaveCanv = FALSE,
-          N_sets = 20, runsetting = Scen_settingsNK, zstart = 1, Additive = TRUE, Unfenced=TRUE)
-
-## Run the batch function for multiplicative
+# ## Run the batch function for additive
 # BatchBake(Canvas=Canv, SniModel=NULL, LapModel=LapMod,  RedModel=RedMod, LandCov=LC_crop,
 #           Outpath = "CleanData/Scenarios/5-ScenarioCreation/Kent/", SaveCanv = FALSE,
-#           N_sets = 5, runsetting = Scen_settingsNK, zstart = 1, Additive = FALSE, Unfenced=TRUE)
+#           N_sets = 20, runsetting = Scen_settingsNK, zstart = 1, Additive = TRUE, Unfenced=TRUE)
+
+# Run the batch function for multiplicative
+BatchBake(Canvas=Canv, SniModel=NULL, LapModel=LapMod,  RedModel=RedMod, LandCov=LC_crop,
+          Outpath = "CleanData/Scenarios/5-ScenarioCreation/Kent/", SaveCanv = FALSE,
+          N_sets = 5, runsetting = Scen_settingsNK, zstart = 1, Additive = FALSE, Unfenced=TRUE)
 
 
 
@@ -950,15 +951,15 @@ Scen_settingsEs<- Scen_settings #|> filter(!(ScenType == "cluster" & ClustMean =
 Scen_settingsEs$OppCat4 <- NA
 
 
-## Run the batch function for additive
-BatchBake(Canvas=Canv, SniModel=NULL, LapModel=LapMod,  RedModel=RedMod, LandCov=LC_crop,
-          Outpath = "CleanData/Scenarios/5-ScenarioCreation/Essex/", SaveCanv = FALSE,
-          N_sets = 20, runsetting = Scen_settingsEs, zstart = 1, Additive = TRUE, Unfenced=TRUE)
-
-## Run the batch function for multiplicative
+# ## Run the batch function for additive
 # BatchBake(Canvas=Canv, SniModel=NULL, LapModel=LapMod,  RedModel=RedMod, LandCov=LC_crop,
 #           Outpath = "CleanData/Scenarios/5-ScenarioCreation/Essex/", SaveCanv = FALSE,
-#           N_sets = 5, runsetting = Scen_settingsEs, zstart = 1, Additive = FALSE, Unfenced=TRUE)
+#           N_sets = 20, runsetting = Scen_settingsEs, zstart = 1, Additive = TRUE, Unfenced=TRUE)
+
+# Run the batch function for multiplicative
+BatchBake(Canvas=Canv, SniModel=NULL, LapModel=LapMod,  RedModel=RedMod, LandCov=LC_crop,
+          Outpath = "CleanData/Scenarios/5-ScenarioCreation/Essex/", SaveCanv = FALSE,
+          N_sets = 5, runsetting = Scen_settingsEs, zstart = 1, Additive = FALSE, Unfenced=TRUE)
 
 
 
@@ -1170,15 +1171,15 @@ Scen_settings$ClustMean <- ifelse(Scen_settings$ClustMean == max(Scen_settings$C
 Scen_settingsBr <- Scen_settings #|> filter(!(ScenType == "cluster" & ClustMean == max(ClustMean, na.rm = T) & Strategy == "Better"))
 Scen_settingsBr$OppCat4 <- NA
 
-## Run the batch function for additive
-BatchBake(Canvas=Canv, SniModel=NULL, LapModel=LapMod,  RedModel=RedMod, LandCov=LC_crop,
-          Outpath = "CleanData/Scenarios/5-ScenarioCreation/Broads/", SaveCanv = FALSE,
-          N_sets = 20, runsetting = Scen_settingsBr, zstart = 1, Additive = TRUE, Unfenced=TRUE)
-
-## Run the batch function for multiplicative
+# ## Run the batch function for additive
 # BatchBake(Canvas=Canv, SniModel=NULL, LapModel=LapMod,  RedModel=RedMod, LandCov=LC_crop,
 #           Outpath = "CleanData/Scenarios/5-ScenarioCreation/Broads/", SaveCanv = FALSE,
-#           N_sets = 5, runsetting = Scen_settingsBr, zstart = 1, Additive = FALSE, Unfenced=TRUE)
+#           N_sets = 20, runsetting = Scen_settingsBr, zstart = 1, Additive = TRUE, Unfenced=TRUE)
+
+# Run the batch function for multiplicative
+BatchBake(Canvas=Canv, SniModel=NULL, LapModel=LapMod,  RedModel=RedMod, LandCov=LC_crop,
+          Outpath = "CleanData/Scenarios/5-ScenarioCreation/Broads/", SaveCanv = FALSE,
+          N_sets = 5, runsetting = Scen_settingsBr, zstart = 1, Additive = FALSE, Unfenced=TRUE)
 
 
 
@@ -1299,7 +1300,7 @@ BarPlotTheme <- theme_light() +
 ## First create a data set that can be used to create a bar plot that covers all scenarios
 ScenSum <- Set |>
 mutate(PlotCatFull = paste0(Strategy, " for ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
-       PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
+       PlusFull = ifelse(Plus==FALSE, "Quality: Average", "Quality: High")) |>
 group_by(PlotCatFull, ScenType, PlusFull, Plus, NewCat, Strategy) |>
 summarise(StEr = sd(Perc_Waders_100Ha)/sqrt(n()),
           t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
@@ -1336,7 +1337,7 @@ ggsave(plot=last_plot(), filename= paste0(outpath, "Additive_Pairha_vs_Category.
 ## First create a data set that can be used to create a bar plot that covers all scenarios
 ScenSumCost <- Set |>
 mutate(PlotCatFull = paste0(Strategy, " for ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
-       PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
+       PlusFull = ifelse(Plus==FALSE, "Quality: Average", "Quality: High")) |>
 group_by(PlotCatFull, ScenType, PlusFull, Plus, NewCat, Strategy) |>
 summarise(StEr = sd(Perc_PairCost)/sqrt(n()),
           t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
@@ -1382,7 +1383,7 @@ ScenSum2 <- Set |>
         ungroup() |>
         mutate(PlotCatOther = paste0(NewCat, " ", ifelse(Plus==T, "+", "-")),
                PlotCatFull= paste0(Strategy, " for ", PlotCatOther),
-               PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality"),
+               PlusFull = ifelse(Plus==FALSE, "Quality: Average", "Quality: High"),
                NewCatFull = ifelse(OppCat== "Arable Opp", paste0(NewCat, " from Arable"), NewCat),
                LowerCI = Perc_Waders_100Ha - (t_score * StEr),
                UpperCI = Perc_Waders_100Ha + (t_score * StEr)) 
@@ -1393,15 +1394,12 @@ ggplot(ScenSum2, aes(x= Strategy, y= Perc_Waders_100Ha, fill = NewCatFull)) +
 geom_col(width=0.75, position=position_dodge(0.75, preserve = "single")) +
 geom_errorbar(aes(ymin= LowerCI, ymax= UpperCI), width=0.2, position=position_dodge(width=0.75, preserve = "single"), colour = "#6a6b6b") +
 facet_wrap(~PlusFull) +
-<<<<<<< HEAD
-scale_fill_manual(name = "Mechanism",   # Change legend title
-=======
-scale_fill_manual(name = "Scenario Type",   # Change legend title
->>>>>>> 3df2806f235f4042a1cc095ec47e8f1ff9e342d9
-                  labels = c("AES Only"= "AES Only", "Reserve"= "Reserve from grassland", "Reserve from Arable" = "Reserve from Arable"),  # Change legend labels
+
+scale_fill_manual(name = "Mechanism &\nStarting Habitat",   # Change legend title
+                  labels = c("AES Only"= "AES Only", "Reserve"= "Reserve from Grassland", "Reserve from Arable" = "Reserve from Arable"),  # Change legend labels
                   values = c("AES Only"="#F076A5", "Reserve"= "#76A5F0", "Reserve from Arable"= "#DDB24C")) +
 ylab("% Change in Breeding Pairs per 100ha") +
-xlab("Lawton Principle") +
+xlab("Location") +
 labs(fill = "Management Used") +
 BarPlotTheme
 
@@ -1424,7 +1422,7 @@ ScenSumCost2 <- Set |>
                   Perc_PairCost = mean(Perc_PairCost)) |>
         mutate(PlotCatOther = paste0(NewCat, " ", ifelse(Plus==T, "+", "-")),
                PlotCatFull= paste0(Strategy, " for ", PlotCatOther),
-               PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality"),
+               PlusFull = ifelse(Plus==FALSE, "Quality: Average", "Quality: High"),
                NewCatFull = ifelse(OppCat== "Arable Opp", paste0(NewCat, " from Arable"), NewCat),
                LowerCI = Perc_PairCost - (t_score * StEr),
                UpperCI = Perc_PairCost + (t_score * StEr))
@@ -1435,15 +1433,12 @@ ggplot(ScenSumCost2, aes(x= Strategy, y= Perc_PairCost*100000, fill = NewCatFull
 geom_col(width=0.75, position=position_dodge(0.75, preserve = "single")) +
 geom_errorbar(aes(ymin= LowerCI*100000, ymax= UpperCI*100000), width=0.2, position=position_dodge(width=0.75, preserve = "single"), colour = "#6a6b6b") +
 facet_wrap(~PlusFull) +
-<<<<<<< HEAD
-scale_fill_manual(name = "Mechanism",   # Change legend title
-=======
-scale_fill_manual(name = "Scenario Type",   # Change legend title
->>>>>>> 3df2806f235f4042a1cc095ec47e8f1ff9e342d9
-                  labels = c("AES Only"= "AES Only", "Reserve"= "Reserve from grassland", "Reserve from Arable" = "Reserve from Arable"),  # Change legend labels
+
+scale_fill_manual(name = "Mechanism &\nStarting Habitat",   # Change legend title
+                  labels = c("AES Only"= "AES Only", "Reserve"= "Reserve from Grassland", "Reserve from Arable" = "Reserve from Arable"),  # Change legend labels
                   values = c("AES Only"="#F076A5", "Reserve"= "#76A5F0", "Reserve from Arable"= "#DDB24C")) +
 ylab("% Change in Breeding Pairs per £100,000") +
-xlab("Lawton Principle") +
+xlab("Location") +
 labs(fill = "Management Used") +
 BarPlotTheme
 
@@ -1465,13 +1460,13 @@ ScenSumCost_NoFence <- Set |>
 filter(!OppCat == "Arable Opp") |> 
 mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
        PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
-       PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
+       PlusFull = ifelse(Plus==FALSE, "Quality: Average", "Quality: High")) |>
 group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
 summarise(StEr = sd(Perc_PairCostNoF)/sqrt(n()),
           t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
           Ave_PairCost = mean(Perc_PairCostNoF)) |> 
 ungroup() |> 
-mutate(Fencing = "Reserve Unfenced\n(grassland)",
+mutate(Fencing = "Reserve (grassland conversion) - Unfenced",
        LowerCI = Ave_PairCost - (t_score * StEr),
        UpperCI = Ave_PairCost + (t_score * StEr)) |> 
 filter(NewCat == "Reserve")
@@ -1481,13 +1476,13 @@ ScenSumCost_Fence <- Set |>
 filter(!OppCat == "Arable Opp") |> 
 mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
        PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
-       PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
+       PlusFull = ifelse(Plus==FALSE, "Quality: Average", "Quality: High")) |>
 group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
 summarise(StEr = sd(Perc_PairCost)/sqrt(n()),
           t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
           Ave_PairCost = mean(Perc_PairCost)) |> 
 ungroup() |> 
-mutate(Fencing = "Reserve Fenced\n(grassland)",
+mutate(Fencing = "Reserve (grassland conversion) - Fenced",
        LowerCI = Ave_PairCost - (t_score * StEr),
        UpperCI = Ave_PairCost + (t_score * StEr)) |> 
 filter(NewCat == "Reserve")
@@ -1496,13 +1491,13 @@ filter(NewCat == "Reserve")
 ScenSumCost_AES <- Set |>
 mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
        PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
-       PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
+       PlusFull = ifelse(Plus==FALSE, "Quality: Average", "Quality: High")) |>
 group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
 summarise(StEr = sd(Perc_PairCost)/sqrt(n()),
           t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
           Ave_PairCost = mean(Perc_PairCost)) |> 
 ungroup() |> 
-mutate(Fencing = "AES Only",
+mutate(Fencing = "AES only",
        LowerCI = Ave_PairCost - (t_score * StEr),
        UpperCI = Ave_PairCost + (t_score * StEr)) |> 
 filter(NewCat == "AES Only")
@@ -1514,13 +1509,13 @@ ScenSumCost_NoFArable <- Set |>
 filter(OppCat == "Arable Opp") |> 
 mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
        PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
-       PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
+       PlusFull = ifelse(Plus==FALSE, "Quality: Average", "Quality: High")) |>
 group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
 summarise(StEr = sd(Perc_PairCostNoF)/sqrt(n()),
           t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
           Ave_PairCost = mean(Perc_PairCostNoF)) |> 
 ungroup() |> 
-mutate(Fencing = "Reserve Unfenced\n(arable)",
+mutate(Fencing = "Reserve (arable reversion) - Unfenced",
        LowerCI = Ave_PairCost - (t_score * StEr),
        UpperCI = Ave_PairCost + (t_score * StEr)) |> 
 filter(NewCat == "Reserve")
@@ -1530,13 +1525,13 @@ ScenSumCost_FenceArable <- Set |>
 filter(OppCat == "Arable Opp") |> 
 mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
        PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
-       PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
+       PlusFull = ifelse(Plus==FALSE, "Quality: Average", "Quality: High")) |>
 group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
 summarise(StEr = sd(Perc_PairCost)/sqrt(n()),
           t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
           Ave_PairCost = mean(Perc_PairCost)) |> 
 ungroup() |> 
-mutate(Fencing = "Reserve Fenced\n(arable)",
+mutate(Fencing = "Reserve (arable reversion) - Fenced",
        LowerCI = Ave_PairCost - (t_score * StEr),
        UpperCI = Ave_PairCost + (t_score * StEr)) |> 
 filter(NewCat == "Reserve")
@@ -1544,6 +1539,7 @@ filter(NewCat == "Reserve")
 
 ## Combine all data sets for plotting
 FenceComp <- rbind(ScenSumCost_NoFence, ScenSumCost_Fence, ScenSumCost_AES, ScenSumCost_NoFArable, ScenSumCost_FenceArable)
+FenceComp <- FenceComp |> mutate(Strategy = ifelse(Strategy=="Big", "Bigger", Strategy))
 
 
 ## Create Bar plot
@@ -1551,18 +1547,17 @@ ggplot(FenceComp, aes(x= Strategy, y= Ave_PairCost*100000, fill = Fencing)) +
 geom_col(width=0.55, position=position_dodge(0.6, preserve = "single")) +
 geom_errorbar(aes(ymin= LowerCI*100000, ymax= UpperCI*100000), width=0.2, position=position_dodge(0.6, preserve = "single"), colour = "#6a6b6b") +
 facet_wrap(~PlusFull) +
-scale_fill_manual(name = "Mechanism\n(orginal habitat)",   # Change legend title
+scale_fill_manual(name = "Mechanism -\nFencing",   # Change legend title
                   values = c("#073b4c", "#ffd166", "#06d6a0",  "#ef476f", "#118ab2")) +
 ylab("% Change in Breeding Pairs per £100,000") +
-xlab("Lawton Principle") +
+xlab("Location") +
 labs(fill = "Targeting Strategy") +
-guides(fill=guide_legend(nrow=2, byrow=F)) +
+guides(fill=guide_legend(nrow=3, byrow=F)) +
 BarPlotTheme
 
 
 ## save the plot
 ggsave(plot=last_plot(), filename= paste0(outpath, "Additive_Pair£_vs_FencingEffect.png"), units = "in", height = 9, width = 11)
-
 
 
 
@@ -1578,13 +1573,13 @@ ScenSumCost_FG <- Set |>
 filter(!OppCat == "Arable Opp") |> 
 mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
        PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
-       PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
+       PlusFull = ifelse(Plus==FALSE, "Quality: Average", "Quality: High")) |>
 group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
 summarise(StEr = sd(Perc_PairCost)/sqrt(n()),
           t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
           Ave_PairCost = mean(Perc_PairCost)) |> 
 ungroup() |> 
-mutate(Created = "Reserve- Grassland Income Foregone",           
+mutate(Created = "Reserve (grassland conversion) - Income foregone",           
        LowerCI = Ave_PairCost - (t_score * StEr),
        UpperCI = Ave_PairCost + (t_score * StEr)) |> 
 filter(NewCat == "Reserve")
@@ -1594,13 +1589,13 @@ ScenSumCost_PU <- Set |>
 filter(!OppCat == "Arable Opp") |> 
 mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
        PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
-       PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
+       PlusFull = ifelse(Plus==FALSE, "Quality: Average", "Quality: High")) |>
 group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
 summarise(StEr = sd(Perc_PairCostPU)/sqrt(n()),
           t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
           Ave_PairCost = mean(Perc_PairCostPU)) |> 
 ungroup() |> 
-mutate(Created = "Reserve- Purchase Grassland",           
+mutate(Created = "Reserve (grassland conversion) - Purchase",           
        LowerCI = Ave_PairCost - (t_score * StEr),
        UpperCI = Ave_PairCost + (t_score * StEr)) |> 
 filter(NewCat == "Reserve")
@@ -1611,13 +1606,13 @@ ScenSumCost_FGArable <- Set |>
 filter(OppCat == "Arable Opp") |> 
 mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
        PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
-       PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
+       PlusFull = ifelse(Plus==FALSE, "Quality: Average", "Quality: High")) |>
 group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
 summarise(StEr = sd(Perc_PairCost)/sqrt(n()),
           t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
           Ave_PairCost = mean(Perc_PairCost)) |> 
 ungroup() |> 
-mutate(Created = "Reserve- Arable Income Foregone",           
+mutate(Created = "Reserve (arable reversion) - Income foregone",           
        LowerCI = Ave_PairCost - (t_score * StEr),
        UpperCI = Ave_PairCost + (t_score * StEr)) |> 
 filter(NewCat == "Reserve")
@@ -1627,13 +1622,13 @@ ScenSumCost_PUArable <- Set |>
 filter(OppCat == "Arable Opp") |> 
 mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
        PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
-       PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
+       PlusFull = ifelse(Plus==FALSE, "Quality: Average", "Quality: High")) |>
 group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
 summarise(StEr = sd(Perc_PairCostPU)/sqrt(n()),
           t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
           Ave_PairCost = mean(Perc_PairCostPU)) |> 
 ungroup() |> 
-mutate(Created = "Reserve- Purchase Arable",           
+mutate(Created = "Reserve (arable reversion) - Purchase",           
        LowerCI = Ave_PairCost - (t_score * StEr),
        UpperCI = Ave_PairCost + (t_score * StEr)) |> 
 filter(NewCat == "Reserve")
@@ -1643,13 +1638,13 @@ filter(NewCat == "Reserve")
 ScenSumCost_AES <- Set |>
 mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
        PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
-       PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
+       PlusFull = ifelse(Plus==FALSE, "Quality: Average", "Quality: High")) |>
 group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
 summarise(StEr = sd(Perc_PairCost)/sqrt(n()),
           t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
           Ave_PairCost = mean(Perc_PairCost)) |> 
 ungroup() |> 
-mutate(Created = "AES Only",           
+mutate(Created = "AES only",           
        LowerCI = Ave_PairCost - (t_score * StEr),
        UpperCI = Ave_PairCost + (t_score * StEr)) |> 
 filter(NewCat == "AES Only")
@@ -1657,6 +1652,7 @@ filter(NewCat == "AES Only")
 
 ## Combine all data sets for plotting
 CostComp <- rbind(ScenSumCost_FG, ScenSumCost_PU, ScenSumCost_AES, ScenSumCost_FGArable, ScenSumCost_PUArable)
+CostComp <- CostComp |> mutate(Strategy = ifelse(Strategy=="Big", "Bigger", Strategy))
 
 
 ## Create Bar plot
@@ -1667,10 +1663,10 @@ facet_wrap(~PlusFull) +
 scale_fill_manual(name = "Mechanism-\nland costs",   # Change legend title
                   values = c("#073b4c", "#ffd166", "#06d6a0",  "#ef476f", "#118ab2")) +
 ylab("% Change in Breeding Pairs per £100,000") +
-xlab("Lawton Principle") +
+xlab("Location") +
 labs(fill = "Targeting Strategy") +
-guides(fill=guide_legend(nrow=2, byrow=F)) +
-BarPlotTheme + theme(legend.text = element_text(size = 12))
+guides(fill=guide_legend(nrow=3, byrow=F)) +
+BarPlotTheme + theme(legend.text = element_text(size = 13))
 
 
 ## save the plot
@@ -1689,7 +1685,7 @@ ggsave(plot=last_plot(), filename= paste0(outpath, "Additive_Pair£_vs_ForegoneP
 ## First create a data set that can be used to create a bar plot that covers all scenarios
 ScenSum <- Set |>
 mutate(PlotCatFull = paste0(Strategy, " for ", NewCat, ifelse(OppCat== "Arable Opp", "\nfrom Arable", "")),
-       PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
+       PlusFull = ifelse(Plus==FALSE, "Quality: Average", "Quality: High")) |>
 group_by(PlotCatFull, ScenType, PlusFull, Plus, NewCat, Strategy) |>
 summarise(StEr = sd(ClustActual)/sqrt(n()),
           t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
@@ -1701,21 +1697,51 @@ mutate(LowerCI = ClustActual - (t_score * StEr),
 ## Read in the 
 Sizes <- read_csv("CleanData/Scenarios/4-AnnotateCanvas/Average_reserve_AES_size.csv")
 
+# Define x-axis positions for groupings
+group_ranges <- data.frame(
+  category = c("Better", "Bigger", "More"),
+  xmin = c(0.5, 2.5, 5.5),  # approximate starting positions
+  xmax = c(2.5, 5.5, 8.5)   # approximate ending positions
+)
+
+
 ## Create Bar plot
 ggplot(ScenSum, aes(x= PlotCatFull, y= ClustActual, fill = ScenType)) +
+# Add grey rectangles
+geom_rect(data = group_ranges, 
+          aes(xmin = xmin, xmax = xmax, ymin = -Inf, ymax = Inf),
+          inherit.aes = FALSE, 
+          fill = "grey", 
+          alpha = c(0, 0.2, 0.5, 0, 0.2, 0.5)) +
 geom_col(width=0.55, position=position_dodge(0.55)) +
 geom_errorbar(aes(ymin= LowerCI, ymax= UpperCI), width=0.2, position=position_dodge(0.55), colour = "#6a6b6b") +
 facet_wrap(~PlusFull) +
-scale_fill_manual(name = "Scenario Type",   # Change legend title
-                    labels = c("clusterlarge"= "Cluster-large", "clustersmall"= "Cluster-small", "random" ="Random"),  # Change legend labels
+scale_fill_manual(name = "Scale",   # Change legend title
+                    labels = c("clusterlarge"= "Single large site", "clustersmall"= "Several small sites", "random" ="Field-scale"),  # Change legend labels
                     values = c("clusterlarge"="#A5F076", "clustersmall"="#76A5F0", "random"="#F076A5")) +
 geom_hline(yintercept=Sizes$ReserveAve, linetype="dashed", color = "grey", linewidth = 1.2) +
 geom_hline(yintercept=Sizes$AESAve, linetype="dashed", color = "grey", linewidth = 1.2) +
+# Add labels
+annotate("text", x = 1.5, y = max(Sizes$ReserveAve, na.rm = TRUE) + 11,
+         label = "Better", fontface = "bold", size = 5) +
+annotate("text", x = 4, y = max(Sizes$ReserveAve, na.rm = TRUE) + 11,
+         label = "Bigger", fontface = "bold", size = 5) +
+annotate("text", x = 7, y = max(Sizes$ReserveAve, na.rm = TRUE) + 11,
+         label = "More", fontface = "bold", size = 5) +
 ylab("Average cluster size/ ha") +
-xlab("Scenario Category") +
+xlab("Mechanism") +
 labs(fill = "Targeting Strategy") +
 BarPlotTheme + 
-theme(axis.text.x = element_text(size = 11, angle = 45, vjust = 1, hjust = 1))
+theme(axis.text.x = element_text(size = 11, angle = 45, vjust = 1, hjust = 1)) +
+  scale_x_discrete(labels = c(
+    "Better for AES Only"  = "AES only",
+    "Better for Reserve"  = "Reserve\n(grassland conversion)",
+    "Big for AES Only" = "AES only",
+    "Big for Reserve" = "Reserve\n(grassland conversion)",
+    "Big for Reserve\nfrom Arable" = "Reserve\n(arable reversion)",
+    "More for AES Only"  = "AES only",
+    "More for Reserve"  = "Reserve\n(grassland conversion)",
+    "More for Reserve\nfrom Arable" = "Reserve\n(arable reversion)"))
 
 ## save the plot
 ggsave(plot=last_plot(), filename= paste0(outpath, "Additive_AveClusterSizeha_vs_Category.png"), units = "in", height = 9, width = 11)
@@ -1733,7 +1759,7 @@ ScenSumLap <- Set |>
   filter(!Landscape == "Somerset Levels and Moors") |> 
   mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
          PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
-         PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
+         PlusFull = ifelse(Plus==FALSE, "Quality: Average", "Quality: High")) |>
   group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
   summarise(StEr = sd(Perc_PairCostLap)/sqrt(n()),
             t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
@@ -1748,7 +1774,7 @@ ScenSumRed <- Set |>
   filter(!Landscape == "Somerset Levels and Moors") |> 
   mutate(Arable2 = ifelse(OppCat== "Arable Opp", "\nfrom Arable", ""),
          PlotCatFull = paste0(Strategy, " for ", NewCat, Arable2),
-         PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality")) |>
+         PlusFull = ifelse(Plus==FALSE, "Quality: Average", "Quality: High")) |>
   group_by(PlotCatFull, PlusFull, Plus, NewCat, Strategy) |>
   summarise(StEr = sd(Perc_PairCostRed)/sqrt(n()),
             t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
@@ -1762,18 +1788,46 @@ ScenSumRed <- Set |>
 ## Combine the data sets for Lapwing and Redshank
 SpeciesComb <- rbind(ScenSumLap, ScenSumRed)
 
+# Define x-axis positions for groupings
+group_ranges <- data.frame(
+  category = c("Better", "Bigger", "More"),
+  xmin = c(0.5, 2.5, 5.5),  # approximate starting positions
+  xmax = c(2.5, 5.5, 8.5)   # approximate ending positions
+)
 
 ## Create Bar plot
 ggplot(SpeciesComb, aes(x= PlotCatFull, y= Ave_PairCost*100000, fill = Species)) +
+  # Add grey rectangles
+  geom_rect(data = group_ranges, 
+            aes(xmin = xmin, xmax = xmax, ymin = -Inf, ymax = Inf),
+            inherit.aes = FALSE, 
+            fill = "grey", 
+            alpha = c(0, 0.2, 0.5, 0, 0.2, 0.5)) +
   geom_col(width=0.55, position=position_dodge(0.6)) +
   geom_errorbar(aes(ymin= LowerCI*100000, ymax= UpperCI*100000), width=0.2, position=position_dodge(0.6), colour = "#6a6b6b") +
   facet_wrap(~PlusFull) +
   scale_fill_manual(name = "Species",   # Change legend title
                     values = c("#6464f4", "#f46464")) +
   ylab("% Change in Breeding Pairs per £100,000") +
-  xlab("Scenario Category") +
+  xlab("Mechanism") +
   BarPlotTheme + 
-  theme(axis.text.x = element_text(size = 11, angle = 45, vjust = 1, hjust = 1))
+  theme(axis.text.x = element_text(size = 11, angle = 45, vjust = 1, hjust = 1)) +
+  # Add labels
+  annotate("text", x = 1.5, y = max(SpeciesComb$UpperCI*100000, na.rm = TRUE) + 0.5,
+           label = "Better", fontface = "bold", size = 5) +
+  annotate("text", x = 4, y = max(SpeciesComb$UpperCI*100000, na.rm = TRUE) + 0.5,
+           label = "Bigger", fontface = "bold", size = 5) +
+  annotate("text", x = 7, y = max(SpeciesComb$UpperCI*100000, na.rm = TRUE) + 0.5,
+           label = "More", fontface = "bold", size = 5) +
+  scale_x_discrete(labels = c(
+    "Better for AES Only"  = "AES only",
+    "Better for Reserve"  = "Reserve\n(grassland conversion)",
+    "Big for AES Only" = "AES only",
+    "Big for Reserve" = "Reserve\n(grassland conversion)",
+    "Big for Reserve\nfrom Arable" = "Reserve\n(arable reversion)",
+    "More for AES Only"  = "AES only",
+    "More for Reserve"  = "Reserve\n(grassland conversion)",
+    "More for Reserve\nfrom Arable" = "Reserve\n(arable reversion)"))
 
 
 ## save the plot
@@ -1794,7 +1848,10 @@ ggsave(plot=last_plot(), filename= paste0(outpath, "Additive_Pair£_vs_LapwingRe
 ## Create a function that can plot the increase in breeding waders per £100,000 for one landscape
 RegionPlot <- function(inpath,
                          outpath,
-                         species){
+                         species, 
+                         xlab, 
+                         ylab, 
+                         ylims){
   
   ## First create a data set that can be used to create a bar plot that covers all scenarios
   files <- c(dir(paste0(inpath, "rand/"), pattern  = "Track_Add", full.names  = T),
@@ -1839,10 +1896,10 @@ RegionPlot <- function(inpath,
   ## Set a general theme for the bar plots
   BarPlotTheme <- theme_light() +
                   theme(panel.grid.minor = element_blank(),
-                        strip.text = element_text(size = 17),
-                        axis.title = element_text(size = 18),
-                        axis.text.y = element_text(size = 16),
-                        axis.text.x = element_text(size = 16, angle = 45, vjust = 0.5),
+                        strip.text = element_text(size = 15),
+                        axis.title = element_text(size = 17),
+                        axis.text.y = element_text(size = 12),
+                        axis.text.x = element_text(size = 12, angle = 45, vjust = 0.5),
                         legend.title = element_text(size = 17),
                         legend.text = element_text(size = 16),
                         legend.position = "bottom", 
@@ -1860,7 +1917,7 @@ RegionPlot <- function(inpath,
                       Ave_PairCost = mean(PairCost)) |>
             mutate(PlotCatOther = paste0(NewCat, " ", ifelse(Plus==T, "+", "-")),
                    PlotCatFull= paste0(Strategy, " for ", PlotCatOther),
-                   PlusFull = ifelse(Plus==FALSE, "Average-Quality", "High-Quality"),
+                   PlusFull = ifelse(Plus==FALSE, "Quality: Average", "Quality: High"),
                    NewCatFull = ifelse(OppCat== "Arable Opp", paste0(NewCat, " from Arable"), NewCat),
                    LowerCI = Ave_PairCost - (t_score * StEr),
                    UpperCI = Ave_PairCost + (t_score * StEr))
@@ -1871,15 +1928,12 @@ RegionPlot <- function(inpath,
     geom_col(width=0.75, position=position_dodge(0.75, preserve = "single")) +
     geom_errorbar(aes(ymin= LowerCI*100000, ymax= UpperCI*100000), width=0.2, position=position_dodge(width=0.75, preserve = "single"), colour = "#6a6b6b") +
     facet_wrap(~PlusFull) +
-<<<<<<< HEAD
     scale_fill_manual(name = "Mechanism",   # Change legend title
-=======
-    scale_fill_manual(name = "Scenario Type",   # Change legend title
->>>>>>> 3df2806f235f4042a1cc095ec47e8f1ff9e342d9
-                      labels = c("AES Only"= "AES Only", "Reserve"= "Reserve from grassland", "Reserve from Arable" = "Reserve from Arable"),  # Change legend labels
+                      labels = c("AES Only" = "AES only", "Reserve" = "Reserve creation (grassland conversion)", "Reserve from Arable" = "Reserve creation (arable reversion)"),  # Change legend labels
                       values = c("AES Only"="#F076A5", "Reserve"= "#76A5F0", "Reserve from Arable"= "#DDB24C")) +
-    ylab("Change in Breeding Pairs per £100,000") +
-    xlab("Lawton Principle") +
+    ylab(ylab) +
+    xlab(xlab) +
+    ylim(ylims) +
     ggtitle(paste0(ScenSumCost2$Landscape[1])) +
     labs(fill = "Management Used") +
     BarPlotTheme
@@ -1892,29 +1946,401 @@ RegionPlot <- function(inpath,
 ## Create plots for the regional landscapes
 SP <- RegionPlot(inpath= "CleanData/Scenarios/5-ScenarioCreation/Som/",
                  outpath="CleanData/Scenarios/5-ScenarioCreation/Som/Plots/",
-                 species="Snipe")
+                 species="Snipe",
+                 xlab = " ", 
+                 ylab = " ", 
+                 ylims= c(-7.5, 50))
 
 Br <- RegionPlot(inpath= "CleanData/Scenarios/5-ScenarioCreation/Broads/",
                  outpath="CleanData/Scenarios/5-ScenarioCreation/Broads/Plots/",
-                 species="LapRed")
+                 species="LapRed",
+                 xlab = "Location", 
+                 ylab = "Change in Breeding Pairs per £100,000",
+                 ylims= c(-15, 100))
 
 NK <- RegionPlot(inpath= "CleanData/Scenarios/5-ScenarioCreation/Kent/",
                  outpath="CleanData/Scenarios/5-ScenarioCreation/Kent/Plots/",
-                 species="LapRed")
+                 species="LapRed", 
+                 xlab = " ", 
+                 ylab = " ",
+                 ylims= c(-15, 100))
 
 Es <- RegionPlot(inpath= "CleanData/Scenarios/5-ScenarioCreation/Essex/",
                  outpath="CleanData/Scenarios/5-ScenarioCreation/Essex/Plots/",
-                 species="LapRed")
+                 species="LapRed", 
+                 xlab = " ", 
+                 ylab = " ",
+                 ylims= c(-15, 100))
 
 ## arrange all the plots into one
 library(ggpubr)
-<<<<<<< HEAD
+
 ggarrange(Br, SP, NK, Es, common.legend = T, legend = "bottom")
-=======
-ggarrange(SP, Br, NK, Es, common.legend = T, legend = "bottom")
->>>>>>> 3df2806f235f4042a1cc095ec47e8f1ff9e342d9
+
 
 ## save the plot
-ggsave(plot=last_plot(), filename= paste0(outpath, "RegionalBreakdown_Pair£_vs_Category.png"), units = "in", height = 12, width = 12)
+ggsave(plot=last_plot(), filename= paste0(outpath, "RegionalBreakdown_Pair£_vs_SumCategory.png"), units = "in", height = 12, width = 12)
   
   
+
+
+##----------------------------------------------##
+##  Combine Pairs per £100,000 & Ha vs Category ##
+##----------------------------------------------##
+
+## First create a data set that can be used to create a bar plot that covers all scenarios
+ScenSumCost <- Set |>
+  mutate(ScenType = case_when(ScenType == "random" ~ "Field-scale",
+                              ScenType  == "clustersmall" ~ "Several small sites",  
+                              ScenType  == "clusterlarge" ~ "Single large site")) |> 
+  mutate(NewCatFull = ifelse(OppCat== "Arable Opp", paste0(NewCat, " from Arable"), NewCat),
+         PlotXCat = paste0(Strategy, " & ", ScenType),
+         PlusFull = ifelse(Plus==FALSE, "Quality: Average", "Quality: High")) |>
+  group_by(PlotXCat, ScenType, NewCatFull, PlusFull, Plus) |>
+  summarise(StEr = sd(Perc_PairCost)/sqrt(n()),
+            t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
+            Perc_PairCost = mean(Perc_PairCost)) |>     
+  ungroup() |> 
+  mutate(LowerCI = Perc_PairCost - (t_score * StEr),
+         UpperCI = Perc_PairCost + (t_score * StEr))
+
+# Define x-axis positions for groupings
+group_ranges <- data.frame(
+  category = c("Better", "Bigger", "More"),
+  xmin = c(0.5, 3.5, 6.5),  # approximate starting positions
+  xmax = c(3.5, 6.5, 9.5)   # approximate ending positions
+)
+
+# Create the base plot
+FullCost <- ggplot(ScenSumCost, aes(x = PlotXCat, y = Perc_PairCost * 100000, fill = NewCatFull)) +
+  # Add grey rectangles
+  geom_rect(data = group_ranges, 
+            aes(xmin = xmin, xmax = xmax, ymin = -Inf, ymax = Inf),
+            inherit.aes = FALSE, 
+            fill = "grey", 
+            alpha = c(0, 0.15, 0.4, 0, 0.15, 0.4)) +  # Increasing darkness
+  ## add bars
+  geom_col(width = 0.55, position = position_dodge(0.55, preserve = "single")) +
+  geom_errorbar(aes(ymin = LowerCI * 100000, ymax = UpperCI * 100000), 
+                width = 0.2, 
+                position = position_dodge(width = 0.55, preserve = "single"), 
+                colour = "#6a6b6b") +
+  
+  # Add labels
+  annotate("text", x = 2, y = max(ScenSumCost$UpperCI, na.rm = TRUE) * 100000 + 0.5,
+           label = "Better", fontface = "bold", size = 5) +
+  annotate("text", x = 5, y = max(ScenSumCost$UpperCI, na.rm = TRUE) * 100000 + 0.5,
+           label = "Bigger", fontface = "bold", size = 5) +
+  annotate("text", x = 8, y = max(ScenSumCost$UpperCI, na.rm = TRUE) * 100000 + 0.5,
+           label = "More", fontface = "bold", size = 5) +
+  
+  # Continue with your existing layers
+  facet_wrap(~PlusFull) +
+  scale_fill_manual(name = "Mechanism",
+                    labels = c("AES Only" = "AES only",
+                               "Reserve" = "Reserve creation (grassland conversion)",
+                               "Reserve from Arable" = "Reserve creation (arable reversion)"),
+                    values = c("AES Only" = "#F076A5",
+                               "Reserve" = "#76A5F0",
+                               "Reserve from Arable" = "#DDB24C")) +
+  ylab("% Change in Breeding Pairs per £100,000") +
+  xlab(" ") +
+  #ylim(-1, 10) +
+  labs(fill = "Targeting Strategy") +
+  BarPlotTheme +
+  theme(axis.text.x = element_text(size = 12, angle = 45, vjust = 1, hjust = 1)) +
+  scale_x_discrete(labels = c(
+    "Better & Field-scale" = "Field-scale",
+    "Better & Several small sites" = "Several small sites",
+    "Better & Single large site" = "Single large site",
+    "Big & Field-scale" = "Field-scale",
+    "Big & Several small sites" = "Several small sites",
+    "Big & Single large site" = "Single large site",
+    "More & Field-scale" = "Field-scale",
+    "More & Several small sites" = "Several small sites",
+    "More & Single large site" = "Single large site"))
+
+
+
+##--------------------##
+
+
+## First create a data set that can be used to create a bar plot that covers all scenarios
+ScenSumHa <- Set |>
+  mutate(ScenType = case_when(ScenType == "random" ~ "Field-scale",
+                              ScenType  == "clustersmall" ~ "Several small sites",  
+                              ScenType  == "clusterlarge" ~ "Single large site")) |> 
+  mutate(NewCatFull = ifelse(OppCat== "Arable Opp", paste0(NewCat, " from Arable"), NewCat),
+         PlotXCat = paste0(Strategy, " & ", ScenType), 
+         PlusFull = ifelse(Plus==FALSE, "Quality: Average", "Quality: High")) |>
+  group_by(PlotXCat, ScenType, NewCatFull, PlusFull, Plus) |>
+  summarise(StEr = sd(Perc_Waders_100Ha)/sqrt(n()),
+            t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
+            Perc_Waders_100Ha = mean(Perc_Waders_100Ha)) |>     
+  ungroup() |> 
+  mutate(LowerCI = Perc_Waders_100Ha - (t_score * StEr),
+         UpperCI = Perc_Waders_100Ha + (t_score * StEr))
+
+
+# Define x-axis positions for groupings
+group_ranges <- data.frame(
+  category = c("Better", "Bigger", "More"),
+  xmin = c(0.5, 3.5, 6.5),  # approximate starting positions
+  xmax = c(3.5, 6.5, 9.5)   # approximate ending positions
+)
+
+# Create the base plot
+FullHa <- ggplot(ScenSumHa, aes(x = PlotXCat, y = Perc_Waders_100Ha, fill = NewCatFull)) +
+  # Add grey rectangles
+  geom_rect(data = group_ranges, 
+            aes(xmin = xmin, xmax = xmax, ymin = -Inf, ymax = Inf),
+            inherit.aes = FALSE, 
+            fill = "grey", 
+            alpha = c(0, 0.15, 0.4, 0, 0.15, 0.4)) +  # Increasing darkness
+  ## add bars
+  geom_col(width = 0.55, position = position_dodge(0.55, preserve = "single")) +
+  geom_errorbar(aes(ymin = LowerCI, ymax = UpperCI), 
+                width = 0.2, 
+                position = position_dodge(width = 0.55, preserve = "single"), 
+                colour = "#6a6b6b") +
+  
+  # Add labels
+  annotate("text", x = 2, y = max(ScenSumHa$UpperCI, na.rm = TRUE) + 0.5,
+           label = "Better", fontface = "bold", size = 5) +
+  annotate("text", x = 5, y = max(ScenSumHa$UpperCI, na.rm = TRUE) + 0.5,
+           label = "Bigger", fontface = "bold", size = 5) +
+  annotate("text", x = 8, y = max(ScenSumHa$UpperCI, na.rm = TRUE) + 0.5,
+           label = "More", fontface = "bold", size = 5) +
+  
+  # Continue with your existing layers
+  facet_wrap(~PlusFull) +
+  scale_fill_manual(name = "Mechanism",
+                    labels = c("AES Only" = "AES only",
+                               "Reserve" = "Reserve creation (grassland conversion)",
+                               "Reserve from Arable" = "Reserve creation (arable reversion)"),
+                    values = c("AES Only" = "#F076A5",
+                               "Reserve" = "#76A5F0",
+                               "Reserve from Arable" = "#DDB24C")) +
+  ylab("% Change in Breeding Pairs per 100 ha") +
+  xlab("Scale") +
+  #ylim(-1, 10) +
+  labs(fill = "Targeting Strategy") +
+  BarPlotTheme +
+  theme(axis.text.x = element_text(size = 12, angle = 45, vjust = 1, hjust = 1)) +
+  scale_x_discrete(labels = c(
+    "Better & Field-scale" = "Field-scale",
+    "Better & Several small sites" = "Several small sites",
+    "Better & Single large site" = "Single large site",
+    "Big & Field-scale" = "Field-scale",
+    "Big & Several small sites" = "Several small sites",
+    "Big & Single large site" = "Single large site",
+    "More & Field-scale" = "Field-scale",
+    "More & Several small sites" = "Several small sites",
+    "More & Single large site" = "Single large site"))
+
+
+
+## Combine the two plots above
+FullCombo <- ggarrange(FullCost, FullHa,
+                       nrow=2, common.legend = T)
+
+## save the plot
+ggsave(plot=FullCombo, filename= paste0(outpath, "Additive_Pair£_FULL.png"), units = "in", height = 18, width = 14)
+
+
+
+
+
+##----------------------------##
+##  Plot Regional vs Category ##
+##----------------------------##
+
+## Create a function that can plot the increase in breeding waders per £100,000 for one landscape
+RegionPlot2 <- function(inpath,
+                       species, 
+                       xlab, 
+                       ylab,
+                       title,
+                       ylims){
+  
+  ## First create a data set that can be used to create a bar plot that covers all scenarios
+  files <- c(dir(paste0(inpath, "rand/"), pattern  = "Track_Add", full.names  = T),
+             dir(paste0(inpath, "clustlarge/"), pattern  = "Track_Add", full.names  = T),
+             dir(paste0(inpath, "clustsmall/"), pattern  = "Track_Add", full.names  = T))
+  
+  
+  ## Read in all these files and bind them together
+  AllScn2 <- files %>%
+    map(fread) %>% # read in all files into a list
+    bind_rows() %>% # bind all the rows
+    mutate(ScenType = ifelse(ScenType == "cluster" & ClustMean == max(ClustMean, na.rm = T), "clusterlarge", ScenType),
+           ScenType = ifelse(ScenType == "cluster" & ClustMean == min(ClustMean, na.rm = T), "clustersmall", ScenType),
+           ChangeSnipe = Snipe-BaseSnipe,
+           ChangeSnipenoF = Snipe_unfenced-BaseSnipe,
+           ChangeLapwing = Lapwing-BaseLapwing,
+           ChangeRedshank = Redshank-BaseRedshank,
+           ChangeWaders = (Lapwing+Redshank) - (BaseLapwing+BaseRedshank),
+           ChangeWadersnoF = (Lapwing_unfenced+Redshank_unfenced) - (BaseLapwing+BaseRedshank),
+           ChangeCostsFG = ifelse(NewCat=="AES Only", NewAESCost - BaseAESCost,
+                                  ifelse(NewCat=="Reserve", (NewResMaintCost+(NewResCreatCost/Yrs)+(FencingCost/Yrs)+ForegoneCost)-BaseResMaintCost, 0)),
+           ChangeCostsPU = ifelse(NewCat=="AES Only", NewAESCost - BaseAESCost,
+                                  ifelse(NewCat=="Reserve", (NewResMaintCost+(NewResCreatCost/Yrs)+(FencingCost/Yrs)+(PurchaseCost/Yrs))-BaseResMaintCost, 0)),
+           ChangeCostsNoF = ifelse(NewCat=="AES Only", NewAESCost - BaseAESCost,
+                                   ifelse(NewCat=="Reserve", (NewResMaintCost+(NewResCreatCost/Yrs)+ForegoneCost)-BaseResMaintCost, 0)),
+           PlotCat = paste0(NewCat, ifelse(Plus==T, "+", "-"), " ", ifelse(OppCat== "Arable Opp", "Arable", ""))) |>
+    filter(!SegmentArea == 0) 
+  
+  
+  ## Calculate the cost per pairs depending on whether it is Snipe or Lapwing/Redshank
+  if(species == "LapRed"){ AllScn2 <- AllScn2 |> mutate(PairCost = ChangeWaders/ChangeCostsFG,
+                                                        PairCostPU = ChangeWaders/ChangeCostsPU,
+                                                        PairCostNoF = ChangeWadersnoF/ChangeCostsNoF,
+                                                        Waders_100Ha = (ChangeWaders/SegmentArea)*100) }
+  
+  if(species == "Snipe"){ AllScn2 <- AllScn2 |> mutate(PairCost = ChangeSnipe/ChangeCostsFG,
+                                                       PairCostPU = ChangeSnipe/ChangeCostsPU,
+                                                       PairCostNoF = ChangeSnipenoF/ChangeCostsNoF,
+                                                       Waders_100Ha = (ChangeSnipe/SegmentArea)*100) }
+  
+  
+  ## Set a general theme for the bar plots
+  BarPlotTheme <- theme_light() +
+    theme(panel.grid.minor = element_blank(),
+          strip.text = element_text(size = 11),
+          axis.title = element_text(size = 12),
+          axis.text.y = element_text(size = 10),
+          axis.text.x = element_text(size = 10, angle = 45, vjust = 0.5),
+          legend.title = element_text(size = 12),
+          legend.text = element_text(size = 10),
+          legend.position = "bottom", 
+          plot.title = element_text(size = 12, face = "bold"))
+  
+  ## First create a data set that can be used to create a bar plot that covers all scenarios
+  ScenSumCostR <- AllScn2 |>
+    mutate(NewCatFull = ifelse(OppCat== "Arable Opp", paste0(NewCat, " from Arable"), NewCat),
+           PlusFull = ifelse(Plus==FALSE, "Quality: Average", "Quality: High"),
+           ScenType = case_when(ScenType == "random" ~ "Field-scale",
+                                ScenType  == "clustersmall" ~ "Several small sites",  
+                                ScenType  == "clusterlarge" ~ "Single large site"),
+           PlotXCat = paste0(Strategy, " & ", ScenType),) |>
+    group_by(PlotXCat, ScenType, NewCatFull, PlusFull, Plus, Landscape) |>
+    summarise(StEr = sd(PairCost)/sqrt(n()),
+              t_score = qt(p=0.05/2, df=(n()-1), lower.tail=F),
+              Ave_PairCost = mean(PairCost)) |>     
+    ungroup() |> 
+    mutate(LowerCI = Ave_PairCost - (t_score * StEr),
+           UpperCI = Ave_PairCost + (t_score * StEr))
+
+  # Define x-axis positions for groupings
+  group_ranges <- data.frame(
+    category = c("Better", "Bigger", "More"),
+    xmin = c(0.5, 3.5, 6.5),  # approximate starting positions
+    xmax = c(3.5, 6.5, 9.5)   # approximate ending positions
+  )
+  
+  # Create the base plot
+  Plotout <- ggplot(ScenSumCostR, aes(x = PlotXCat, y = Ave_PairCost * 100000, fill = NewCatFull)) +
+    # Add grey rectangles
+    geom_rect(data = group_ranges, 
+              aes(xmin = xmin, xmax = xmax, ymin = -Inf, ymax = Inf),
+              inherit.aes = FALSE, 
+              fill = "grey", 
+              alpha = c(0, 0.2, 0.5, 0, 0.2, 0.5)) +  # Increasing darkness
+    ## add bars
+    geom_col(width = 0.7, position = position_dodge(0.55, preserve = "single")) +
+    geom_errorbar(aes(ymin = LowerCI * 100000, ymax = UpperCI * 100000),
+                  width = 0,
+                  position = position_dodge(width = 0.55, preserve = "single"),
+                  colour = "#6a6b6b") +
+    
+    # Add labels
+    annotate("text", x = 2, y = ylims[2]-(ylims[2]*0.02),
+             label = "Better", fontface = "bold", size = 3) +
+    annotate("text", x = 5, y = ylims[2]-(ylims[2]*0.02),
+             label = "Bigger", fontface = "bold", size = 3) +
+    annotate("text", x = 8, y = ylims[2]-(ylims[2]*0.02),
+             label = "More", fontface = "bold", size = 3) +
+    
+    # Continue with your existing layers
+    facet_wrap(~PlusFull) +
+    scale_fill_manual(name = "Mechanism",
+                      labels = c("AES Only" = "AES only",
+                                 "Reserve" = "Reserve creation (grassland conversion)",
+                                 "Reserve from Arable" = "Reserve creation (arable reversion)"),
+                      values = c("AES Only" = "#F076A5",
+                                 "Reserve" = "#76A5F0",
+                                 "Reserve from Arable" = "#DDB24C")) +
+    ylab(ylab) +
+    xlab(xlab) +
+    ylim(ylims) +
+    ggtitle(paste0(title)) +
+    labs(fill = "Targeting Strategy") +
+    BarPlotTheme +
+    theme(axis.text.x = element_text(size = 9, angle = 45, vjust = 1, hjust = 1), 
+          plot.margin = margin(t = 0, b = 0)) +
+    scale_x_discrete(labels = c(
+      "Better & Field-scale" = "Field",
+      "Better & Several small sites" = "Small",
+      "Better & Single large site" = "Large",
+      "Big & Field-scale" = "Field",
+      "Big & Several small sites" = "Small",
+      "Big & Single large site" = "Large",
+      "More & Field-scale" = "Field",
+      "More & Several small sites" = "Small",
+      "More & Single large site" = "Large"))
+  
+  return(Plotout)
+  
+}
+
+
+## Create plots for the regional landscapes
+SP <- RegionPlot2(inpath= "CleanData/Scenarios/5-ScenarioCreation/Som/",
+                 species="Snipe",
+                 xlab = " ", 
+                 ylab = " ", 
+                 title = "Somerset Levels",
+                 ylims= c(-9, (135/2)))
+
+Br <- RegionPlot2(inpath= "CleanData/Scenarios/5-ScenarioCreation/Broads/",
+                 species="LapRed",
+                 xlab = "Location", 
+                 ylab = "Change in Breeding Pairs per £100,000",
+                 title = "Norfolk Broads",
+                 ylims= c(-18, 135))
+
+NK <- RegionPlot2(inpath= "CleanData/Scenarios/5-ScenarioCreation/Kent/",
+                 species="LapRed", 
+                 xlab = " ", 
+                 ylab = " ",
+                 title = "North Kent",
+                 ylims= c(-18, 135))
+
+Es <- RegionPlot2(inpath= "CleanData/Scenarios/5-ScenarioCreation/Essex/",
+                 species="LapRed", 
+                 xlab = " ", 
+                 ylab = " ",
+                 title = "Essex",
+                 ylims= c(-18, 135))
+
+## arrange all the plots into one
+RegCat <- ggarrange(Br, SP, NK, Es, common.legend = T, 
+                    nrow= 2, ncol = 2, legend = "top",
+                    align='hv',
+                    hjust=-4.5, vjust=3)
+
+
+## save the plot
+ggsave(plot = RegCat, filename= paste0(outpath, "RegionalBreakdown_Pair£_vs_Category.png"), units = "cm", height = 20.3, width = 21.6)
+
+
+
+## arrange all the plots into one
+RegCatHor <- ggarrange(Br, SP, NK, Es, common.legend = T, 
+                    nrow= 1, ncol = 4, legend = "top",
+                    align='hv',
+                    hjust=-4.5, vjust=3)
+
+
+## save the plot
+ggsave(plot = RegCatHor, filename= paste0(outpath, "RegionalBreakdown_Pair£_vs_CategoryHoriz.png"), units = "cm", height = 14.3, width = 40.6)

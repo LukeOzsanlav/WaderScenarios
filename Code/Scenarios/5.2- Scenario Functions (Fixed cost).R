@@ -350,18 +350,14 @@ CreateScenario <- function(Canvas,
   ## Get the index of rows representing the opportunity area for scenarios involving AES creation
   ## This is decided based upon whether fields are inside or outside of wader clusters and the category of the field
   ## Grassland opportunity fields are selected and AES fields that do not have a breeding wader option
-  if(Strategy %in% c("Big", "More") & NewCat == "AES Only"){ IndOpp <- which((is.na(Canvas$ClustGroup)==T & Canvas$Category %in% OppCat) | 
-                                                                             (is.na(Canvas$ClustGroup)==T & Canvas$Category %in% NewCat & Canvas$BrAES == F)) }
-  if(Strategy %in% c("Better") & NewCat == "AES Only"){ IndOpp <- which((is.na(Canvas$ClustGroup)==F & Canvas$Category %in% OppCat) |
-                                                                        (is.na(Canvas$ClustGroup)==F & Canvas$Category %in% NewCat & Canvas$BrAES == F)) }
+  if(Strategy %in% c("Big", "More") & NewCat == "AES Only"){ IndOpp <- which((is.na(Canvas$ClustGroup)==T & Canvas$Category %in% OppCat)) }  # BrAES == F
+  if(Strategy %in% c("Better") & NewCat == "AES Only"){ IndOpp <- which((is.na(Canvas$ClustGroup)==F & Canvas$Category %in% OppCat)) } # BrAES == F
   
   
   ## For the plus strategies we also remove any fields that are the same category as the new management type and already have waders 
   ## (i.e. AES fields with waders will not be targeted and those without will be)
-  if(Strategy %in% c("Big", "More") & NewCat == "Reserve"){ IndOpp <- which((is.na(Canvas$ClustGroup)==T & Canvas$Category %in% OppCat) | 
-                                                                            (is.na(Canvas$ClustGroup)==T & Canvas$Category %in% NewCat & Canvas$ResQual == "LowQ")) }
-  if(Strategy %in% c("Better") & NewCat == "Reserve"){ IndOpp <- which((is.na(Canvas$ClustGroup)==F & Canvas$Category %in% OppCat) | 
-                                                                       (is.na(Canvas$ClustGroup)==F & Canvas$Category %in% NewCat & Canvas$ResQual == "LowQ ")) }
+  if(Strategy %in% c("Big", "More") & NewCat == "Reserve"){ IndOpp <- which((is.na(Canvas$ClustGroup)==T & Canvas$Category %in% OppCat)) } # ResQual == "LowQ"
+  if(Strategy %in% c("Better") & NewCat == "Reserve"){ IndOpp <- which((is.na(Canvas$ClustGroup)==F & Canvas$Category %in% OppCat)) } # ResQual == "LowQ"
   
   ## Only sample the appropriate Arable fields if doing arable reversion
   if(Strategy %in% c("Big", "More") & NewCat == "Reserve" & 
@@ -374,13 +370,24 @@ CreateScenario <- function(Canvas,
   
   ## These are the fields from which I will sample costs and habtiat values
   ## Pre-compute the AES rate per ha and trim down to two columns to speed up the loop
-  AESBr_fields <- filter(Canvas, Category == "AES Only" & BrAES == T) |> 
-                  mutate(AES_Rate = AESCostGDP/FieldArea) |> 
-                  select(ParcRef, AES_Rate)
+  # AESBr_fields <- filter(Canvas, Category == "AES Only" & BrAES == T) |> 
+  #                 mutate(AES_Rate = AESCostGDP/FieldArea) |> 
+  #                 select(ParcRef, AES_Rate)
+  # 
+  # QReserve_fields <- filter(Canvas, Category == "Reserve" & ResQual == "HighQ") |> 
+  #                 mutate(AES_Rate = AESCostGDP/FieldArea) |> 
+  #                 select(ParcRef, AES_Rate, Fence_Coverage)
   
-  QReserve_fields <- filter(Canvas, Category == "Reserve" & ResQual == "HighQ") |> 
-                  mutate(AES_Rate = AESCostGDP/FieldArea) |> 
-                  select(ParcRef, AES_Rate, Fence_Coverage)
+  ## These are the fields from which I will sample costs and habtiat values
+  ## Pre-compute the AES rate per ha and trim down to two columns to speed up the loop
+  AESBr_fields <- filter(Canvas, Category == "AES Only" & Tot_abund > 0) |> 
+    mutate(AES_Rate = AESCostGDP/FieldArea) |> 
+    select(ParcRef, AES_Rate)
+  
+  QReserve_fields <- filter(Canvas, Category == "Reserve" & Tot_abund > 0) |> 
+    mutate(AES_Rate = AESCostGDP/FieldArea) |> 
+    select(ParcRef, AES_Rate, Fence_Coverage)
+  
   
   
 
@@ -1987,7 +1994,7 @@ PlotScenario <- function(inpath,
 # ## Now using the list column of the different AES schemes this function looks through all the AES codes
 # ## Then ti works out the total payment for those fields based on the AES payment rates and the area of the field
 # for(j in 1:nrow(AES_Costs)){
-#   
+# 
 #   ## How many years to spread one off costs over
 #   Yrs <- 15
 # 
@@ -2139,13 +2146,13 @@ PlotScenario <- function(inpath,
 # 
 # # Create directory if needs be
 # dir.create(FinalOutPath, showWarnings = F)
-
-
-# CreateScenario(Canvas=Canvas, SniModel=SniModel, LapModel=LapModel, RedModel=RedModel, LandCov=LandCov,
-#                N_sets=N_sets, Budget = 300000, ClustBuf= 200, OppCat= c("Arable Opp"),
-#                NewCat= "Reserve", Strategy = runsetting$Strategy[z],
-#                CostSpread = 20, SaveCanv = F, Outpath = "CleanData/Scenarios/5-ScenarioCreation/Kent/SetCost/")
-
+# 
+# 
+# # CreateScenario(Canvas=Canvas, SniModel=SniModel, LapModel=LapModel, RedModel=RedModel, LandCov=LandCov,
+# #                N_sets=N_sets, Budget = 300000, ClustBuf= 200, OppCat= c("Arable Opp"),
+# #                NewCat= "Reserve", Strategy = runsetting$Strategy[z],
+# #                CostSpread = 20, SaveCanv = F, Outpath = "CleanData/Scenarios/5-ScenarioCreation/Kent/SetCost/")
+# 
 # Canvas=Canvas
 # SniModel=SniModel
 # LapModel=LapModel
@@ -2160,7 +2167,3 @@ PlotScenario <- function(inpath,
 # CostSpread = 20
 # SaveCanv = F
 # Outpath = "CleanData/Scenarios/5-ScenarioCreation/Kent/SetCost/"
-# 
-# 
-# "Arable Opp"
-
