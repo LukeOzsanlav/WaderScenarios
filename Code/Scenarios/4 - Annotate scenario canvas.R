@@ -680,7 +680,7 @@ AnnotateCanv <- function(Canv, ## Blank un-labelled canvas for each priority lan
     Can2 <- Data 
     
     ## Seperate the reserve parcels without habitat values to the ones with habitat values
-    ## Use Reserve== "Y" top capture any reserve parcels that might be just outside the priority landscape
+    ## Use Reserve== "Y" to capture any reserve parcels that might be just outside the priority landscape
     noHab <- which(is.na(Can2[,colnames(Can2)==ColName])==T & Can2$Category == "Reserve")
     Hab <- which(is.na(Can2[,colnames(Can2)==ColName])==F & Can2$Reserve== "Y")
     
@@ -702,6 +702,7 @@ AnnotateCanv <- function(Canv, ## Blank un-labelled canvas for each priority lan
     ## For Reserve parcels missing a habitat value sample a habitat value from the same category
     InterS <- sample(x= na.omit((Can2[Can2$Reserve== "Y",])[, colnames(Can2)==ColName]), 
                      size = nrow(Can2[is.na(Can2[,colnames(Can2)==ColName])==T & Can2$Reserve== "Y",]), replace = T)
+    
     ## Assign the sampled value to the rows with the missing habitat values
     Can2[is.na(Can2[,colnames(Can2)==ColName])==T & Can2$Reserve== "Y" , colnames(Can2)==ColName] <- InterS
     

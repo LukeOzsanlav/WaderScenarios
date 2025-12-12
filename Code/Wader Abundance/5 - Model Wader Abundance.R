@@ -76,7 +76,7 @@ hist(WData$Lap_Density, main = "Breeding Lapwing density")
 hist(WData$Red_Density, main = "Breeding Redshank density")
 hist(WData$Sni_Density, main = "Breeding Snipe density")
 
-## ## summarise the data by landscape
+## summarise the overall sample size and samples sizes by landscape
 WDatafilt <- WData |> 
   filter(is.na(est_pairsL)==F | is.na(est_pairsR)==F | is.na(est_pairsS)==F)
 
@@ -86,6 +86,28 @@ WDatafilt |>
             TotFields = length(unique(F_LOC_ID)))
 length(unique(WDatafilt$F_LOC_ID))
 sum(WDatafilt$FieldArea)
+
+
+## ummarise the overall sample size and samples sizes by landscape
+## This time remove fields with missing variables
+WDatafilt2 <- WData |> 
+  filter(is.na(est_pairsL)==F | is.na(est_pairsR)==F | is.na(est_pairsS)==F)
+
+## remove rows with with NAs in these columns
+WDatafilt2 <- WDatafilt2 |> drop_na(TALL_BOUNDARY_PERCENT, STOCK, VEG_STRUCTURE, RUSH_PERCENT, GRASSLAND_TYPE, 
+                                  Fence_Coverage, WaterCoverage, Ave_WiderWater500)
+WDatafilt2 |> 
+  group_by(Landscape) |> 
+  summarise(TotArea = sum(FieldArea),
+            TotFields = length(unique(F_LOC_ID)))
+length(unique(WDatafilt2$F_LOC_ID))
+sum(WDatafilt2$FieldArea)
+
+## How many fields are removed in this step
+length(unique(WDatafilt$F_LOC_ID))-length(unique(WDatafilt2$F_LOC_ID)) # number
+(length(unique(WDatafilt$F_LOC_ID))-length(unique(WDatafilt2$F_LOC_ID)))/length(unique(WDatafilt$F_LOC_ID)) # proportion
+
+
 
 
 
@@ -114,8 +136,8 @@ Lap |> select(TALL_BOUNDARY_PERCENT, STANDING_WATER_TOTAL_PERCENT, GROUND_DAMP, 
        is.na() |> summary()
 
 ## remove rows with with NAs in these columns
-LapF <- Lap |> drop_na(TALL_BOUNDARY_PERCENT, STANDING_WATER_TOTAL_PERCENT, STOCK, VEG_STRUCTURE, GROUND_DAMP, RUSH_PERCENT, 
-                       WaterCoverage, GRASSLAND_TYPE, Ave_WiderWater500)
+LapF <- Lap |> drop_na(TALL_BOUNDARY_PERCENT, STOCK, VEG_STRUCTURE, RUSH_PERCENT, GRASSLAND_TYPE, 
+                       WaterCoverage, Ave_WiderWater500)
 
 ## Select columns wanted for modelling
 colnames(LapF)
@@ -213,7 +235,7 @@ RF_fit <- rfsrc(est_pairsL ~ FieldArea + Landscape + CorvDens + GRASSLAND_TYPE +
                 data = Lap_train, ntree = 2000, mtry = 5, nodesize = 1)
 saveRDS(RF_fit, "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Objects/LapRF.rds") # Save model for later use if wanted
 
-# ## run full model with all the data
+## run full model with all the data
 # set.seed(112)
 # RF_fit <- rfsrc(est_pairsL ~ FieldArea + Landscape + CorvDens + GRASSLAND_TYPE + Fence_Coverage +
 #                                WaterCoverage + TALL_BOUNDARY_PERCENT + STOCK + VEG_STRUCTURE + RUSH_PERCENT +
@@ -253,21 +275,17 @@ dev.off()
 ## Partial Dependence Plot
 ## These plots display the predicted conditional mean of the outcome as a function of an x variable
 png(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Lapwing_VarRel1.png", width = 20, height = 10, units = "cm", res = 1200)
-plot.variable(RF_fit, c("Fence_Coverage", "FieldArea", "Landscape"), partial = TRUE)
+plot.variable(RF_fit, c("Fence_Coverage", "FieldArea", "WaterCoverage"), partial = TRUE)
 dev.off()
 
 png(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Lapwing_VarRel2.png", width = 20, height = 10, units = "cm", res = 1200)
-plot.variable(RF_fit, c("WaterCoverage","Ave_WiderWater500", "PropUrban_2000"), partial = TRUE)
+plot.variable(RF_fit, c("Ave_WiderWater500", "Landscape", "PropWetGrass_2000"), partial = TRUE)
 dev.off()
 
-
-
-# ## find possible interactions, not sure quite how this works
-# find.interaction(RF_fit, method = "vimp", nrep = 3)
-# 
 # ## Create confidence intervals around variable importance (by subsampling) and plot them
 # smp_o <- subsample(RF_fit, B=100, subratio= 0.5)
 # plot.subsample(smp_o, alpha = 0.05)
+
 
 
 
@@ -321,7 +339,8 @@ sqrt(mean((Lap_test5$est_pairsL - Lap_test5$Predicted)^2)) # RMSE
 
 
 ## Add on the site total for each site
-Lap_test <- Lap_test |>  group_by(S_LOC_ID) |> 
+Lap_test <- Lap_test |>  
+              group_by(S_LOC_ID) |> 
               summarise(SitePopPred = sum(Predicted, na.rm = T),
                         SitePopReal = sum(est_pairsL, na.rm = T)) |> 
               full_join(Lap_test, by = "S_LOC_ID")
@@ -329,19 +348,37 @@ Lap_test <- Lap_test |>  group_by(S_LOC_ID) |>
 ## Add the field shapes onto the data set
 L_TestFields <- left_join(Lap_test, BWWM, by = "F_LOC_ID") |> st_as_sf()
 
+## Summarise by site to calcualte RSME
+L_TestFieldsSum <- L_TestFields |> 
+  group_by(S_LOC_ID, Landscape) |> 
+  summarise(SitePopReal = max(SitePopReal, na.rm=T),
+            SitePopPred = max(SitePopPred, na.rm=T))
+
+## filter out the landscape individually
+LS_TestFieldssum <- filter(L_TestFieldsSum, Landscape == "Somerset Levels and Moors")
+LNK_TestFieldssum <- filter(L_TestFieldsSum, Landscape == "North Kent")
+LB_TestFieldssum <- filter(L_TestFieldsSum, Landscape == "Broads")
+LEs_TestFieldssum <- filter(L_TestFieldsSum, Landscape == "Essex")
+
+## Calculate the RMSE at the site level
+sqrt(mean((L_TestFieldsSum$SitePopReal - L_TestFieldsSum$SitePopPred)^2)) # RMSE
+sqrt(mean((LS_TestFieldssum$SitePopReal - LS_TestFieldssum$SitePopPred)^2)) # RMSE
+sqrt(mean((LNK_TestFieldssum$SitePopReal - LNK_TestFieldssum$SitePopPred)^2)) # RMSE
+sqrt(mean((LB_TestFieldssum$SitePopReal - LB_TestFieldssum$SitePopPred)^2)) # RMSE
+sqrt(mean((LEs_TestFieldssum$SitePopReal - LEs_TestFieldssum$SitePopPred)^2)) # RMSE
+
+
+
+
+##---------------------------------##
+#### Lapwing: Plot test set maps ####
+##---------------------------------##
+
 ## filter out the landscape individually
 LS_TestFields <- filter(L_TestFields, Landscape == "Somerset Levels and Moors")
 LNK_TestFields <- filter(L_TestFields, Landscape == "North Kent")
 LB_TestFields <- filter(L_TestFields, Landscape == "Broads")
 LEs_TestFields <- filter(L_TestFields, Landscape == "Essex")
-
-## Calculate the RMSE at the site level
-sqrt(mean((L_TestFields$SitePopReal - L_TestFields$SitePopPred)^2)) # RMSE
-sqrt(mean((LS_TestFields$SitePopReal - LS_TestFields$SitePopPred)^2)) # RMSE
-sqrt(mean((LNK_TestFields$SitePopReal - LNK_TestFields$SitePopPred)^2)) # RMSE
-sqrt(mean((LB_TestFields$SitePopReal - LB_TestFields$SitePopPred)^2)) # RMSE
-sqrt(mean((LEs_TestFields$SitePopReal - LEs_TestFields$SitePopPred)^2)) # RMSE
-
 
 ## Plot predicted vs real Lapwing abundance for Somerset
 LapSFi1 <- ggplot() + 
@@ -549,9 +586,8 @@ Red |> select(TALL_BOUNDARY_PERCENT, STANDING_WATER_TOTAL_PERCENT, GROUND_DAMP, 
        is.na() |> summary()
 
 ## remove rows with with NAs in these columns
-RedF <- Red |> drop_na(TALL_BOUNDARY_PERCENT, STANDING_WATER_TOTAL_PERCENT, STOCK, VEG_STRUCTURE, GROUND_DAMP, RUSH_PERCENT, 
-                       WaterCoverage, GRASSLAND_TYPE, Fence_Coverage, Ave_WiderWater500)
-
+RedF <- Red |> drop_na(TALL_BOUNDARY_PERCENT, STOCK, VEG_STRUCTURE, RUSH_PERCENT, GRASSLAND_TYPE, 
+                       Fence_Coverage, WaterCoverage, Ave_WiderWater500)
 
 ## Select columns wanted for modelling
 colnames(RedF)
@@ -649,7 +685,7 @@ RF_fit <- rfsrc(est_pairsR ~ FieldArea + Landscape + CorvDens + GRASSLAND_TYPE +
                 data = Red_train, ntree = 2000, mtry = 5, nodesize = 1)
 saveRDS(RF_fit, "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Objects/RedRF.rds") # Save model for later use if wanted
 
-# # run model on full data
+# run model on full data
 # set.seed(1212)
 # RF_fit <- rfsrc(est_pairsR ~ FieldArea + Landscape + CorvDens + GRASSLAND_TYPE + Fence_Coverage +
 #                                WaterCoverage + TALL_BOUNDARY_PERCENT + STOCK + VEG_STRUCTURE + RUSH_PERCENT +
@@ -689,21 +725,17 @@ dev.off()
 ## Partial Dependence Plot
 ## These plots display the predicted conditional mean of the outcome as a function of an x variable
 png(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Redshank_VarRel1.png", width = 20, height = 10, units = "cm", res = 1200)
-plot.variable(RF_fit, c("FieldArea","Fence_Coverage", "PropUrban_2000"), partial = TRUE)
+plot.variable(RF_fit, c("Fence_Coverage", "FieldArea", "PropUrban_2000"), partial = TRUE)
 dev.off()
 
 png(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Redshank_VarRel2.png", width = 20, height = 10, units = "cm", res = 1200)
-plot.variable(RF_fit, c("Ave_WiderWater500", "WaterCoverage","PropWetGrass_1000"), partial = TRUE)
+plot.variable(RF_fit, c("PropWetGrass_1500", "WaterCoverage", "Ave_WiderWater500"), partial = TRUE)
 dev.off()
 
-
-
-# ## find possible interactions, not sure quite how this works
-# find.interaction(RF_fit, method = "vimp", nrep = 3)
-# 
 # ## Create confidence intervals around variable importance (by sub-sampling) and plot them
 # smp_o <- subsample(RF_fit, B=100, subratio= 0.5)
 # plot.subsample(smp_o, alpha = 0.05)
+
 
 
 
@@ -762,17 +794,35 @@ Red_test <- Red_test |>  group_by(S_LOC_ID) |>
 ## Add the field shapes onto the data set
 R_TestFields <- left_join(Red_test, BWWM, by = "F_LOC_ID") |> st_as_sf()
 
+## Summarise by site to calcualte RSME
+R_TestFieldsSum <- R_TestFields |> 
+  group_by(S_LOC_ID, Landscape) |> 
+  summarise(SitePopReal = max(SitePopReal, na.rm=T),
+            SitePopPred = max(SitePopPred, na.rm=T))
+
+## filter out the landscape individually
+RNK_TestFieldsSum <- filter(R_TestFieldsSum, Landscape == "North Kent")
+REs_TestFieldsSum <- filter(R_TestFieldsSum, Landscape == "Essex")
+RB_TestFieldsSum <- filter(R_TestFieldsSum, Landscape == "Broads")
+
+## Calculate the RMSE at the site level
+sqrt(mean((R_TestFieldsSum$SitePopReal - R_TestFieldsSum$SitePopPred)^2)) # RMSE
+sqrt(mean((RNK_TestFieldsSum$SitePopReal - RNK_TestFieldsSum$SitePopPred)^2)) # RMSE
+sqrt(mean((REs_TestFieldsSum$SitePopReal - REs_TestFieldsSum$SitePopPred)^2)) # RMSE
+sqrt(mean((RB_TestFieldsSum$SitePopReal - RB_TestFieldsSum$SitePopPred)^2)) # RMSE
+
+
+
+
+
+##----------------------------------##
+#### Redshank: Plot test set maps ####
+##----------------------------------##
+
 ## filter out the landscape individually
 RNK_TestFields <- filter(R_TestFields, Landscape == "North Kent")
 REs_TestFields <- filter(R_TestFields, Landscape == "Essex")
 RB_TestFields <- filter(R_TestFields, Landscape == "Broads")
-
-## Calculate the RMSE at the site level
-sqrt(mean((R_TestFields$SitePopReal - R_TestFields$SitePopPred)^2)) # RMSE
-sqrt(mean((RNK_TestFields$SitePopReal - RNK_TestFields$SitePopPred)^2)) # RMSE
-sqrt(mean((REs_TestFields$SitePopReal - REs_TestFields$SitePopPred)^2)) # RMSE
-sqrt(mean((RB_TestFields$SitePopReal - RB_TestFields$SitePopPred)^2)) # RMSE
-
 
 
 ## Plot predicted vs real Redshank abundance for Broads
@@ -821,7 +871,7 @@ RedNKFi2 <- ggplot() +
 
 ## Arrange plots side-by side and save
 RedNKFi <- grid.arrange(RedNKFi1, RedNKFi2, nrow=2)
-ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Redshank_NK_FieldComp.png", plot = RedNKFi, width = 20, height = 18, units = "cm")
+ggsave(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Redshank_NK_FieldComp.png", plot = RedNKFi, width = 24, height = 20, units = "cm")
 
 
 
@@ -949,8 +999,8 @@ Snipe |> select(TALL_BOUNDARY_PERCENT, STANDING_WATER_TOTAL_PERCENT, GROUND_DAMP
        is.na() |> summary()
 
 ## remove rows with with NAs in these columns
-SnipeF <- Snipe |> drop_na(TALL_BOUNDARY_PERCENT, STANDING_WATER_TOTAL_PERCENT, STOCK, VEG_STRUCTURE, GROUND_DAMP, RUSH_PERCENT, 
-                       WaterCoverage, GRASSLAND_TYPE, Fence_Coverage, Ave_WiderWater500)
+SnipeF <- Snipe |> drop_na(TALL_BOUNDARY_PERCENT, STOCK, VEG_STRUCTURE, RUSH_PERCENT, GRASSLAND_TYPE, 
+                           Fence_Coverage, WaterCoverage, Ave_WiderWater500)
 
 ## Select columns wanted for modelling
 colnames(SnipeF)
@@ -1052,10 +1102,10 @@ RF_fit <- rfsrc(est_pairsS ~ FieldArea + CorvDens + GRASSLAND_TYPE + Fence_Cover
                 ntree = 2000, mtry = 4, nodesize = 1)
 saveRDS(RF_fit, "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Objects/SnipeRF.rds") # Save model for later use if wanted
 
-## run on full data set
+# run on full data set
 # set.seed(1212)
 # RF_fit <- rfsrc(est_pairsS ~ FieldArea + CorvDens + GRASSLAND_TYPE + Fence_Coverage + Peat_Soil +
-#                              WaterCoverage + TALL_BOUNDARY_PERCENT + STOCK + VEG_STRUCTURE + RUSH_PERCENT + 
+#                              WaterCoverage + TALL_BOUNDARY_PERCENT + STOCK + VEG_STRUCTURE + RUSH_PERCENT +
 #                              WaterCoverage*Peat_Soil +
 #                              PropWood_500 + PropUrban_500 + PropWetGrass_500 + Ave_WiderWater500 +
 #                              PropWood_1000 + PropUrban_1000 + PropWetGrass_1000 + Ave_WiderWater1000 +
@@ -1064,8 +1114,8 @@ saveRDS(RF_fit, "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Objects/S
 #                              PropWood_500*WaterCoverage + PropUrban_500*WaterCoverage + PropWetGrass_500*WaterCoverage + Ave_WiderWater500*WaterCoverage +
 #                              PropWood_1000*WaterCoverage + PropUrban_1000*WaterCoverage + PropWetGrass_1000*WaterCoverage + Ave_WiderWater1000*WaterCoverage +
 #                              PropWood_1500*WaterCoverage + PropUrban_1500*WaterCoverage + PropWetGrass_1500*WaterCoverage + Ave_WiderWater1500*WaterCoverage +
-#                              PropWood_2000*WaterCoverage + PropUrban_2000*WaterCoverage + PropWetGrass_2000*WaterCoverage + Ave_WiderWater2000*WaterCoverage, 
-#                 data = SnipeF, 
+#                              PropWood_2000*WaterCoverage + PropUrban_2000*WaterCoverage + PropWetGrass_2000*WaterCoverage + Ave_WiderWater2000*WaterCoverage,
+#                 data = SnipeF,
 #                 ntree = 2000, mtry = 4, nodesize = 1)
 # saveRDS(RF_fit, "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Objects/SnipeRF_FullData.rds") # Save model for later use if wanted
 
@@ -1094,7 +1144,7 @@ dev.off()
 ## Partial Dependence Plot
 ## These plots display the predicted conditional mean of the outcome as a function of an x variable
 png(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Snipe_VarRel1.png", width = 20, height = 10, units = "cm", res = 1200)
-plot.variable(RF_fit, c("Ave_WiderWater1000", "Ave_WiderWater1500", "Ave_WiderWater2000"), partial = TRUE)
+plot.variable(RF_fit, c("Ave_WiderWater1000", "Ave_WiderWater2000", "Ave_WiderWater1500"), partial = TRUE)
 dev.off()
 
 png(filename = "CleanData/Wader Abundance/5-ModelWaderAbundance/Model Plots/Snipe_VarRel2.png", width = 20, height = 10, units = "cm", res = 1200)
@@ -1105,9 +1155,6 @@ dev.off()
 # ## Create confidence intervals around variable importance (by subsampling) and plot them
 # smp_o <- subsample(RF_fit, B=100, subratio= 0.5)
 # plot.subsample(smp_o, alpha = 0.05)
-# 
-# ## find possible interactions, not sure quite how this works
-# find.interaction(RF_fit, method = "vimp", nrep = 3)
 
 
 
@@ -1119,7 +1166,6 @@ dev.off()
 ## Use the RF model to predict the number of pairs for the test data set
 pred_vals <- predict(object = RF_fit, Sni_test)
 Sni_test$Predicted <- pred_vals$predicted
-
 
 ## Calculate the root mean square error
 sqrt(mean((Sni_test$est_pairsS - Sni_test$Predicted)^2))
@@ -1145,8 +1191,20 @@ Sni_test <- Sni_test |>  group_by(S_LOC_ID) |>
 ## Add the field shapes onto the data set
 S_TestFields <- left_join(Sni_test, BWWM, by = "F_LOC_ID") |> st_as_sf()
 
+## Summarise by site to calcualte RSME
+S_TestFieldsSum <- S_TestFields |> 
+  group_by(S_LOC_ID, Landscape) |> 
+  summarise(SitePopReal = max(SitePopReal, na.rm=T),
+            SitePopPred = max(SitePopPred, na.rm=T))
+
 ## Calculate the RMSE at the site level
-sqrt(mean((S_TestFields$SitePopReal - S_TestFields$SitePopPred)^2)) # RMSE
+sqrt(mean((S_TestFieldsSum$SitePopReal - S_TestFieldsSum$SitePopPred)^2)) # RMSE
+
+
+
+##----------------------------------##
+#### Snipe: Plot test set maps ####
+##----------------------------------##
 
 
 ## Plot predicted vs real Snipe abundance for Somerset
